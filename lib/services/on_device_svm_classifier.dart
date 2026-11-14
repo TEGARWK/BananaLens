@@ -1,0 +1,272 @@
+import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+/// Prediction output from the on-device hybrid PCA + RBF SVM pipeline.
+class SvmPrediction {
+  const SvmPrediction({
+    required this.predictedClass,
+    required this.confidence,
+    required this.probabilities,
+  });
+
+  final String predictedClass;
+  final double confidence;
+  final Map<String, double> probabilities;
+}
+
+/// Pure-Dart implementation of scikit-learn StandardScaler + PCA + LIBSVM RBF + Platt coupling.
+/// All fields are isolate-safe primitive/typed-data buffers loaded once from assets.
+class OnDeviceSvmClassifier {
+  OnDeviceSvmClassifier({
+    required this.classNames,
+    required this.hsvWeight,
+    required this.gamma,
+    required this.nSupport,
+    required this.intercept,
+    required this.probA,
+    required this.probB,
+    required this.cnnScalerMean,
+    required this.cnnScalerScale,
+    required this.pcaMean,
+    required this.pcaComponents,
+    required this.hsvScalerMean,
+    required this.hsvScalerScale,
+    required this.supportVectors,
+    required this.dualCoef,
+  });
+
+  final List<String> classNames;
+  final double hsvWeight;
+  final double gamma;
+  final List<int> nSupport;
+  final List<double> intercept;
+  final List<double> probA;
+  final List<double> probB;
+
+  final Float32List cnnScalerMean;
+  final Float32List cnnScalerScale;
+  final Float32List pcaMean;
+  final Float32List pcaComponents; // [100 * 576] row-major
+  final Float32List hsvScalerMean;
+  final Float32List hsvScalerScale;
+  final Float32List supportVectors; // [nSV * 130] row-major
+  final Float32List dualCoef; // [(K-1) * nSV] row-major
+
+  /// Parses packed `svm_pisang_meta.json` string and `svm_pisang_weights.bin` bytes.
+  factory OnDeviceSvmClassifier.fromAssets({
+    required String metaJson,
+    required Uint8List weightsBytes,
+  }) {
+    final meta = jsonDecode(metaJson) as Map<String, dynamic>;
+    final tensors = meta['tensors'] as Map<String, dynamic>;
+
+    // Copy to a zero-aligned Uint8List before viewing as Float32List (little-endian).
+    final aligned = Uint8List.fromList(weightsBytes);
+    final allFloats = aligned.buffer.asFloat32List();
+
+    Float32List sliceTensor(String name) {
+      final info = tensors[name] as Map<String, dynamic>;
+      final offset = (info['offset'] as num).toInt();
+      final length = (info['length'] as num).toInt();
+      return Float32List.sublistView(allFloats, offset, offset + length);
+    }
+
+    List<int> intList(String key) =>
+        (meta[key] as List<dynamic>).map((e) => (e as num).toInt()).toList();
+    List<double> doubleList(String key) =>
+        (meta[key] as List<dynamic>).map((e) => (e as num).toDouble()).toList();
+
+    return OnDeviceSvmClassifier(
+      classNames: (meta['class_names'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList(growable: false),
+      hsvWeight: (meta['hsv_weight'] as num).toDouble(),
+      gamma: (meta['gamma'] as num).toDouble(),
+      nSupport: intList('n_support'),
+      intercept: doubleList('intercept'),
+      probA: doubleList('probA'),
+      probB: doubleList('probB'),
+      cnnScalerMean: sliceTensor('cnn_scaler_mean'),
+      cnnScalerScale: sliceTensor('cnn_scaler_scale'),
+      pcaMean: sliceTensor('pca_mean'),
+      pcaComponents: sliceTensor('pca_components'),
+      hsvScalerMean: sliceTensor('hsv_scaler_mean'),
+      hsvScalerScale: sliceTensor('hsv_scaler_scale'),
+      supportVectors: sliceTensor('support_vectors'),
+      dualCoef: sliceTensor('dual_coef'),
+    );
+  }
+
+  /// Runs StandardScaler + PCA + RBF kernel + LIBSVM pairwise coupling probabilities.
+  SvmPrediction predict(Float32List cnn576, Float32List hsv30) {
+    const cnnDim = 576;
+    const pcaDim = 100;
+    const hsvDim = 30;
+    const totalDim = pcaDim + hsvDim; // 130
+
+    // 1. Scale CNN 576 & subtract PCA mean
+    final cnnCentered = Float64List(cnnDim);
+    for (int i = 0; i < cnnDim; i++) {
+      final scaled = (cnn576[i] - cnnScalerMean[i]) / cnnScalerScale[i];
+      cnnCentered[i] = scaled - pcaMean[i];
+    }
+
+    // 2. Project via PCA components [100 x 576] and concatenate scaled HSV [30]
+    final x130 = Float64List(totalDim);
+    for (int c = 0; c < pcaDim; c++) {
+      final rowOffset = c * cnnDim;
+      double dot = 0.0;
+      for (int i = 0; i < cnnDim; i++) {
+        dot += cnnCentered[i] * pcaComponents[rowOffset + i];
+      }
+      x130[c] = dot;
+    }
+    for (int i = 0; i < hsvDim; i++) {
+      x130[pcaDim + i] = (hsv30[i] - hsvScalerMean[i]) / hsvScalerScale[i];
+    }
+
+    // 3. Evaluate RBF kernel K(x, sv_i) = exp(-gamma * ||x - sv_i||^2)
+    final numClasses = classNames.length;
+    int totalSv = 0;
+    for (final count in nSupport) {
+      totalSv += count;
+    }
+
+    final kernel = Float64List(totalSv);
+    for (int i = 0; i < totalSv; i++) {
+      final svOffset = i * totalDim;
+      double distSq = 0.0;
+      for (int j = 0; j < totalDim; j++) {
+        final d = x130[j] - supportVectors[svOffset + j];
+        distSq += d * d;
+      }
+      kernel[i] = math.exp(-gamma * distSq);
+    }
+
+    // 4. LIBSVM pairwise decision values
+    final start = List<int>.filled(numClasses, 0);
+    for (int i = 1; i < numClasses; i++) {
+      start[i] = start[i - 1] + nSupport[i - 1];
+    }
+
+    final numPairs = (numClasses * (numClasses - 1)) ~/ 2;
+    final decValues = Float64List(numPairs);
+    int p = 0;
+    for (int i = 0; i < numClasses; i++) {
+      for (int j = i + 1; j < numClasses; j++) {
+        final si = start[i];
+        final ci = nSupport[i];
+        final sj = start[j];
+        final cj = nSupport[j];
+
+        final coefOffsetJ = (j - 1) * totalSv;
+        final coefOffsetI = i * totalSv;
+
+        double sum = 0.0;
+        for (int k = 0; k < ci; k++) {
+          sum += dualCoef[coefOffsetJ + si + k] * kernel[si + k];
+        }
+        for (int k = 0; k < cj; k++) {
+          sum += dualCoef[coefOffsetI + sj + k] * kernel[sj + k];
+        }
+        decValues[p] = sum + intercept[p];
+        p++;
+      }
+    }
+
+    // 5. Platt sigmoid calibration -> pairwise probability matrix
+    final pairwise = List<Float64List>.generate(
+      numClasses,
+      (_) => Float64List(numClasses),
+    );
+    const minProb = 1e-7;
+    p = 0;
+    for (int i = 0; i < numClasses; i++) {
+      for (int j = i + 1; j < numClasses; j++) {
+        final fApB = decValues[p] * probA[p] + probB[p];
+        double prob;
+        if (fApB >= 0) {
+          prob = math.exp(-fApB) / (1.0 + math.exp(-fApB));
+        } else {
+          prob = 1.0 / (1.0 + math.exp(fApB));
+        }
+        prob = prob.clamp(minProb, 1.0 - minProb);
+        pairwise[i][j] = prob;
+        pairwise[j][i] = 1.0 - prob;
+        p++;
+      }
+    }
+
+    // 6. Wu, Lin & Weng (2004) multiclass pairwise coupling solver
+    final probs = _multiclassProbability(numClasses, pairwise);
+
+    final probMap = <String, double>{};
+    int bestIdx = 0;
+    for (int i = 0; i < numClasses; i++) {
+      probMap[classNames[i]] = probs[i].clamp(0.0, 1.0);
+      if (probs[i] > probs[bestIdx]) {
+        bestIdx = i;
+      }
+    }
+
+    return SvmPrediction(
+      predictedClass: classNames[bestIdx],
+      confidence: probs[bestIdx].clamp(0.0, 1.0),
+      probabilities: probMap,
+    );
+  }
+
+  static Float64List _multiclassProbability(int k, List<Float64List> r) {
+    final q = List<Float64List>.generate(k, (_) => Float64List(k));
+    final p = Float64List(k);
+    final qp = Float64List(k);
+    final eps = 0.005 / k;
+
+    for (int t = 0; t < k; t++) {
+      p[t] = 1.0 / k;
+      q[t][t] = 0.0;
+      for (int j = 0; j < t; j++) {
+        q[t][t] += r[j][t] * r[j][t];
+        q[t][j] = q[j][t];
+      }
+      for (int j = t + 1; j < k; j++) {
+        q[t][t] += r[j][t] * r[j][t];
+        q[t][j] = -r[j][t] * r[t][j];
+      }
+    }
+
+    for (int iter = 0; iter < 100; iter++) {
+      double pQp = 0.0;
+      for (int t = 0; t < k; t++) {
+        double rowDot = 0.0;
+        for (int j = 0; j < k; j++) {
+          rowDot += q[t][j] * p[j];
+        }
+        qp[t] = rowDot;
+        pQp += p[t] * rowDot;
+      }
+
+      double maxError = 0.0;
+      for (int t = 0; t < k; t++) {
+        final error = (qp[t] - pQp).abs();
+        if (error > maxError) maxError = error;
+      }
+      if (maxError < eps) break;
+
+      for (int t = 0; t < k; t++) {
+        final diff = (-qp[t] + pQp) / q[t][t];
+        p[t] += diff;
+        pQp =
+            (pQp + diff * (diff * q[t][t] + 2.0 * qp[t])) /
+            (1.0 + diff) /
+            (1.0 + diff);
+        for (int j = 0; j < k; j++) {
+          qp[j] = (qp[j] + diff * q[t][j]) / (1.0 + diff);
+          p[j] /= (1.0 + diff);
+        }
+      }
+    }
+    return p;
+  }
+}

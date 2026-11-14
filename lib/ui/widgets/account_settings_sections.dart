@@ -1,0 +1,162 @@
+import 'package:flutter/material.dart';
+import 'package:fruitlens/core/theme/app_dimens.dart';
+import 'package:fruitlens/core/theme/harvest_colors.dart';
+import 'package:fruitlens/data/models/user_profile.dart';
+import 'package:fruitlens/ui/widgets/app_card.dart';
+import 'package:fruitlens/ui/widgets/primary_button.dart';
+import 'package:go_router/go_router.dart';
+
+/// Compact summary header displaying the active user avatar, name, and email.
+class AccountIdentityBanner extends StatelessWidget {
+  const AccountIdentityBanner({required this.user, super.key});
+
+  final UserProfile user;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final harvest = context.harvest;
+    final name = user.name.trim().isNotEmpty ? user.name.trim() : 'Pengguna';
+    final initial = name[0].toUpperCase();
+
+    return AppCard(
+      padding: const EdgeInsets.all(AppDimens.s16),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: harvest.primarySoft,
+            child: Text(
+              initial,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppDimens.s12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  user.email,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: harvest.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Clean navigation tile linking to the password reset flow.
+class AccountPasswordTile extends StatelessWidget {
+  const AccountPasswordTile({required this.email, super.key});
+
+  final String email;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final harvest = context.harvest;
+
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimens.s16,
+        vertical: AppDimens.s12,
+      ),
+      onTap: () =>
+          context.push('/forgot-password?email=${Uri.encodeComponent(email)}'),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: harvest.primarySoft,
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
+            ),
+            child: Icon(
+              Icons.lock_reset_rounded,
+              size: 20,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: AppDimens.s12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ubah Kata Sandi',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  'Perbarui kata sandi keamanan akunmu',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: harvest.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: harvest.muted),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sticky bottom action bar with SafeArea spacing above system navigation bars.
+class AccountBottomSaveBar extends StatelessWidget {
+  const AccountBottomSaveBar({
+    required this.isSaving,
+    required this.onSave,
+    super.key,
+  });
+
+  final bool isSaving;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final harvest = context.harvest;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(top: BorderSide(color: harvest.border)),
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        AppDimens.s16,
+        AppDimens.s12,
+        AppDimens.s16,
+        AppDimens.s16,
+      ),
+      child: SafeArea(
+        top: false,
+        child: PrimaryButton(
+          text: 'Simpan Perubahan',
+          icon: Icons.check_rounded,
+          isLoading: isSaving,
+          onPressed: isSaving ? null : onSave,
+        ),
+      ),
+    );
+  }
+}

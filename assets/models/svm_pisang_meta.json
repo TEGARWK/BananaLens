@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "class_names": [
+    "ripe",
+    "rotten",
+    "unripe"
+  ],
+  "hsv_weight": 2.5,
+  "gamma": 0.001968290142054588,
+  "n_support": [
+    2409,
+    2144,
+    1609
+  ],
+  "intercept": [
+    -0.10852084561382179,
+    0.6035449084973084,
+    0.5990182697328893
+  ],
+  "probA": [
+    -5.7439323195623135,
+    -11.201791834702243,
+    -7.702543652215027
+  ],
+  "probB": [
+    -0.18748249118819152,
+    1.2235531763779988,
+    -0.41233876186065965
+  ],
+  "total_floats": 872772,
+  "tensors": {
+    "cnn_scaler_mean": {
+      "offset": 0,
+      "length": 576,
+      "shape": [
+        576
+      ]
+    },
+    "cnn_scaler_scale": {
+      "offset": 576,
+      "length": 576,
+      "shape": [
+        576
+      ]
+    },
+    "pca_mean": {
+      "offset": 1152,
+      "length": 576,
+      "shape": [
+        576
+      ]
+    },
+    "pca_components": {
+      "offset": 1728,
+      "length": 57600,
+      "shape": [
+        100,
+        576
+      ]
+    },
+    "hsv_scaler_mean": {
+      "offset": 59328,
+      "length": 30,
+      "shape": [
+        30
+      ]
+    },
+    "hsv_scaler_scale": {
+      "offset": 59358,
+      "length": 30,
+      "shape": [
+        30
+      ]
+    },
+    "support_vectors": {
+      "offset": 59388,
+      "length": 801060,
+      "shape": [
+        6162,
+        130
+      ]
+    },
+    "dual_coef": {
+      "offset": 860448,
+      "length": 12324,
+      "shape": [
+        2,
+        6162
+      ]
+    }
+  }
+}

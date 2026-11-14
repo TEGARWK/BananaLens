@@ -1,0 +1,123 @@
+[
+  {
+    "label": "apple",
+    "name_id": "Apel",
+    "calories": 52,
+    "carbs": 13.8,
+    "sugar": 10.4,
+    "fiber": 2.4,
+    "vitamins": "Vitamin C, vitamin K",
+    "benefits": "Serat pektin membantu pencernaan dan membuat kenyang lebih lama.",
+    "storage_tips": "Simpan di kulkas, jauhkan dari buah lain karena melepas gas etilen.",
+    "allergen_note": "Dapat memicu alergi mulut pada penderita alergi serbuk sari birch."
+  },
+  {
+    "label": "banana",
+    "name_id": "Pisang",
+    "calories": 89,
+    "carbs": 22.8,
+    "sugar": 12.2,
+    "fiber": 2.6,
+    "vitamins": "Vitamin B6, vitamin C, kalium",
+    "benefits": "Sumber energi cepat dan kalium yang baik untuk otot.",
+    "storage_tips": "Simpan di suhu ruang. Kulit menghitam tanda sangat matang, cocok untuk smoothie.",
+    "allergen_note": "Berkaitan dengan alergi lateks pada sebagian orang."
+  },
+  {
+    "label": "orange",
+    "name_id": "Jeruk",
+    "calories": 47,
+    "carbs": 11.8,
+    "sugar": 9.4,
+    "fiber": 2.4,
+    "vitamins": "Vitamin C, folat",
+    "benefits": "Kaya vitamin C untuk mendukung daya tahan tubuh.",
+    "storage_tips": "Tahan beberapa minggu di kulkas. Simpan utuh sampai akan dikupas.",
+    "allergen_note": "Buah sitrus dapat memicu alergi atau memperparah asam lambung."
+  },
+  {
+    "label": "mango",
+    "name_id": "Mangga",
+    "calories": 60,
+    "carbs": 15.0,
+    "sugar": 13.7,
+    "fiber": 1.6,
+    "vitamins": "Vitamin C, vitamin A",
+    "benefits": "Mengandung vitamin A dan antioksidan untuk kesehatan mata dan kulit.",
+    "storage_tips": "Matangkan di suhu ruang, pindahkan ke kulkas setelah matang.",
+    "allergen_note": "Getah kulit dapat memicu iritasi pada orang yang sensitif."
+  },
+  {
+    "label": "avocado",
+    "name_id": "Alpukat",
+    "calories": 160,
+    "carbs": 8.5,
+    "sugar": 0.7,
+    "fiber": 6.7,
+    "vitamins": "Vitamin K, vitamin E, folat",
+    "benefits": "Lemak tak jenuh tunggal dan serat tinggi, gulanya rendah.",
+    "storage_tips": "Matangkan di suhu ruang. Setelah dibelah, simpan dengan biji dan tutup rapat.",
+    "allergen_note": "Berkaitan dengan alergi lateks pada sebagian orang."
+  },
+  {
+    "label": "tomato",
+    "name_id": "Tomat",
+    "calories": 18,
+    "carbs": 3.9,
+    "sugar": 2.6,
+    "fiber": 1.2,
+    "vitamins": "Vitamin C, vitamin K, likopen",
+    "benefits": "Rendah kalori dan mengandung likopen sebagai antioksidan.",
+    "storage_tips": "Simpan di suhu ruang agar rasa tetap baik, kulkas hanya untuk yang sudah sangat matang.",
+    "allergen_note": "Dapat memicu refluks pada penderita asam lambung."
+  },
+  {
+    "label": "strawberry",
+    "name_id": "Stroberi",
+    "calories": 32,
+    "carbs": 7.7,
+    "sugar": 4.9,
+    "fiber": 2.0,
+    "vitamins": "Vitamin C, mangan, folat",
+    "benefits": "Rendah gula dan tinggi vitamin C serta antioksidan.",
+    "storage_tips": "Simpan di kulkas tanpa dicuci, cuci tepat sebelum dimakan.",
+    "allergen_note": "Cukup sering memicu alergi pada anak dan orang sensitif."
+  },
+  {
+    "label": "grape",
+    "name_id": "Anggur",
+    "calories": 69,
+    "carbs": 18.1,
+    "sugar": 15.5,
+    "fiber": 0.9,
+    "vitamins": "Vitamin K, vitamin C",
+    "benefits": "Mengandung antioksidan polifenol, praktis dimakan langsung.",
+    "storage_tips": "Simpan di kulkas dalam wadah berlubang, cuci sebelum dimakan.",
+    "allergen_note": "Gulanya relatif tinggi, perhatikan porsi bila menjaga gula darah."
+  },
+  {
+    "label": "watermelon",
+    "name_id": "Semangka",
+    "calories": 30,
+    "carbs": 7.6,
+    "sugar": 6.2,
+    "fiber": 0.4,
+    "vitamins": "Vitamin C, vitamin A, likopen",
+    "benefits": "Sekitar 90% air, membantu hidrasi dan rendah kalori.",
+    "storage_tips": "Utuh di suhu ruang, potongan ditutup dan disimpan di kulkas maksimal 3 hari.",
+    "allergen_note": "Dapat memicu alergi mulut pada penderita alergi serbuk sari ragweed."
+  },
+  {
+    "label": "pineapple",
+    "name_id": "Nanas",
+    "calories": 50,
+    "carbs": 13.1,
+    "sugar": 9.9,
+    "fiber": 1.4,
+    "vitamins": "Vitamin C, mangan, bromelain",
+    "benefits": "Mengandung enzim bromelain yang membantu mencerna protein.",
+    "storage_tips": "Simpan utuh di suhu ruang 1-2 hari, potongan di kulkas.",
+    "allergen_note": "Bromelain dapat membuat mulut perih dan memicu alergi pada orang sensitif."
+  }
+]
+

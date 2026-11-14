@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "551802712440",
+    "project_id": "fruitlens-447e4",
+    "storage_bucket": "fruitlens-447e4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:551802712440:android:75f73e77d421f30c28d88d",
+        "android_client_info": {
+          "package_name": "com.fruitlens.fruitlens"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW8h2EEhN72TiKS4VDHauIQQuqPe_zl_I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

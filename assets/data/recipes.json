@@ -1,0 +1,145 @@
+[
+  {
+    "id": 1,
+    "title": "Smoothie Pisang Madu Hangat",
+    "fruit_label": "banana",
+    "suitable_ripeness": ["ripe", "overripe"],
+    "prep_time": "10 menit",
+    "difficulty": "Sangat Mudah",
+    "ingredients": [
+      "2 buah pisang matang atau terlalu matang",
+      "200 ml susu segar atau susu oat",
+      "1 sendok makan madu alami",
+      "Es batu secukupnya (opsional)"
+    ],
+    "steps": [
+      "Kupas pisang dan potong-potong menjadi bagian kecil.",
+      "Masukkan pisang, susu, dan madu ke dalam blender.",
+      "Blender dengan kecepatan sedang hingga tekstur lembut dan creamy.",
+      "Tuangkan ke dalam gelas dan nikmati selagi segar."
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Pancake Pisang Oatmeal",
+    "fruit_label": "banana",
+    "suitable_ripeness": ["overripe"],
+    "prep_time": "15 menit",
+    "difficulty": "Mudah",
+    "ingredients": [
+      "1 buah pisang yang sangat matang / bintik cokelat",
+      "1 butir telur ayam",
+      "4 sendok makan oatmeal halus",
+      "1/4 sendok teh kayu manis bubuk"
+    ],
+    "steps": [
+      "Lumatkan pisang menggunakan garpu hingga halus.",
+      "Campurkan telur dan oatmeal, aduk rata hingga membentuk adonan pancake.",
+      "Panaskan teflon anti-lengket dengan api kecil.",
+      "Tuang 2 sendok makan adonan, masak hingga muncul gelembung lalu balik hingga matang keemasan."
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Salad Apel & Keju Segar",
+    "fruit_label": "apple",
+    "suitable_ripeness": ["ripe", "unripe"],
+    "prep_time": "10 menit",
+    "difficulty": "Sangat Mudah",
+    "ingredients": [
+      "1 buah apel merah atau fuji segar",
+      "1 sendok makan perasan air lemon",
+      "Segenggam daun selada segar",
+      "30 g keju parut atau keju feta",
+      "1 sendok makan minyak zaitun extra virgin"
+    ],
+    "steps": [
+      "Cuci bersih apel, lalu potong dadu atau iris tipis sesuai selera.",
+      "Lumuri potongan apel dengan air lemon agar warnanya tetap cerah dan tidak mencokelat.",
+      "Campurkan apel dengan daun selada dan keju dalam mangkuk.",
+      "Beri minyak zaitun dan aduk perlahan sebelum disajikan."
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Selai Apel Kayu Manis Rumahan",
+    "fruit_label": "apple",
+    "suitable_ripeness": ["overripe", "ripe"],
+    "prep_time": "25 menit",
+    "difficulty": "Sedang",
+    "ingredients": [
+      "2 buah apel, kupas dan potong kecil",
+      "2 sendok makan gula aren atau madu",
+      "1/2 batang kayu manis",
+      "50 ml air matang"
+    ],
+    "steps": [
+      "Rebus potongan apel dan kayu manis dengan air di atas api sedang hingga apel melunak.",
+      "Hancurkan apel menggunakan sendok kayu atau garpu.",
+      "Tambahkan gula aren, aduk terus dengan api kecil hingga air menyusut dan mengental seperti selai.",
+      "Simpan dalam toples kaca di kulkas setelah dingin."
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Guacamole Alpukat Segar",
+    "fruit_label": "avocado",
+    "suitable_ripeness": ["ripe"],
+    "prep_time": "10 menit",
+    "difficulty": "Sangat Mudah",
+    "ingredients": [
+      "1 buah alpukat matang sempurna",
+      "1/2 buah tomat matang, buang biji dan potong dadu",
+      "1 sendok makan perasan jeruk nipis",
+      "Sejumput garam dan lada hitam bubuk",
+      "Daun ketumbar cincang (opsional)"
+    ],
+    "steps": [
+      "Belah alpukat, buang bijinya, dan kerok dagingnya ke dalam mangkuk.",
+      "Lumatkan alpukat dengan garpu, biarkan sedikit bertekstur kasar.",
+      "Campurkan tomat, perasan jeruk nipis, garam, dan lada.",
+      "Aduk rata dan sajikan bersama keripik jagung atau olesan roti panggang."
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Puding Mangga Chia Seed",
+    "fruit_label": "mango",
+    "suitable_ripeness": ["ripe", "overripe"],
+    "prep_time": "15 menit + dingin",
+    "difficulty": "Mudah",
+    "ingredients": [
+      "1 buah mangga matang manis",
+      "2 sendok makan chia seed",
+      "150 ml susu kelapa atau susu almond",
+      "1 sendok teh madu"
+    ],
+    "steps": [
+      "Campurkan chia seed, susu, dan madu dalam wadah, aduk rata dan diamkan di kulkas minimal 2 jam.",
+      "Blender sebagian daging mangga hingga halus membentuk puree mangga.",
+      "Potong dadu sisa mangga untuk topping.",
+      "Susun puding chia di gelas, lapisi dengan puree mangga, dan beri potongan mangga di atasnya."
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Es Semangka Jeruk Nipis",
+    "fruit_label": "watermelon",
+    "suitable_ripeness": ["ripe"],
+    "prep_time": "10 menit",
+    "difficulty": "Sangat Mudah",
+    "ingredients": [
+      "300 g semangka merah matang",
+      "1 buah jeruk nipis, peras airnya",
+      "Beberapa lembar daun mint",
+      "Es batu secukupnya"
+    ],
+    "steps": [
+      "Potong semangka dadu kecil atau cetak bulat dengan scoop.",
+      "Campurkan perasan jeruk nipis dan daun mint yang sedikit dimemarkan.",
+      "Masukkan es batu dan potongan semangka ke dalam gelas saji.",
+      "Aduk lembut dan nikmati sensasi kesegaran alami pelepas dahaga."
+    ]
+  }
+]
+
