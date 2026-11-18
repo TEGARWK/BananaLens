@@ -332,6 +332,68 @@ void main() {
           (a, b) => a + b,
         );
         expect(totalProb, closeTo(1.0, 1e-5));
+
+        // High green chlorophyll with minor shadow/brown ratio should also
+        // dampen false-positive `rotten` probabilities into `unripe`.
+        final bunchPred = classifier.predict(
+          dummyCnn,
+          dummyHsv,
+          pigmentRatios: const PigmentRatios(
+            greenRatio: 0.62,
+            yellowRatio: 0.10,
+            brownDarkRatio: 0.18,
+            activePixelCount: 5000,
+          ),
+        );
+        expect(bunchPred.predictedClass, 'unripe');
+        expect(
+          bunchPred.probabilities['unripe']!,
+          greaterThan(bunchPred.probabilities['rotten']!),
+        );
+        final bunchTotal = bunchPred.probabilities.values.fold<double>(
+          0.0,
+          (a, b) => a + b,
+        );
+        expect(bunchTotal, closeTo(1.0, 1e-5));
+
+        // Yellow peel with sugar spots (`yellowRatio >= 0.50` & >= 1.6x brown)
+        // shifts false `rotten` back to `ripe` (very_ripe), while truly dark
+        // rotten peels (`brownDarkRatio >= yellowRatio`) stay `rotten`.
+        final sugarSpotPred = classifier.predict(
+          dummyCnn,
+          dummyHsv,
+          pigmentRatios: const PigmentRatios(
+            greenRatio: 0.02,
+            yellowRatio: 0.68,
+            brownDarkRatio: 0.28,
+            activePixelCount: 5000,
+          ),
+        );
+        expect(sugarSpotPred.predictedClass, 'ripe');
+        expect(
+          sugarSpotPred.probabilities['ripe']!,
+          greaterThan(sugarSpotPred.probabilities['rotten']!),
+        );
+        final sugarTotal = sugarSpotPred.probabilities.values.fold<double>(
+          0.0,
+          (a, b) => a + b,
+        );
+        expect(sugarTotal, closeTo(1.0, 1e-5));
+
+        final trulyRottenPred = classifier.predict(
+          dummyCnn,
+          dummyHsv,
+          pigmentRatios: const PigmentRatios(
+            greenRatio: 0.0,
+            yellowRatio: 0.25,
+            brownDarkRatio: 0.70,
+            activePixelCount: 5000,
+          ),
+        );
+        expect(
+          trulyRottenPred.probabilities['rotten'],
+          closeTo(rawPred.probabilities['rotten']!, 1e-6),
+        );
       },
     );
   });

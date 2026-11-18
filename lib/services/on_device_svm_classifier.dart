@@ -214,6 +214,7 @@ class OnDeviceSvmClassifier {
 
     if (pigmentRatios != null) {
       _applyChlorophyllCalibration(probMap, pigmentRatios);
+      _applyOverripeYellowCalibration(probMap, pigmentRatios);
     }
 
     String bestClass = classNames.first;
@@ -266,6 +267,54 @@ class OnDeviceSvmClassifier {
       probMap['unripe'] = calibratedUnripe;
       probMap['ripe'] = (pairBudget - calibratedUnripe).clamp(0.0, pairBudget);
     }
+
+    // Dampens false-positive `rotten` caused by inter-fruit shadows or dark
+    // backgrounds on green banana bunches when chlorophyll clearly dominates brown/dark pixels.
+    final svmRotten = probMap['rotten'];
+    if (svmRotten != null &&
+        svmRotten > 0.0 &&
+        pigment.greenRatio >= 0.35 &&
+        pigment.greenRatio >= pigment.brownDarkRatio * 1.8) {
+      final greenVsBrown =
+          (pigment.greenRatio /
+                  (pigment.greenRatio + pigment.brownDarkRatio + 1e-6))
+              .clamp(0.0, 1.0);
+      final rottenShift = (svmRotten * (0.75 * greenVsBrown)).clamp(
+        0.0,
+        svmRotten,
+      );
+      probMap['rotten'] = (svmRotten - rottenShift).clamp(0.0, 1.0);
+      probMap['unripe'] = ((probMap['unripe'] ?? 0.0) + rottenShift).clamp(
+        0.0,
+        1.0,
+      );
+    }
+  }
+
+  /// Keeps yellow bananas with sugar spots (`overripe`) in `ripe` instead of
+  /// `rotten` when bright yellow peel still dominates brown/dark areas.
+  static void _applyOverripeYellowCalibration(
+    Map<String, double> probMap,
+    PigmentRatios pigment,
+  ) {
+    if (pigment.activePixelCount < 50) return;
+    if (pigment.greenRatio >= 0.30) return;
+    if (pigment.yellowRatio < 0.50) return;
+    if (pigment.yellowRatio < pigment.brownDarkRatio * 1.6) return;
+
+    final svmRipe = probMap['ripe'];
+    final svmRotten = probMap['rotten'];
+    if (svmRipe == null || svmRotten == null) return;
+    if (svmRotten <= svmRipe) return;
+
+    final yellowDominance =
+        (pigment.yellowRatio /
+                (pigment.yellowRatio + pigment.brownDarkRatio + 1e-6))
+            .clamp(0.0, 1.0);
+    final shift = (svmRotten * (0.60 * yellowDominance)).clamp(0.0, svmRotten);
+
+    probMap['rotten'] = (svmRotten - shift).clamp(0.0, 1.0);
+    probMap['ripe'] = (svmRipe + shift).clamp(0.0, 1.0);
   }
 
   static Float64List _multiclassProbability(int k, List<Float64List> r) {
