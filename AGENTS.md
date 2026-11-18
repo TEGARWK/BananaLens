@@ -115,6 +115,7 @@ Catatan untuk fase berikutnya: ...
 - [ ] Tidak ada API key / secret di kode
 - [ ] Sesuai `ARCHITECTURE.md` dan `DESIGN_RULES.md`
 - [ ] `TASKS.md` diperbarui (seluruh tugas dalam fase berubah status menjadi DONE)
+- [ ] `CHANGELOG.md` diperbarui dengan format Hari, Tanggal dan ringkasan perubahan
 - [ ] Laporan format bagian 6 diberikan
 
 ## 8. Perilaku AI
