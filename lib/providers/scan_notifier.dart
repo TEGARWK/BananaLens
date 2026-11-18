@@ -70,13 +70,22 @@ class ScanNotifier extends AsyncNotifier<ScanReport?> {
     // Salin foto ke folder dokumen permanen aplikasi agar tidak terhapus cache OS
     final permanentPath = await _persistImage(imagePath);
 
-    // Simpan akurasi kematangan aktual ke riwayat lokal (bukan label jenis statis).
+    // Simpan akurasi kematangan aktual & probabilitas 3 kelas ke riwayat lokal.
+    final probs = outcome.classProbabilities;
+    final hasRipeSplit =
+        probs != null &&
+        (probs.containsKey('ripe') || probs.containsKey('overripe'));
     final resultRecord = ScanResult(
       imagePath: permanentPath,
       fruitLabel: outcome.fruitLabel,
       ripenessLabel: outcome.ripenessLabel,
       confidence: outcome.ripenessConfidence,
       createdAt: DateTime.now(),
+      unripeProb: probs?['unripe'],
+      ripeProb: hasRipeSplit
+          ? (probs['ripe'] ?? 0.0) + (probs['overripe'] ?? 0.0)
+          : null,
+      rottenProb: probs?['rotten'],
     );
     await ref.read(historyListProvider.notifier).add(resultRecord);
 

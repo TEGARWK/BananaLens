@@ -15,7 +15,7 @@ class AppDatabase {
 
   static final AppDatabase instance = AppDatabase();
 
-  static const int currentVersion = 3;
+  static const int currentVersion = 4;
   static const String dbFileName = 'fruitlens.db';
   static const String scanResultsTable = 'scan_results';
   static const String fruitsTable = 'fruits';
@@ -57,6 +57,17 @@ class AppDatabase {
         if (oldVersion < 3) {
           await _createFruitsAndRecipesTables(db);
         }
+        if (oldVersion < 4) {
+          await db.execute(
+            'ALTER TABLE $scanResultsTable ADD COLUMN unripe_prob REAL',
+          );
+          await db.execute(
+            'ALTER TABLE $scanResultsTable ADD COLUMN ripe_prob REAL',
+          );
+          await db.execute(
+            'ALTER TABLE $scanResultsTable ADD COLUMN rotten_prob REAL',
+          );
+        }
       },
     );
   }
@@ -72,7 +83,10 @@ class AppDatabase {
         confidence REAL NOT NULL,
         created_at TEXT NOT NULL,
         is_favorite INTEGER NOT NULL DEFAULT 0,
-        synced INTEGER NOT NULL DEFAULT 0
+        synced INTEGER NOT NULL DEFAULT 0,
+        unripe_prob REAL,
+        ripe_prob REAL,
+        rotten_prob REAL
       )
     ''');
   }

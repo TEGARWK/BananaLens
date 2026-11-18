@@ -18,6 +18,7 @@ class NutrientTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -25,12 +26,16 @@ class NutrientTile extends StatelessWidget {
         vertical: AppDimens.s12,
       ),
       decoration: BoxDecoration(
-        color: harvest.primarySoft.withValues(alpha: 0.55),
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppDimens.rButton),
-        border: Border.all(
-          color: harvest.border.withValues(alpha: 0.7),
-          width: 1,
-        ),
+        border: Border.all(color: ink.withValues(alpha: 0.65), width: 1.3),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary,
+            offset: const Offset(0, 2.5),
+            blurRadius: 0,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,19 +48,18 @@ class NutrientTile extends StatelessWidget {
               Text(
                 value,
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
+                  color: ink,
+                  fontWeight: FontWeight.w800,
                   height: 1.1,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
               const SizedBox(width: AppDimens.s4),
               Text(
                 unit,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.textTheme.bodyMedium?.color?.withValues(
-                    alpha: 0.8,
-                  ),
-                  fontWeight: FontWeight.w600,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: harvest.muted,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -66,8 +70,9 @@ class NutrientTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: harvest.muted,
-              fontSize: 12,
+              color: ink.withValues(alpha: 0.78),
+              fontWeight: FontWeight.w600,
+              fontSize: 12.5,
             ),
           ),
         ],

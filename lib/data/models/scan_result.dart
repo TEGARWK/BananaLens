@@ -10,6 +10,9 @@ class ScanResult {
     this.id,
     this.isFavorite = false,
     this.synced = false,
+    this.unripeProb,
+    this.ripeProb,
+    this.rottenProb,
   });
 
   factory ScanResult.fromMap(Map<String, Object?> map) {
@@ -23,6 +26,9 @@ class ScanResult {
       createdAt: DateTime.parse(map['created_at']! as String),
       isFavorite: (map['is_favorite'] as int? ?? 0) == 1,
       synced: (map['synced'] as int? ?? 0) == 1,
+      unripeProb: (map['unripe_prob'] as num?)?.toDouble(),
+      ripeProb: (map['ripe_prob'] as num?)?.toDouble(),
+      rottenProb: (map['rotten_prob'] as num?)?.toDouble(),
     );
   }
 
@@ -35,6 +41,9 @@ class ScanResult {
   final DateTime createdAt;
   final bool isFavorite;
   final bool synced;
+  final double? unripeProb;
+  final double? ripeProb;
+  final double? rottenProb;
 
   Map<String, Object?> toMap() {
     return <String, Object?>{
@@ -47,6 +56,9 @@ class ScanResult {
       'created_at': createdAt.toIso8601String(),
       'is_favorite': isFavorite ? 1 : 0,
       'synced': synced ? 1 : 0,
+      'unripe_prob': unripeProb,
+      'ripe_prob': ripeProb,
+      'rotten_prob': rottenProb,
     };
   }
 
@@ -60,6 +72,9 @@ class ScanResult {
     DateTime? createdAt,
     bool? isFavorite,
     bool? synced,
+    double? unripeProb,
+    double? ripeProb,
+    double? rottenProb,
   }) {
     return ScanResult(
       id: id ?? this.id,
@@ -71,6 +86,9 @@ class ScanResult {
       createdAt: createdAt ?? this.createdAt,
       isFavorite: isFavorite ?? this.isFavorite,
       synced: synced ?? this.synced,
+      unripeProb: unripeProb ?? this.unripeProb,
+      ripeProb: ripeProb ?? this.ripeProb,
+      rottenProb: rottenProb ?? this.rottenProb,
     );
   }
 }
