@@ -1,6 +1,6 @@
 /// Centralized UI text in Indonesian (see AGENTS.md section 4).
 abstract final class AppStrings {
-  static const String appName = 'FruitLens';
+  static const String appName = 'BananaLens';
 
   // Navigation tabs
   static const String navHome = 'Beranda';
@@ -10,15 +10,15 @@ abstract final class AppStrings {
   static const String navProfile = 'Profil';
 
   // Placeholder screen titles & descriptions
-  static const String homeTitle = 'Beranda FruitLens';
+  static const String homeTitle = 'Beranda BananaLens';
   static const String homeSubtitle =
-      'Pantau kematangan buah, kandungan nutrisi, dan inspirasi olahan sehat harian.';
+      'Pantau kematangan pisang, kandungan nutrisi, dan inspirasi olahan sehat harian.';
 
-  static const String scanTitle = 'Pemindai Buah';
+  static const String scanTitle = 'Pemindai Pisang';
   static const String scanSubtitle =
       'Arahkan kamera ke buah untuk mendeteksi jenis dan tingkat kematangannya.';
 
-  static const String chatTitle = 'Asisten AI FruitLens';
+  static const String chatTitle = 'Asisten AI BananaLens';
   static const String chatSubtitle =
       'Tanyakan informasi gizi, resep, atau cara penyimpanan buah segar.';
 
@@ -33,7 +33,7 @@ abstract final class AppStrings {
   // Camera & permission
   static const String cameraPermissionTitle = 'Izin kamera dibutuhkan';
   static const String cameraPermissionBody =
-      'FruitLens memakai kamera untuk mengenali buah. Fotomu diproses di '
+      'BananaLens memakai kamera untuk mengenali buah. Fotomu diproses di '
       'perangkat dan tidak dikirim ke mana pun.';
   static const String cameraAllow = 'Izinkan kamera';
   static const String cameraOpenSettings = 'Buka pengaturan';
@@ -117,7 +117,7 @@ abstract final class AppStrings {
   static const String rottenSheetAcknowledge = 'Mengerti';
 
   // Splash Screen
-  static const String splashBadge = 'PEMINDAI KEMATANGAN AI';
-  static const String splashTagline = 'Kenali Segarnya Setiap Buah';
-  static const String splashSemantics = 'Logo FruitLens';
+  static const String splashBadge = 'INSTRUMEN KEMATANGAN PISANG';
+  static const String splashTagline = 'Deteksi Kematangan & Nutrisi Presisi';
+  static const String splashSemantics = 'Logo BananaLens';
 }

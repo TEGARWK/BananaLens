@@ -22,16 +22,25 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final borderInk = isDark
+        ? theme.colorScheme.primary
+        : const Color(0xFF181A16);
     final buttonStyle = ElevatedButton.styleFrom(
       backgroundColor: theme.colorScheme.primary,
       foregroundColor: theme.colorScheme.onPrimary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimens.rButton),
+        side: BorderSide(color: borderInk, width: 1.5),
       ),
       elevation: 0,
-      minimumSize: Size(fullWidth ? double.infinity : 88, height),
+      minimumSize: Size(
+        fullWidth ? double.infinity : 88,
+        height < 48 ? 48 : height,
+      ),
       textStyle: theme.textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.1,
       ),
     );
 
@@ -53,7 +62,7 @@ class PrimaryButton extends StatelessWidget {
       btn = ElevatedButton.icon(
         onPressed: isLoading ? null : onPressed,
         style: buttonStyle,
-        icon: Icon(icon, size: 20),
+        icon: Icon(icon, size: 18),
         label: labelWidget,
       );
     } else {
@@ -64,6 +73,34 @@ class PrimaryButton extends StatelessWidget {
       );
     }
 
-    return btn;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppDimens.rButton),
+        boxShadow: onPressed != null && !isLoading
+            ? <BoxShadow>[
+                BoxShadow(
+                  color: borderInk,
+                  offset: const Offset(0, 4),
+                  blurRadius: 0,
+                ),
+                BoxShadow(
+                  color: const Color(0xFF181A16).withValues(alpha: 0.14),
+                  blurRadius: 10,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : null,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: isDark ? 0.12 : 0.55),
+            width: 1.2,
+          ),
+        ),
+        child: btn,
+      ),
+    );
   }
 }

@@ -166,7 +166,7 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(find.byType(SplashScreen), findsNothing);
-      expect(find.text('Masuk ke FruitLens'), findsOneWidget);
+      expect(find.text('Masuk ke BananaLens'), findsOneWidget);
     },
   );
 }

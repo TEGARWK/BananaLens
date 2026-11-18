@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fruitlens/core/constants/app_strings.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 import 'package:fruitlens/ui/widgets/onboarding_slide_content.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -89,10 +91,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(Icons.eco_rounded, color: theme.colorScheme.primary, size: 22),
+            const IndustrialBananaMark(size: 28),
             const SizedBox(width: AppDimens.s8),
             Text(
-              'FruitLens',
+              AppStrings.appName,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
@@ -105,9 +107,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               onPressed: () => _completeOnboarding(),
               child: Text(
                 'Lewati',
-                style: theme.textTheme.labelLarge?.copyWith(
+                style: theme.textTheme.labelMedium?.copyWith(
                   color: context.harvest.muted,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

@@ -100,8 +100,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/auth';
       }
 
-      // Logged-in user should not linger on auth or forgot-password
-      if (location == '/auth' || location == '/forgot-password') {
+      // Logged-in user should not linger on auth (forgot-password remains accessible for password updates)
+      if (location == '/auth') {
         return '/';
       }
 
@@ -213,18 +213,24 @@ GoRouter createAppRouter({
       GoRoute(
         path: '/auth',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (BuildContext context, GoRouterState state) {
+        pageBuilder: (BuildContext context, GoRouterState state) {
           final mode = state.uri.queryParameters['mode'];
-          return AuthScreen(initialRegister: mode == 'register');
+          return _horizontalSlidePage<void>(
+            key: state.pageKey,
+            child: AuthScreen(initialRegister: mode == 'register'),
+          );
         },
       ),
       // Layar Lupa Kata Sandi
       GoRoute(
         path: '/forgot-password',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (BuildContext context, GoRouterState state) {
+        pageBuilder: (BuildContext context, GoRouterState state) {
           final email = state.uri.queryParameters['email'] ?? '';
-          return ForgotPasswordScreen(initialEmail: email);
+          return _horizontalSlidePage<bool>(
+            key: state.pageKey,
+            child: ForgotPasswordScreen(initialEmail: email),
+          );
         },
       ),
       // Layar Pengaturan Akun & Preferensi Kesehatan
@@ -279,5 +285,46 @@ GoRouter createAppRouter({
             const ThemePreviewScreen(),
       ),
     ],
+  );
+}
+
+CustomTransitionPage<T> _horizontalSlidePage<T>({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: key,
+    transitionDuration: const Duration(milliseconds: 300),
+    reverseTransitionDuration: const Duration(milliseconds: 260),
+    child: child,
+    transitionsBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          final slideIn =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          final slideOut =
+              Tween<Offset>(
+                begin: Offset.zero,
+                end: const Offset(-0.25, 0.0),
+              ).animate(
+                CurvedAnimation(
+                  parent: secondaryAnimation,
+                  curve: Curves.easeOutCubic,
+                ),
+              );
+          return SlideTransition(
+            position: slideOut,
+            child: SlideTransition(position: slideIn, child: child),
+          );
+        },
   );
 }

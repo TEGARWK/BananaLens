@@ -6,6 +6,8 @@ import 'package:fruitlens/core/theme/theme_controller.dart';
 import 'package:fruitlens/data/models/user_profile.dart';
 import 'package:fruitlens/providers/auth_providers.dart';
 import 'package:fruitlens/ui/widgets/fruitlens_app_bar.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
+import 'package:fruitlens/ui/widgets/primary_button.dart';
 import 'package:fruitlens/ui/widgets/profile_header_card.dart';
 import 'package:fruitlens/ui/widgets/profile_history_card.dart';
 import 'package:fruitlens/ui/widgets/profile_menu_section.dart';
@@ -92,19 +94,19 @@ class ProfileScreen extends ConsumerWidget {
         icon: Icons.memory_rounded,
         title: 'Engine AI On-Device',
         subtitle: 'TFLite MobileNetV3 + SVM · Google ML Kit',
-        onTap: () => _showAboutDialog(context),
+        onTap: () => _showInfoModal(context, isEngine: true),
       ),
       ProfileMenuItem(
         icon: Icons.menu_book_outlined,
         title: 'Panduan Penggunaan',
-        subtitle: 'Lihat ulang cara kerja FruitLens',
+        subtitle: 'Lihat ulang cara kerja BananaLens',
         onTap: () => context.push('/onboarding'),
       ),
       ProfileMenuItem(
         icon: Icons.info_outline_rounded,
-        title: 'Tentang FruitLens',
+        title: 'Tentang BananaLens',
         subtitle: 'Versi 1.0.0 · Privasi pemindaian lokal',
-        onTap: () => _showAboutDialog(context),
+        onTap: () => _showInfoModal(context, isEngine: false),
       ),
     ];
 
@@ -167,29 +169,93 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final theme = Theme.of(context);
+    final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rCard),
-        ),
-        title: const Text('Keluar dari Akun?'),
-        content: const Text(
-          'Riwayat pemindaian di perangkat ini tetap tersimpan dengan aman.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Batal'),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: AppDimens.s24),
+        child: IndustrialSpecimenCard(
+          padding: const EdgeInsets.all(AppDimens.s20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const IndustrialTagChip(label: 'KONFIRMASI // KELUAR'),
+                  Icon(
+                    Icons.logout_rounded,
+                    size: 20,
+                    color: theme.colorScheme.error,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppDimens.s16),
+              Text(
+                'Keluar dari Akun?',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: AppDimens.s8),
+              Text(
+                'Riwayat pemindaian di perangkat ini tetap tersimpan dengan aman.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: harvest.muted,
+                ),
+              ),
+              const SizedBox(height: AppDimens.s20),
+              Row(
+                children: [
+                  Expanded(
+                    child: SoftButton(
+                      text: 'Batal',
+                      height: 48,
+                      fullWidth: true,
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                    ),
+                  ),
+                  const SizedBox(width: AppDimens.s12),
+                  Expanded(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
+                        boxShadow: [
+                          BoxShadow(
+                            color: ink,
+                            offset: const Offset(0, 4),
+                            blurRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.error,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppDimens.rButton,
+                            ),
+                            side: BorderSide(color: ink, width: 1.5),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text('Keluar'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Keluar'),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -198,25 +264,136 @@ class ProfileScreen extends ConsumerWidget {
     }
   }
 
-  void _showAboutDialog(BuildContext context) {
+  void _showInfoModal(BuildContext context, {required bool isEngine}) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
 
     showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rCard),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: AppDimens.s24),
+        child: IndustrialSpecimenCard(
+          padding: const EdgeInsets.all(AppDimens.s20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IndustrialTagChip(
+                    label: isEngine ? 'MOD-AI // ENGINE' : 'BANANALENS // V1.0',
+                    accent: true,
+                  ),
+                  if (isEngine)
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(
+                          AppDimens.rButton - 2,
+                        ),
+                        border: Border.all(color: ink, width: 1.4),
+                      ),
+                      child: Icon(
+                        Icons.memory_rounded,
+                        size: 20,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    )
+                  else
+                    const IndustrialBananaMark(size: 40),
+                ],
+              ),
+              const SizedBox(height: AppDimens.s16),
+              Text(
+                isEngine ? 'Engine AI On-Device' : 'BananaLens v1.0.0',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: AppDimens.s8),
+              if (isEngine) ...[
+                const _ModalSpecRow(
+                  label: 'DETEKSI OBJEK',
+                  value: 'Google ML Kit Image Labeling',
+                ),
+                const SizedBox(height: AppDimens.s8),
+                const _ModalSpecRow(
+                  label: 'FITUR VISUAL',
+                  value: 'TFLite MobileNetV3Small + Masked HSV',
+                ),
+                const SizedBox(height: AppDimens.s8),
+                const _ModalSpecRow(
+                  label: 'KLASIFIKASI',
+                  value: 'PCA + RBF SVM + Kalibrasi Pigmen',
+                ),
+                const SizedBox(height: AppDimens.s8),
+                const _ModalSpecRow(
+                  label: 'PRIVASI',
+                  value: '100% Offline di Background Isolate',
+                ),
+              ] else
+                Text(
+                  'Instrumen pintar pendeteksi jenis & tingkat kematangan pisang secara instan di HP meski tanpa internet, dilengkapi info gizi dan ide resep olahan.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: harvest.muted,
+                  ),
+                ),
+              const SizedBox(height: AppDimens.s20),
+              PrimaryButton(
+                text: 'Tutup',
+                height: 48,
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+            ],
+          ),
         ),
-        title: const Text('FruitLens v1.0.0'),
-        content: Text(
-          'Deteksi jenis & kematangan buah secara instan langsung di HP meski tanpa internet, dilengkapi info nutrisi dan ide resep olahan.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: harvest.muted),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Tutup'),
+      ),
+    );
+  }
+}
+
+class _ModalSpecRow extends StatelessWidget {
+  const _ModalSpecRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final harvest = context.harvest;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimens.s12,
+        vertical: AppDimens.s8,
+      ),
+      decoration: BoxDecoration(
+        color: harvest.primarySoft,
+        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+        border: Border.all(color: harvest.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: harvest.muted,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),

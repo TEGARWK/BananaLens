@@ -76,10 +76,9 @@ class AccountGoalSelector extends StatelessWidget {
     required _GoalOption option,
     required bool selected,
   }) {
+    final ink = theme.colorScheme.onSurface;
     return Material(
-      color: selected
-          ? harvest.primarySoft.withValues(alpha: 0.5)
-          : Colors.transparent,
+      color: selected ? primary.withValues(alpha: 0.25) : Colors.transparent,
       borderRadius: BorderRadius.circular(AppDimens.rButton),
       child: InkWell(
         onTap: () => onChanged(option.title),
@@ -92,9 +91,18 @@ class AccountGoalSelector extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppDimens.rButton),
             border: Border.all(
-              color: selected ? primary : harvest.border,
-              width: selected ? 1.5 : 1,
+              color: selected ? ink : harvest.border,
+              width: selected ? 1.6 : 1,
             ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: primary,
+                      offset: const Offset(0, 2.5),
+                      blurRadius: 0,
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             children: [
@@ -104,11 +112,15 @@ class AccountGoalSelector extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: selected ? primary : harvest.primarySoft,
                   borderRadius: BorderRadius.circular(AppDimens.s12),
+                  border: Border.all(
+                    color: selected ? ink : harvest.border,
+                    width: 1.2,
+                  ),
                 ),
                 child: Icon(
                   option.icon,
                   size: 19,
-                  color: selected ? theme.colorScheme.onPrimary : primary,
+                  color: selected ? theme.colorScheme.onPrimary : ink,
                 ),
               ),
               const SizedBox(width: AppDimens.s12),

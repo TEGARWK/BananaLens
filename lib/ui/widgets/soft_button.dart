@@ -22,20 +22,22 @@ class SoftButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
 
     final childWidget = Row(
       mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (icon != null) ...[
-          Icon(icon, size: 18, color: theme.colorScheme.primary),
+          Icon(icon, size: 18, color: ink),
           const SizedBox(width: AppDimens.s8),
         ],
         Text(
           text,
           style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w600,
+            color: ink,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.9,
           ),
         ),
       ],
@@ -48,8 +50,19 @@ class SoftButton extends StatelessWidget {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(AppDimens.rButton),
         child: Container(
-          height: height,
+          height: height < 48 ? 48 : height,
           padding: const EdgeInsets.symmetric(horizontal: AppDimens.s16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppDimens.rButton),
+            border: Border.all(color: harvest.muted, width: 1.4),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: harvest.border,
+                offset: const Offset(0, 3),
+                blurRadius: 0,
+              ),
+            ],
+          ),
           alignment: Alignment.center,
           child: childWidget,
         ),
