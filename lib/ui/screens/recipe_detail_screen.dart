@@ -58,47 +58,59 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           // 1. Metric Summary Card
           IndustrialSpecimenCard(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                _InfoItem(
-                  icon: Icons.timer_outlined,
-                  iconColor: theme.colorScheme.onSurface,
-                  label: 'Waktu Masak',
-                  value: recipe.prepTime,
+                Expanded(
+                  child: _InfoItem(
+                    icon: Icons.timer_outlined,
+                    iconColor: theme.colorScheme.onSurface,
+                    label: 'Waktu Masak',
+                    value: recipe.prepTime,
+                  ),
                 ),
                 Container(height: 38, width: 1, color: harvest.border),
-                _InfoItem(
-                  icon: Icons.bar_chart_rounded,
-                  iconColor: theme.colorScheme.onSurface,
-                  label: 'Kesulitan',
-                  value: recipe.difficulty,
+                Expanded(
+                  child: _InfoItem(
+                    icon: Icons.bar_chart_rounded,
+                    iconColor: theme.colorScheme.onSurface,
+                    label: 'Kesulitan',
+                    value: recipe.difficulty,
+                  ),
                 ),
                 Container(height: 38, width: 1, color: harvest.border),
-                Column(
-                  children: <Widget>[
-                    FruitVectorIcon(
-                      fruitLabel: recipe.fruitLabel,
-                      size: 28,
-                      iconSize: 18,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      FruitNameHelper.toIndonesian(
-                        recipe.fruitLabel,
-                      ).toUpperCase(),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: <Widget>[
+                      FruitVectorIcon(
+                        fruitLabel: recipe.fruitLabel,
+                        size: 28,
+                        iconSize: 18,
                       ),
-                    ),
-                    Text(
-                      '${recipe.type.labelId} · ${recipe.ripenessBucket.labelId}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: harvest.muted,
-                        fontSize: 10,
+                      const SizedBox(height: 3),
+                      Text(
+                        FruitNameHelper.toIndonesian(
+                          recipe.fruitLabel,
+                        ).toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                  ],
+                      Text(
+                        '${recipe.type.labelId} · ${recipe.ripenessBucket.labelId}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: harvest.muted,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -422,6 +434,9 @@ class _InfoItem extends StatelessWidget {
         const SizedBox(height: 3),
         Text(
           value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 13,
@@ -429,6 +444,9 @@ class _InfoItem extends StatelessWidget {
         ),
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
           style: theme.textTheme.labelSmall?.copyWith(
             color: harvest.muted,
             fontSize: 10,

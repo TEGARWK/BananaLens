@@ -6,9 +6,9 @@ import '../../core/theme/harvest_colors.dart';
 import '../../core/utils/fruit_name_helper.dart';
 import '../../data/models/ripeness.dart';
 import '../../data/models/scan_result.dart';
-import 'app_card.dart';
 import 'empty_state.dart';
 import 'fruit_vector_icon.dart';
+import 'industrial_art.dart';
 import 'ripeness_chip.dart';
 import 'section_header.dart';
 import 'shimmer_box.dart';
@@ -34,7 +34,7 @@ class HomeRecentScansSection extends StatelessWidget {
         ),
         const SizedBox(height: AppDimens.s8),
         historyAsync.when(
-          loading: () => const AppCard(
+          loading: () => const IndustrialSpecimenCard(
             child: Column(
               children: [
                 ShimmerBox(height: 52, radius: AppDimens.s12),
@@ -43,7 +43,7 @@ class HomeRecentScansSection extends StatelessWidget {
               ],
             ),
           ),
-          error: (err, _) => AppCard(
+          error: (err, _) => IndustrialSpecimenCard(
             child: Text(
               'Gagal memuat riwayat: $err',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -53,7 +53,7 @@ class HomeRecentScansSection extends StatelessWidget {
           ),
           data: (items) {
             if (items.isEmpty) {
-              return const AppCard(
+              return const IndustrialSpecimenCard(
                 padding: EdgeInsets.symmetric(vertical: AppDimens.s20),
                 child: EmptyState(
                   icon: Icons.history_rounded,
@@ -64,7 +64,7 @@ class HomeRecentScansSection extends StatelessWidget {
               );
             }
             final recents = items.take(3).toList();
-            return AppCard(
+            return IndustrialSpecimenCard(
               padding: EdgeInsets.zero,
               child: Column(
                 children: [
@@ -87,7 +87,7 @@ class HomeRecentScansSection extends StatelessWidget {
                             FruitVectorIcon(
                               fruitLabel: recents[i].fruitLabel,
                               size: 44,
-                              isCircular: true,
+                              isCircular: false,
                             ),
                             const SizedBox(width: AppDimens.s12),
                             Expanded(

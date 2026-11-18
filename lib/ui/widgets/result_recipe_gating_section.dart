@@ -86,7 +86,10 @@ class _ResultRecipeGatingSectionState
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.s16),
       child: IndustrialSpecimenCard(
-        backgroundColor: errorColor.withValues(alpha: 0.10),
+        backgroundColor: Color.alphaBlend(
+          errorColor.withValues(alpha: 0.12),
+          theme.colorScheme.surface,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -133,7 +136,10 @@ class _ResultRecipeGatingSectionState
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.s16),
       child: IndustrialSpecimenCard(
-        backgroundColor: harvest.unripe.withValues(alpha: 0.12),
+        backgroundColor: Color.alphaBlend(
+          harvest.unripe.withValues(alpha: 0.14),
+          theme.colorScheme.surface,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -218,7 +224,10 @@ class _ResultRecipeGatingSectionState
           const SizedBox(height: AppDimens.s12),
           if (_unripeTabIndex == 0)
             IndustrialSpecimenCard(
-              backgroundColor: harvest.unripe.withValues(alpha: 0.12),
+              backgroundColor: Color.alphaBlend(
+                harvest.unripe.withValues(alpha: 0.14),
+                theme.colorScheme.surface,
+              ),
               child: Row(
                 children: [
                   const Icon(
@@ -369,58 +378,54 @@ class _OptionTabButton extends StatelessWidget {
     final harvest = context.harvest;
 
     final ink = theme.colorScheme.onSurface;
-    return Material(
-      color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(AppDimens.rButton),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDimens.rButton),
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 48),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimens.s12,
-            vertical: AppDimens.s8,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppDimens.rButton),
-            border: Border.all(
-              color: selected ? ink : harvest.border,
-              width: selected ? 1.5 : 1.0,
+    return Container(
+      decoration: BoxDecoration(
+        color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+        border: Border.all(
+          color: selected ? ink : harvest.border,
+          width: selected ? 1.5 : 1.0,
+        ),
+        boxShadow: selected
+            ? [BoxShadow(color: ink, offset: const Offset(2, 2), blurRadius: 0)]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 48),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimens.s12,
+              vertical: AppDimens.s8,
             ),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: ink,
-                      offset: const Offset(0, 2.5),
-                      blurRadius: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 16,
+                  color: selected
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onSurface,
+                ),
+                const SizedBox(width: AppDimens.s4),
+                Flexible(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: selected
+                          ? theme.colorScheme.onPrimary
+                          : theme.colorScheme.onSurface,
                     ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: selected
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onSurface,
-              ),
-              const SizedBox(width: AppDimens.s4),
-              Flexible(
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: selected
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onSurface,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

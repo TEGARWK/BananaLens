@@ -5,7 +5,7 @@ import '../../core/theme/harvest_colors.dart';
 import '../../core/utils/fruit_name_helper.dart';
 import '../../data/models/scan_result.dart';
 import '../../providers/auth_providers.dart';
-import 'app_card.dart';
+import 'industrial_art.dart';
 
 /// Smart freshness reminder card and personalized wellness recommendations.
 class HomeSmartReminderCard extends ConsumerWidget {
@@ -29,26 +29,27 @@ class HomeSmartReminderCard extends ConsumerWidget {
 
     String reminderText;
     IconData reminderIcon;
-    Color reminderColor;
+    Color badgeColor;
 
     if (recentRipe != null) {
       final fruitName = FruitNameHelper.toIndonesian(recentRipe.fruitLabel);
       reminderText =
           '$fruitName yang kamu scan siap disantap atau diolah menjadi smoothie sebelum terlalu matang!';
       reminderIcon = Icons.alarm_rounded;
-      reminderColor = harvest.accent;
+      badgeColor = theme.colorScheme.primary;
     } else {
       reminderText =
           'Tahukah kamu? Simpan buah matang terpisah agar gas etilen tidak membuat buah lain cepat busuk.';
       reminderIcon = Icons.eco_rounded;
-      reminderColor = theme.colorScheme.primary;
+      badgeColor = harvest.primarySoft;
     }
 
     final goalText = userProfile?.goal != null && userProfile!.goal.isNotEmpty
         ? 'Cocok untuk target ${userProfile.goal}: Perbanyak asupan apel & alpukat kaya serat.'
         : 'Rekomendasi diet sehat: Konsumsi minimal 2 porsi buah segar setiap hari.';
+    final ink = theme.colorScheme.onSurface;
 
-    return AppCard(
+    return IndustrialSpecimenCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -58,10 +59,11 @@ class HomeSmartReminderCard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(AppDimens.s8),
                 decoration: BoxDecoration(
-                  color: reminderColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
+                  color: badgeColor,
+                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                  border: Border.all(color: ink, width: 1.2),
                 ),
-                child: Icon(reminderIcon, size: 18, color: reminderColor),
+                child: Icon(reminderIcon, size: 18, color: ink),
               ),
               const SizedBox(width: AppDimens.s12),
               Expanded(
@@ -71,7 +73,7 @@ class HomeSmartReminderCard extends ConsumerWidget {
                     Text(
                       'Pengingat Kesegaran',
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -92,11 +94,7 @@ class HomeSmartReminderCard extends ConsumerWidget {
           const SizedBox(height: AppDimens.s8),
           Row(
             children: [
-              Icon(
-                Icons.person_pin_rounded,
-                size: 15,
-                color: theme.colorScheme.primary,
-              ),
+              Icon(Icons.person_pin_rounded, size: 15, color: ink),
               const SizedBox(width: AppDimens.s4),
               Expanded(
                 child: Text(

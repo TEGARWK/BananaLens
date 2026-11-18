@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_dimens.dart';
-import '../../core/theme/harvest_colors.dart';
-import 'fruit_vector_icon.dart';
-import 'soft_button.dart';
+import 'industrial_art.dart';
 
-/// Hero Scan Card with direct camera and gallery actions.
+/// Hero Scan Card with direct camera and gallery actions in BananaLens Industrial style.
 class HomeHeroScanCard extends StatelessWidget {
   const HomeHeroScanCard({
     super.key,
@@ -18,60 +16,33 @@ class HomeHeroScanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final harvest = context.harvest;
     final isDark = theme.brightness == Brightness.dark;
-
-    final backgroundDecoration = isDark
-        ? BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(AppDimens.rCard),
-            border: Border.all(color: harvest.border, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
-                blurRadius: 20,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          )
-        : BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF2E9E5B), Color(0xFF1B6A3B)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(AppDimens.rCard),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF2E9E5B).withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          );
-
-    final titleColor = isDark ? theme.colorScheme.onSurface : Colors.white;
-    final subtitleColor = isDark
-        ? harvest.muted
-        : Colors.white.withValues(alpha: 0.88);
+    final ink = theme.colorScheme.onSurface;
+    final cardBg = isDark
+        ? theme.colorScheme.surface
+        : theme.colorScheme.primary;
+    final textInk = isDark
+        ? theme.colorScheme.onSurface
+        : theme.colorScheme.onPrimary;
 
     return Container(
-      decoration: backgroundDecoration,
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(AppDimens.rCard),
+        border: Border.all(color: ink, width: 1.8),
+        boxShadow: [BoxShadow(color: ink, offset: const Offset(4, 4))],
+      ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
           Positioned(
-            right: -10,
-            top: -12,
+            right: -6,
+            top: 8,
             child: Transform.rotate(
-              angle: -0.15,
+              angle: -0.18,
               child: Opacity(
-                opacity: isDark ? 0.35 : 0.85,
-                child: const FruitVectorIcon(
-                  fruitLabel: 'apple',
-                  size: 115,
-                  isCircular: false,
-                ),
+                opacity: isDark ? 0.22 : 0.25,
+                child: const IndustrialBananaMark(size: 112),
               ),
             ),
           ),
@@ -81,77 +52,128 @@ class HomeHeroScanCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimens.s8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? theme.colorScheme.primary
+                        : const Color(0xFF181A16),
+                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                  ),
+                  child: Text(
+                    'DETEKSI INSTAN // AI',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: isDark
+                          ? theme.colorScheme.onPrimary
+                          : const Color(0xFFF5D51E),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppDimens.s12),
                 Text(
                   'Cek Kesegaran Buah',
                   style: theme.textTheme.titleLarge?.copyWith(
-                    color: titleColor,
-                    fontWeight: FontWeight.w700,
+                    color: textInk,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                const SizedBox(height: AppDimens.s8),
+                const SizedBox(height: AppDimens.s4),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.65,
                   child: Text(
                     'Arahkan kamera ke buah untuk deteksi instan.',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: subtitleColor,
-                      height: 1.3,
+                      color: textInk.withValues(alpha: 0.82),
+                      height: 1.35,
                     ),
                   ),
                 ),
                 const SizedBox(height: AppDimens.s16),
                 Row(
                   children: [
-                    AccentButton(
-                      text: 'Mulai Scan',
-                      icon: Icons.camera_alt_rounded,
-                      height: 48,
-                      onPressed: onScanTap,
+                    Material(
+                      color: isDark
+                          ? theme.colorScheme.primary
+                          : const Color(0xFF181A16),
+                      borderRadius: BorderRadius.circular(AppDimens.rButton),
+                      child: InkWell(
+                        onTap: onScanTap,
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
+                        child: Container(
+                          height: 46,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimens.s16,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.camera_alt_rounded,
+                                color: isDark
+                                    ? theme.colorScheme.onPrimary
+                                    : const Color(0xFFF5D51E),
+                                size: 18,
+                              ),
+                              const SizedBox(width: AppDimens.s8),
+                              Text(
+                                'Mulai Scan',
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: isDark
+                                      ? theme.colorScheme.onPrimary
+                                      : const Color(0xFFF5D51E),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: AppDimens.s8),
-                    InkWell(
-                      onTap: onGalleryTap,
+                    Material(
+                      color: isDark
+                          ? const Color(0xFF282B22)
+                          : const Color(0xFFF5F6F1),
                       borderRadius: BorderRadius.circular(AppDimens.rButton),
-                      child: Container(
-                        height: 48,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppDimens.s16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? harvest.primarySoft
-                              : Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(
-                            AppDimens.rButton,
+                      child: InkWell(
+                        onTap: onGalleryTap,
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
+                        child: Container(
+                          height: 46,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimens.s16,
                           ),
-                          border: Border.all(
-                            color: isDark
-                                ? harvest.border
-                                : Colors.white.withValues(alpha: 0.35),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              color: isDark
-                                  ? theme.colorScheme.primary
-                                  : Colors.white,
-                              size: 18,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                              AppDimens.rButton,
                             ),
-                            const SizedBox(width: AppDimens.s4),
-                            Text(
-                              'Galeri',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: isDark
-                                    ? theme.colorScheme.primary
-                                    : Colors.white,
-                                fontWeight: FontWeight.w700,
+                            border: Border.all(color: ink, width: 1.4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.photo_library_outlined,
+                                color: ink,
+                                size: 18,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: AppDimens.s4),
+                              Text(
+                                'Galeri',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: ink,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

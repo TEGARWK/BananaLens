@@ -152,7 +152,9 @@ class IndustrialSpecimenCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final bg = backgroundColor ?? theme.colorScheme.surface;
+    final bg = backgroundColor != null
+        ? Color.alphaBlend(backgroundColor!, theme.colorScheme.surface)
+        : theme.colorScheme.surface;
     final isDark = theme.brightness == Brightness.dark;
     final outerInk = isDark
         ? theme.colorScheme.primary.withValues(alpha: 0.7)

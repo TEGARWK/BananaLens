@@ -26,8 +26,7 @@ class HomeQuickActionChips extends StatelessWidget {
           child: _ChipButton(
             icon: Icons.lightbulb_outline_rounded,
             label: 'Tips Buah',
-            color: harvest.primarySoft,
-            iconColor: theme.colorScheme.primary,
+            badgeColor: theme.colorScheme.primary,
             onTap: onTipsTap,
           ),
         ),
@@ -36,8 +35,7 @@ class HomeQuickActionChips extends StatelessWidget {
           child: _ChipButton(
             icon: Icons.auto_awesome_rounded,
             label: 'Asisten AI',
-            color: harvest.accent.withValues(alpha: 0.15),
-            iconColor: harvest.accent,
+            badgeColor: harvest.primarySoft,
             onTap: onAiTap,
           ),
         ),
@@ -46,8 +44,7 @@ class HomeQuickActionChips extends StatelessWidget {
           child: _ChipButton(
             icon: Icons.restaurant_menu_rounded,
             label: 'Resep Sehat',
-            color: harvest.primarySoft,
-            iconColor: theme.colorScheme.primary,
+            badgeColor: theme.colorScheme.primary,
             onTap: onRecipeTap,
           ),
         ),
@@ -60,25 +57,23 @@ class _ChipButton extends StatelessWidget {
   const _ChipButton({
     required this.icon,
     required this.label,
-    required this.color,
-    required this.iconColor,
+    required this.badgeColor,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
-  final Color color;
-  final Color iconColor;
+  final Color badgeColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimens.rPill),
+      borderRadius: BorderRadius.circular(AppDimens.rSharp),
       child: Container(
         height: 44,
         padding: const EdgeInsets.symmetric(
@@ -87,26 +82,32 @@ class _ChipButton extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
-          border: Border.all(color: harvest.border, width: 1),
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          border: Border.all(color: ink, width: 1.3),
+          boxShadow: [BoxShadow(color: ink, offset: const Offset(2, 2))],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              child: Icon(icon, size: 15, color: iconColor),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: badgeColor,
+                borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                border: Border.all(color: ink, width: 1),
+              ),
+              child: Icon(icon, size: 13, color: ink),
             ),
-            const SizedBox(width: AppDimens.s4),
+            const SizedBox(width: 6),
             Flexible(
               child: Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11.5,
+                  color: ink,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
                 ),
               ),
             ),

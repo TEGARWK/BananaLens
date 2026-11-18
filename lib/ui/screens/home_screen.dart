@@ -16,6 +16,7 @@ import '../widgets/home_recent_scans_section.dart';
 import '../widgets/home_recipes_section.dart';
 import '../widgets/home_smart_reminder_card.dart';
 import '../widgets/home_today_tip_card.dart';
+import '../widgets/industrial_art.dart';
 
 /// Screen utama FruitLens dengan susunan informasi lengkap:
 /// 1. Sapaan + Avatar
@@ -137,6 +138,7 @@ class _HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ink = theme.colorScheme.onSurface;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -147,34 +149,29 @@ class _HomeHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: AppDimens.s4),
+                  const IndustrialBananaMark(size: 22),
+                  const SizedBox(width: AppDimens.s8),
                   Text(
                     AppStrings.appName,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w700,
+                      color: ink,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppDimens.s4),
+              const SizedBox(height: AppDimens.s8),
               Text(
                 '$greeting, $name',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: AppDimens.s4),
+              const SizedBox(height: 2),
               Text(
                 'Mau cek kesegaran buah apa hari ini?',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -190,30 +187,24 @@ class _HomeHeader extends StatelessWidget {
         Semantics(
           button: true,
           label: 'Buka profil saya',
-          child: Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(),
-            child: InkWell(
-              onTap: () => context.go('/profile'),
-              customBorder: const CircleBorder(),
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: harvest.primarySoft,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                    width: 1.5,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
+          child: InkWell(
+            onTap: () => context.go('/profile'),
+            borderRadius: BorderRadius.circular(AppDimens.rSharp),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                border: Border.all(color: ink, width: 1.5),
+                boxShadow: [BoxShadow(color: ink, offset: const Offset(2, 2))],
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
