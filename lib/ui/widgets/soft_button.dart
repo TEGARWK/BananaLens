@@ -32,12 +32,16 @@ class SoftButton extends StatelessWidget {
           Icon(icon, size: 18, color: ink),
           const SizedBox(width: AppDimens.s8),
         ],
-        Text(
-          text,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: ink,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.9,
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: ink,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.9,
+            ),
           ),
         ),
       ],

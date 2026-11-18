@@ -11,8 +11,8 @@ import '../../data/models/scan_outcome.dart';
 import '../../data/models/scan_report.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/chat_notifier.dart';
-import 'app_card.dart';
 import 'fruit_image.dart';
+import 'industrial_art.dart';
 import 'nutrient_tile.dart';
 import 'primary_button.dart';
 import 'result_recipe_gating_section.dart';
@@ -49,80 +49,138 @@ class ResultSuccessView extends ConsumerWidget {
       outcome.fruitLabel,
       userProfile?.allergies,
     );
+    final ink = theme.colorScheme.onSurface;
+    final (accBg, accFg) = switch (ripeness) {
+      Ripeness.unripe => (const Color(0xFF3E7D28), Colors.white),
+      Ripeness.rotten => (const Color(0xFFC43E2B), Colors.white),
+      _ => (theme.colorScheme.primary, theme.colorScheme.onPrimary),
+    };
 
     return ListView(
       padding: const EdgeInsets.all(AppDimens.screenPadding),
       children: [
-        // 1. Foto Buah
-        FruitImage(
-          imagePath: report.imagePath,
-          fruitLabel: outcome.fruitLabel,
-          height: 180,
-          radius: AppDimens.rHero,
-        ),
-        const SizedBox(height: AppDimens.s16),
-
-        // 2. Baris Judul & Status Kematangan
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        // 1 & 2. Hero Specimen: Foto Buah + Judul + Status + Akurasi
+        IndustrialSpecimenCard(
+          padding: const EdgeInsets.all(AppDimens.s16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  const IndustrialTagChip(
+                    label: 'HASIL // PINDAI',
+                    accent: true,
+                  ),
                   Text(
-                    fruitTitle,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
+                    'BANANALENS AI',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: harvest.muted,
                     ),
                   ),
-                  const SizedBox(height: AppDimens.s4),
-                  if (ripeness != null) RipenessChip(ripeness: ripeness),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${(outcome.ripenessConfidence * 100).toStringAsFixed(0)}%',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: ripeness != null
-                        ? harvest.forRipeness(ripeness)
-                        : theme.colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                  ),
+              const SizedBox(height: AppDimens.s12),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
+                  border: Border.all(color: ink, width: 1.5),
                 ),
-                Text(
-                  'Akurasi Kematangan',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: harvest.muted,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: FruitImage(
+                  imagePath: report.imagePath,
+                  fruitLabel: outcome.fruitLabel,
+                  height: 168,
+                  radius: AppDimens.rButton - 1,
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: AppDimens.s16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fruitTitle,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: AppDimens.s8),
+                        if (ripeness != null) RipenessChip(ripeness: ripeness),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppDimens.s12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimens.s12,
+                      vertical: AppDimens.s8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accBg,
+                      borderRadius: BorderRadius.circular(AppDimens.rButton),
+                      border: Border.all(color: ink, width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: ink,
+                          offset: const Offset(2, 2),
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${(outcome.ripenessConfidence * 100).toStringAsFixed(0)}%',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            height: 1.05,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                            color: accFg,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Akurasi Kematangan',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: accFg,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: AppDimens.s16),
 
         // Peringatan jika keyakinan rendah (<60%)
         if (isLowConfidence) ...[
-          AppCard(
-            color: harvest.overripe.withValues(alpha: 0.12),
-            borderColor: harvest.overripe,
+          IndustrialSpecimenCard(
+            backgroundColor: const Color(0xFFD97706).withValues(alpha: 0.14),
             child: Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: harvest.overripe),
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Color(0xFFB45309),
+                ),
                 const SizedBox(width: AppDimens.s8),
                 Expanded(
                   child: Text(
                     'Hasil foto kurang jelas (<60%). Coba foto ulang di tempat terang dan jarak lebih dekat ya.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: harvest.overripe,
-                      fontWeight: FontWeight.w600,
+                      color: ink,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -135,23 +193,32 @@ class ResultSuccessView extends ConsumerWidget {
         // 2b. Rincian Probabilitas Kelas SVM
         if (outcome.classProbabilities != null &&
             outcome.classProbabilities!.isNotEmpty) ...[
-          AppCard(
+          IndustrialSpecimenCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.bar_chart_rounded,
-                      size: 20,
-                      color: theme.colorScheme.primary,
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                        border: Border.all(color: ink, width: 1.2),
+                      ),
+                      child: Icon(
+                        Icons.bar_chart_rounded,
+                        size: 17,
+                        color: ink,
+                      ),
                     ),
                     const SizedBox(width: AppDimens.s8),
                     Expanded(
                       child: Text(
                         'Detail Analisis Kematangan',
                         style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -164,9 +231,13 @@ class ResultSuccessView extends ConsumerWidget {
                   final rawClass = entry.key;
                   final prob = entry.value;
                   final rip = Ripeness.fromLabel(rawClass);
-                  final barColor = rip != null
-                      ? harvest.forRipeness(rip)
-                      : theme.colorScheme.primary;
+                  final barColor = switch (rip) {
+                    Ripeness.unripe => const Color(0xFF3E7D28),
+                    Ripeness.ripe => theme.colorScheme.primary,
+                    Ripeness.overripe => const Color(0xFFD97706),
+                    Ripeness.rotten => const Color(0xFFC43E2B),
+                    null => theme.colorScheme.primary,
+                  };
 
                   final labelIndo = switch (rawClass) {
                     'unripe' => 'Mentah',
@@ -189,22 +260,36 @@ class ResultSuccessView extends ConsumerWidget {
                                 labelIndo,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
+                                  color: ink,
                                 ),
                               ),
                             ),
                             Text(
                               '${(prob * 100).toStringAsFixed(1)}%',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: barColor,
+                                fontWeight: FontWeight.w800,
+                                color: ink,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(AppDimens.rPill),
+                        Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: harvest.primarySoft,
+                            borderRadius: BorderRadius.circular(
+                              AppDimens.rSharp,
+                            ),
+                            border: Border.all(
+                              color: ink.withValues(alpha: 0.45),
+                              width: 1,
+                            ),
+                          ),
                           child: TweenAnimationBuilder<double>(
                             tween: Tween<double>(
                               begin: 0.0,
@@ -213,14 +298,14 @@ class ResultSuccessView extends ConsumerWidget {
                             duration: const Duration(milliseconds: 700),
                             curve: Curves.easeOutCubic,
                             builder: (context, animatedValue, _) {
-                              return LinearProgressIndicator(
-                                value: animatedValue,
-                                minHeight: 8,
-                                backgroundColor: barColor.withValues(
-                                  alpha: 0.15,
-                                ),
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  barColor,
+                              return Align(
+                                alignment: Alignment.centerLeft,
+                                child: FractionallySizedBox(
+                                  widthFactor: animatedValue.clamp(0.0, 1.0),
+                                  child: ColoredBox(
+                                    color: barColor,
+                                    child: const SizedBox.expand(),
+                                  ),
                                 ),
                               );
                             },
@@ -244,10 +329,14 @@ class ResultSuccessView extends ConsumerWidget {
                 text: 'Tanya AI',
                 icon: Icons.chat_bubble_outline_rounded,
                 onPressed: () {
-                  final contextStr = '$fruitTitle (${outcome.ripenessLabel})';
+                  final ripenessIndo =
+                      ripeness?.labelId ?? outcome.ripenessLabel;
+                  final pct = (outcome.ripenessConfidence * 100).round();
+                  final contextStr =
+                      '$fruitTitle ($ripenessIndo · $pct% keyakinan)';
                   ref
                       .read(chatNotifierProvider.notifier)
-                      .setScanContext(contextStr);
+                      .openWithScanContext(contextStr);
                   context.go('/chat');
                 },
               ),
@@ -265,9 +354,14 @@ class ResultSuccessView extends ConsumerWidget {
                   if (ripeness == Ripeness.rotten) {
                     showRottenGuidanceSheet(context, fruitTitle);
                   } else {
-                    context.push(
-                      '/recipes?fruit=${outcome.fruitLabel}&ripeness=${outcome.ripenessLabel}',
-                    );
+                    final uri = Uri(
+                      path: '/recipes',
+                      queryParameters: <String, String>{
+                        'fruit': outcome.fruitLabel,
+                        'ripeness': outcome.ripenessLabel,
+                      },
+                    ).toString();
+                    context.push(uri);
                   }
                 },
               ),
@@ -287,12 +381,16 @@ class ResultSuccessView extends ConsumerWidget {
               vertical: AppDimens.s12,
             ),
             decoration: BoxDecoration(
-              color: harvest.primarySoft,
+              color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(AppDimens.rCard),
-              border: Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                width: 1,
-              ),
+              border: Border.all(color: ink, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: ink,
+                  offset: const Offset(2, 2.5),
+                  blurRadius: 0,
+                ),
+              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -303,33 +401,35 @@ class ResultSuccessView extends ConsumerWidget {
                       info.calories.toStringAsFixed(0),
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: theme.colorScheme.primary,
+                        color: theme.colorScheme.onPrimary,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                     const SizedBox(width: AppDimens.s8),
                     Text(
                       'kkal · Kalori',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w800,
+                        color: theme.colorScheme.onPrimary,
                       ),
                     ),
                   ],
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimens.s8,
+                    horizontal: AppDimens.s8 + 2,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(AppDimens.rPill),
+                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                    border: Border.all(color: ink, width: 1.2),
                   ),
                   child: Text(
                     'Per 100 g',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: harvest.muted,
+                      fontWeight: FontWeight.w700,
+                      color: ink,
                     ),
                   ),
                 ),
@@ -371,22 +471,31 @@ class ResultSuccessView extends ConsumerWidget {
 
         // 6. Kartu Analisis Kematangan & Rekomendasi Konsumsi
         if (ripeness != null) ...[
-          AppCard(
+          IndustrialSpecimenCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.insights_rounded,
-                      size: 20,
-                      color: harvest.forRipeness(ripeness),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: accBg,
+                        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                        border: Border.all(color: ink, width: 1.2),
+                      ),
+                      child: Icon(
+                        Icons.insights_rounded,
+                        size: 16,
+                        color: accFg,
+                      ),
                     ),
                     const SizedBox(width: AppDimens.s8),
                     Text(
                       'Analisis Kematangan',
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -395,8 +504,8 @@ class ResultSuccessView extends ConsumerWidget {
                 Text(
                   _getRipenessDescription(fruitTitle, ripeness),
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: harvest.muted,
-                    height: 1.4,
+                    color: ink.withValues(alpha: 0.85),
+                    height: 1.45,
                   ),
                 ),
               ],
@@ -407,40 +516,59 @@ class ResultSuccessView extends ConsumerWidget {
 
         // 7. Kartu Manfaat & Nutrisi Esensial
         if (info != null) ...[
-          AppCard(
+          IndustrialSpecimenCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.health_and_safety_outlined,
-                      size: 20,
-                      color: theme.colorScheme.primary,
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                        border: Border.all(color: ink, width: 1.2),
+                      ),
+                      child: Icon(
+                        Icons.health_and_safety_outlined,
+                        size: 16,
+                        color: ink,
+                      ),
                     ),
                     const SizedBox(width: AppDimens.s8),
                     Text(
                       AppStrings.resultBenefits,
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimens.s8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: harvest.primarySoft,
-                        borderRadius: BorderRadius.circular(AppDimens.rPill),
-                      ),
-                      child: Text(
-                        info.vitamins,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 10,
+                    const SizedBox(width: AppDimens.s8),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimens.s8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: harvest.primarySoft,
+                            borderRadius: BorderRadius.circular(
+                              AppDimens.rSharp,
+                            ),
+                            border: Border.all(color: ink, width: 1),
+                          ),
+                          child: Text(
+                            info.vitamins,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: ink,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -450,8 +578,8 @@ class ResultSuccessView extends ConsumerWidget {
                 Text(
                   info.benefits,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: harvest.muted,
-                    height: 1.4,
+                    color: ink.withValues(alpha: 0.85),
+                    height: 1.45,
                   ),
                 ),
               ],
@@ -460,22 +588,27 @@ class ResultSuccessView extends ConsumerWidget {
           const SizedBox(height: AppDimens.s12),
 
           // 8. Kartu Cara Menyimpan
-          AppCard(
+          IndustrialSpecimenCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.kitchen_rounded,
-                      size: 20,
-                      color: theme.colorScheme.primary,
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: harvest.primarySoft,
+                        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                        border: Border.all(color: ink, width: 1.2),
+                      ),
+                      child: Icon(Icons.kitchen_rounded, size: 16, color: ink),
                     ),
                     const SizedBox(width: AppDimens.s8),
                     Text(
                       'Cara Menyimpan',
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -484,8 +617,8 @@ class ResultSuccessView extends ConsumerWidget {
                 Text(
                   info.storageTips,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: harvest.muted,
-                    height: 1.4,
+                    color: ink.withValues(alpha: 0.85),
+                    height: 1.45,
                   ),
                 ),
               ],
@@ -496,9 +629,8 @@ class ResultSuccessView extends ConsumerWidget {
 
         // 9. Kartu Peringatan Alergi
         if (hasAllergy != null) ...[
-          AppCard(
-            color: theme.colorScheme.error.withValues(alpha: 0.08),
-            borderColor: theme.colorScheme.error,
+          IndustrialSpecimenCard(
+            backgroundColor: theme.colorScheme.error.withValues(alpha: 0.12),
             child: Row(
               children: [
                 Icon(Icons.warning_rounded, color: theme.colorScheme.error),
@@ -508,7 +640,7 @@ class ResultSuccessView extends ConsumerWidget {
                     'Perhatian: Buah ini cocok dengan riwayat alergi profil Anda ($hasAllergy). Harap berhati-hati saat mengonsumsi.',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.error,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,9 +29,38 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   String _selectedFilter = 'all';
   String _searchQuery = '';
   final _searchController = TextEditingController();
+  Timer? _hintTimer;
+  int _hintIndex = 0;
+
+  static const List<String> _searchHints = <String>[
+    'Cari buah berdasarkan kematangan...',
+    'Cari: Pisang, Matang, Mentah...',
+    'Ketik nama buah atau status busuk...',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startHintTimer();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    _startHintTimer();
+  }
+
+  void _startHintTimer() {
+    _hintTimer?.cancel();
+    _hintTimer = Timer.periodic(const Duration(milliseconds: 2500), (_) {
+      if (!mounted || _searchQuery.isNotEmpty) return;
+      setState(() => _hintIndex = (_hintIndex + 1) % _searchHints.length);
+    });
+  }
 
   @override
   void dispose() {
+    _hintTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -38,7 +69,22 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return items.where((item) {
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
-        if (!item.fruitLabel.toLowerCase().contains(query)) {
+        final fruitId = _formatFruitName(item.fruitLabel).toLowerCase();
+        final fruitEn = item.fruitLabel.toLowerCase();
+        final ripenessId = switch (Ripeness.fromLabel(item.ripenessLabel)) {
+          Ripeness.unripe => 'mentah',
+          Ripeness.ripe => 'matang',
+          Ripeness.overripe => 'terlalu matang',
+          Ripeness.rotten => 'busuk',
+          null => '',
+        };
+        final ripenessEn = item.ripenessLabel.toLowerCase();
+        final matchesQuery =
+            fruitId.contains(query) ||
+            fruitEn.contains(query) ||
+            ripenessId.contains(query) ||
+            ripenessEn.contains(query);
+        if (!matchesQuery) {
           return false;
         }
       }
@@ -212,7 +258,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   });
                 },
                 decoration: InputDecoration(
-                  hintText: 'Cari riwayat buah...',
+                  hintText: _searchHints[_hintIndex],
                   prefixIcon: Icon(Icons.search_rounded, color: ink, size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
@@ -328,27 +374,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               if (ripeness != null)
                                 RipenessChip(ripeness: ripeness),
                               const SizedBox(width: AppDimens.s4),
-                              IconButton(
-                                icon: Icon(
-                                  item.isFavorite
-                                      ? Icons.star_rounded
-                                      : Icons.star_outline_rounded,
-                                  color: item.isFavorite
-                                      ? const Color(0xFFD99B00)
-                                      : harvest.muted,
-                                  size: 22,
-                                ),
-                                onPressed: () {
-                                  if (item.id != null) {
-                                    ref
-                                        .read(historyListProvider.notifier)
-                                        .toggleFavorite(
-                                          item.id!,
-                                          item.isFavorite,
-                                        );
-                                  }
-                                },
-                              ),
                               IconButton(
                                 icon: const Icon(
                                   Icons.delete_outline_rounded,

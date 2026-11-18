@@ -21,17 +21,26 @@ final scanProvider = AsyncNotifierProvider<ScanNotifier, ScanReport?>(
 );
 
 class ScanNotifier extends AsyncNotifier<ScanReport?> {
+  String? _pendingImagePath;
+
+  /// The image path currently being scanned (used by loading UI).
+  String? get pendingImagePath => _pendingImagePath;
+
   @override
   ScanReport? build() => null;
 
   /// Runs a scan for [imagePath] and publishes the outcome.
   Future<void> scan(String imagePath) async {
+    _pendingImagePath = imagePath;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() => _run(imagePath));
   }
 
   /// Clears the last result (e.g. when the user retakes the photo).
-  void reset() => state = const AsyncData(null);
+  void reset() {
+    _pendingImagePath = null;
+    state = const AsyncData(null);
+  }
 
   Future<String> _persistImage(String sourcePath) async {
     try {
@@ -58,7 +67,13 @@ class ScanNotifier extends AsyncNotifier<ScanReport?> {
   }
 
   Future<ScanReport> _run(String imagePath) async {
+    final isTest = Platform.environment.containsKey('FLUTTER_TEST');
+    final minScanDelay = isTest
+        ? Future<void>.value()
+        : Future<void>.delayed(const Duration(milliseconds: 1100));
+
     final raw = await ref.read(scanServiceProvider).scan(imagePath);
+    await minScanDelay;
     final outcome = _applyThreshold(raw);
     if (outcome is! ScanSuccess) {
       return ScanReport(imagePath: imagePath, outcome: outcome);

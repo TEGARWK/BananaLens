@@ -8,7 +8,7 @@ import '../../data/models/recipe.dart';
 import '../../data/models/scan_outcome.dart';
 import '../../providers/recipe_gating_provider.dart';
 import '../../services/recipe_gating_service.dart';
-import 'app_card.dart';
+import 'industrial_art.dart';
 import 'primary_button.dart';
 
 /// Post-scan Recipe gating section on ResultScreen.
@@ -85,9 +85,8 @@ class _ResultRecipeGatingSectionState
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.s16),
-      child: AppCard(
-        color: errorColor.withValues(alpha: 0.10),
-        borderColor: errorColor.withValues(alpha: 0.55),
+      child: IndustrialSpecimenCard(
+        backgroundColor: errorColor.withValues(alpha: 0.10),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -107,7 +106,12 @@ class _ResultRecipeGatingSectionState
                   const SizedBox(height: AppDimens.s4),
                   Text(
                     '$fruitName menunjukkan tanda pembusukan dan tidak aman diolah menjadi makanan atau minuman.',
-                    style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.85,
+                      ),
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),
@@ -128,13 +132,16 @@ class _ResultRecipeGatingSectionState
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.s16),
-      child: AppCard(
-        color: harvest.unripe.withValues(alpha: 0.10),
-        borderColor: harvest.unripe.withValues(alpha: 0.45),
+      child: IndustrialSpecimenCard(
+        backgroundColor: harvest.unripe.withValues(alpha: 0.12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.schedule_rounded, color: harvest.unripe, size: 24),
+            const Icon(
+              Icons.schedule_rounded,
+              color: Color(0xFF3E7D28),
+              size: 24,
+            ),
             const SizedBox(width: AppDimens.s12),
             Expanded(
               child: Column(
@@ -143,14 +150,19 @@ class _ResultRecipeGatingSectionState
                   Text(
                     'Tunggu dulu sampai matang',
                     style: theme.textTheme.titleSmall?.copyWith(
-                      color: harvest.unripe,
+                      color: const Color(0xFF3E7D28),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: AppDimens.s4),
                   Text(
                     '$fruitName masih mentah dan belum layak diolah langsung. Perkiraan waktu matang: $estimatedDays.',
-                    style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.85,
+                      ),
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),
@@ -205,30 +217,42 @@ class _ResultRecipeGatingSectionState
           ),
           const SizedBox(height: AppDimens.s12),
           if (_unripeTabIndex == 0)
-            AppCard(
-              color: harvest.unripe.withValues(alpha: 0.10),
-              borderColor: harvest.unripe.withValues(alpha: 0.4),
+            IndustrialSpecimenCard(
+              backgroundColor: harvest.unripe.withValues(alpha: 0.12),
               child: Row(
                 children: [
-                  Icon(Icons.hourglass_bottom_rounded, color: harvest.unripe),
+                  const Icon(
+                    Icons.hourglass_bottom_rounded,
+                    color: Color(0xFF3E7D28),
+                  ),
                   const SizedBox(width: AppDimens.s12),
                   Expanded(
                     child: Text(
                       'Perkiraan $fruitName matang siap konsumsi langsung: $estimatedDays.',
-                      style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.85,
+                        ),
+                        height: 1.4,
+                      ),
                     ),
                   ),
                 ],
               ),
             )
           else
-            AppCard(
+            IndustrialSpecimenCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '$fruitName mentah bisa diolah dengan dimasak terlebih dahulu.',
-                    style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.85,
+                      ),
+                      height: 1.4,
+                    ),
                   ),
                   const SizedBox(height: AppDimens.s12),
                   PrimaryButton(
@@ -251,28 +275,33 @@ class _ResultRecipeGatingSectionState
     RipenessBucket bucket,
   ) {
     final theme = Theme.of(context);
-    final harvest = context.harvest;
     final desc = bucket == RipenessBucket.veryRipe
         ? '$fruitName sangat matang cocok diolah menjadi smoothie, pancake, atau banana bread.'
         : '$fruitName matang pas cocok dinikmati segar atau diolah ringan seperti salad dan jus.';
 
+    final ink = theme.colorScheme.onSurface;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.s16),
-      child: AppCard(
+      child: IndustrialSpecimenCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.auto_awesome_rounded,
-                  size: 18,
-                  color: theme.colorScheme.primary,
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                    border: Border.all(color: ink, width: 1.2),
+                  ),
+                  child: Icon(Icons.auto_awesome_rounded, size: 16, color: ink),
                 ),
                 const SizedBox(width: AppDimens.s8),
                 Expanded(
                   child: Text(
-                    'Rekomendasi Resep · ${bucket.labelId}',
+                    'Ide Olahan $fruitName',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -284,14 +313,16 @@ class _ResultRecipeGatingSectionState
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: harvest.primarySoft,
-                    borderRadius: BorderRadius.circular(AppDimens.rPill),
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                    border: Border.all(color: ink, width: 1.2),
                   ),
                   child: Text(
                     bucket.labelId,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10.5,
                     ),
                   ),
                 ),
@@ -301,7 +332,7 @@ class _ResultRecipeGatingSectionState
             Text(
               desc,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: harvest.muted,
+                color: ink.withValues(alpha: 0.85),
                 height: 1.4,
               ),
             ),
@@ -337,6 +368,7 @@ class _OptionTabButton extends StatelessWidget {
     final theme = Theme.of(context);
     final harvest = context.harvest;
 
+    final ink = theme.colorScheme.onSurface;
     return Material(
       color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(AppDimens.rButton),
@@ -352,8 +384,18 @@ class _OptionTabButton extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppDimens.rButton),
             border: Border.all(
-              color: selected ? theme.colorScheme.primary : harvest.border,
+              color: selected ? ink : harvest.border,
+              width: selected ? 1.5 : 1.0,
             ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: ink,
+                      offset: const Offset(0, 2.5),
+                      blurRadius: 0,
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

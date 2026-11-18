@@ -9,7 +9,6 @@ import '../../data/models/fruit_info.dart';
 import '../../data/models/ripeness.dart';
 import '../../data/models/scan_result.dart';
 import '../../providers/chat_notifier.dart';
-import '../../providers/history_providers.dart';
 import '../../providers/service_providers.dart';
 import '../widgets/fruit_image.dart';
 import '../widgets/fruitlens_app_bar.dart';
@@ -32,13 +31,11 @@ class HistoryDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
-  late bool _isFavorite;
   FruitInfo? _fruitInfo;
 
   @override
   void initState() {
     super.initState();
-    _isFavorite = widget.initialItem.isFavorite;
     _loadFruitInfo();
   }
 
@@ -77,7 +74,6 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
     final item = widget.initialItem;
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final ink = theme.colorScheme.onSurface;
     final ripeness = Ripeness.fromLabel(item.ripenessLabel);
     final fruitInfo = _fruitInfo;
     final fruitTitle = fruitInfo?.nameId ?? item.fruitLabel;
@@ -94,43 +90,6 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
             context.go('/history');
           }
         },
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppDimens.s12),
-            child: Center(
-              child: InkWell(
-                onTap: () {
-                  final prev = _isFavorite;
-                  setState(() => _isFavorite = !prev);
-                  if (item.id != null) {
-                    ref
-                        .read(historyListProvider.notifier)
-                        .toggleFavorite(item.id!, prev);
-                  }
-                },
-                borderRadius: BorderRadius.circular(AppDimens.rButton),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _isFavorite
-                        ? theme.colorScheme.primary
-                        : harvest.primarySoft,
-                    borderRadius: BorderRadius.circular(AppDimens.rButton),
-                    border: Border.all(color: ink, width: 1.4),
-                  ),
-                  child: Icon(
-                    _isFavorite
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    color: _isFavorite ? theme.colorScheme.error : ink,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppDimens.screenPadding),
@@ -491,10 +450,13 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
             icon: Icons.auto_awesome_rounded,
             fullWidth: true,
             onPressed: () {
-              final contextStr = '$fruitTitle (${item.ripenessLabel})';
+              final ripenessIndo = ripeness?.labelId ?? item.ripenessLabel;
+              final pct = (item.confidence * 100).round();
+              final contextStr =
+                  '$fruitTitle ($ripenessIndo · $pct% keyakinan)';
               ref
                   .read(chatNotifierProvider.notifier)
-                  .setScanContext(contextStr);
+                  .openWithScanContext(contextStr);
               context.go('/chat');
             },
           ),

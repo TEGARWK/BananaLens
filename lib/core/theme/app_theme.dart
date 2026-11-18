@@ -271,12 +271,15 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.lText,
         contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: AppColors.lSurface,
-          fontWeight: FontWeight.w500,
+          color: AppColors.lPrimary,
+          fontWeight: FontWeight.w700,
         ),
+        actionTextColor: AppColors.lPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.rButton),
+          side: const BorderSide(color: AppColors.lPrimary, width: 1.5),
         ),
+        elevation: 4,
         behavior: SnackBarBehavior.floating,
       ),
       dialogTheme: DialogThemeData(
@@ -284,6 +287,7 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.rCard),
+          side: const BorderSide(color: textPrimary, width: 1.5),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
@@ -416,15 +420,17 @@ abstract final class AppTheme {
         space: 1,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: surface,
+        backgroundColor: AppColors.dPrimary,
         contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: textPrimary,
-          fontWeight: FontWeight.w500,
+          color: AppColors.dOnPrimary,
+          fontWeight: FontWeight.w700,
         ),
+        actionTextColor: AppColors.dOnPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.rButton),
-          side: const BorderSide(color: border, width: 1),
+          side: const BorderSide(color: AppColors.dBorder, width: 1.5),
         ),
+        elevation: 4,
         behavior: SnackBarBehavior.floating,
       ),
       dialogTheme: DialogThemeData(
@@ -432,6 +438,7 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.rCard),
+          side: const BorderSide(color: primary, width: 1.5),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(

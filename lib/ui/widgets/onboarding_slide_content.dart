@@ -88,12 +88,14 @@ class OnboardingBottomBar extends StatelessWidget {
     required this.currentIndex,
     required this.onNextOrStart,
     required this.onGoToAuth,
+    this.isLoggedIn = false,
   });
 
   final int slideCount;
   final int currentIndex;
   final VoidCallback onNextOrStart;
   final VoidCallback onGoToAuth;
+  final bool isLoggedIn;
 
   @override
   Widget build(BuildContext context) {
@@ -133,13 +135,15 @@ class OnboardingBottomBar extends StatelessWidget {
           ),
           const SizedBox(height: AppDimens.s20),
           PrimaryButton(
-            text: isLast ? 'Daftar Akun Baru' : 'Lanjut',
+            text: isLast
+                ? (isLoggedIn ? 'Selesai' : 'Daftar Akun Baru')
+                : 'Lanjut',
             icon: isLast
-                ? Icons.person_add_rounded
+                ? (isLoggedIn ? Icons.check_rounded : Icons.person_add_rounded)
                 : Icons.chevron_right_rounded,
             onPressed: onNextOrStart,
           ),
-          if (isLast) ...<Widget>[
+          if (isLast && !isLoggedIn) ...<Widget>[
             const SizedBox(height: AppDimens.s8),
             TextButton(
               onPressed: onGoToAuth,
