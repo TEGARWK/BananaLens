@@ -99,11 +99,12 @@ class ScanNotifier extends AsyncNotifier<ScanReport?> {
     );
   }
 
-  /// FR-11: below the threshold the app asks for a new photo.
+  /// Rejects genuinely uncertain predictions below [kUncertainThreshold] while
+  /// allowing mid-confidence (`0.35..0.59`) predictions through with UI warning.
   ScanOutcome _applyThreshold(ScanOutcome outcome) {
     if (outcome is ScanSuccess &&
-        (outcome.fruitConfidence < kConfidenceThreshold ||
-            outcome.ripenessConfidence < kConfidenceThreshold)) {
+        (outcome.fruitConfidence < kUncertainThreshold ||
+            outcome.ripenessConfidence < kUncertainThreshold)) {
       return const ScanUncertain();
     }
     return outcome;

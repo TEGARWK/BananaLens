@@ -74,7 +74,7 @@ void main() {
   );
 
   test(
-    'ScanNotifier converts low confidence below 0.6 to ScanUncertain',
+    'ScanNotifier converts very low confidence below 0.35 to ScanUncertain',
     () async {
       final container = ProviderContainer(
         overrides: [
@@ -85,7 +85,7 @@ void main() {
                 ScanSuccess(
                   fruitLabel: 'apple',
                   ripenessLabel: 'ripe',
-                  fruitConfidence: 0.55, // di bawah ambang 0.6
+                  fruitConfidence: 0.32, // di bawah ambang 0.35
                   ripenessConfidence: 0.90,
                 ),
               ],
@@ -104,6 +104,43 @@ void main() {
       final report = container.read(scanProvider).value;
       expect(report, isNotNull);
       expect(report!.outcome, isA<ScanUncertain>());
+    },
+  );
+
+  test(
+    'ScanNotifier keeps mid-confidence (0.35..0.59) scan as ScanSuccess for UI warning',
+    () async {
+      final container = ProviderContainer(
+        overrides: [
+          scanServiceProvider.overrideWithValue(
+            FakeScanService(
+              delay: Duration.zero,
+              outcomes: const <ScanOutcome>[
+                ScanSuccess(
+                  fruitLabel: 'banana',
+                  ripenessLabel: 'rotten',
+                  fruitConfidence: 0.48,
+                  ripenessConfidence: 0.57,
+                ),
+              ],
+            ),
+          ),
+          fruitInfoRepositoryProvider.overrideWithValue(_MockFruitRepo()),
+          historyRepositoryProvider.overrideWithValue(
+            InMemoryHistoryRepository(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(scanProvider.notifier).scan('test_transition.jpg');
+
+      final report = container.read(scanProvider).value;
+      expect(report, isNotNull);
+      expect(report!.outcome, isA<ScanSuccess>());
+      final success = report.outcome as ScanSuccess;
+      expect(success.ripenessLabel, 'rotten');
+      expect(success.ripenessConfidence, closeTo(0.57, 1e-6));
     },
   );
 

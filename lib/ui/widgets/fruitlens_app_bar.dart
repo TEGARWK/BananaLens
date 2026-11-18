@@ -74,6 +74,7 @@ class FruitLensAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       );
     } else if (leadingIcon != null) {
+      final isDark = theme.brightness == Brightness.dark;
       leadingWidget = Padding(
         padding: const EdgeInsets.only(left: AppSpacing.md),
         child: Center(
@@ -81,21 +82,38 @@ class FruitLensAppBar extends StatelessWidget implements PreferredSizeWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: <Color>[AppColors.primarySeed, Color(0xFF1B5E20)],
+              gradient: LinearGradient(
+                colors: isDark
+                    ? <Color>[
+                        colorScheme.primary.withValues(alpha: 0.35),
+                        colorScheme.surface,
+                      ]
+                    : const <Color>[AppColors.primarySeed, Color(0xFF1B5E20)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: AppRadius.roundedMd,
+              border: isDark
+                  ? Border.all(
+                      color: colorScheme.primary.withValues(alpha: 0.3),
+                      width: 1,
+                    )
+                  : null,
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: AppColors.primarySeed.withValues(alpha: 0.2),
+                  color: isDark
+                      ? Colors.transparent
+                      : AppColors.primarySeed.withValues(alpha: 0.2),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Icon(leadingIcon, color: Colors.white, size: 20),
+            child: Icon(
+              leadingIcon,
+              color: isDark ? colorScheme.primary : Colors.white,
+              size: 20,
+            ),
           ),
         ),
       );
@@ -135,8 +153,8 @@ class FruitLensAppBar extends StatelessWidget implements PreferredSizeWidget {
                   Container(
                     width: 7,
                     height: 7,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primarySeed,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
                   ),

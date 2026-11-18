@@ -1,8 +1,12 @@
 [
   {
     "id": 1,
+    "name": "Smoothie Pisang Madu Hangat",
     "title": "Smoothie Pisang Madu Hangat",
+    "fruit_id": "banana",
     "fruit_label": "banana",
+    "ripeness_bucket": "very_ripe",
+    "type": "drink",
     "suitable_ripeness": ["ripe", "overripe"],
     "prep_time": "10 menit",
     "difficulty": "Sangat Mudah",
@@ -17,12 +21,18 @@
       "Masukkan pisang, susu, dan madu ke dalam blender.",
       "Blender dengan kecepatan sedang hingga tekstur lembut dan creamy.",
       "Tuangkan ke dalam gelas dan nikmati selagi segar."
-    ]
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
   },
   {
     "id": 2,
+    "name": "Pancake Pisang Oatmeal",
     "title": "Pancake Pisang Oatmeal",
+    "fruit_id": "banana",
     "fruit_label": "banana",
+    "ripeness_bucket": "very_ripe",
+    "type": "food",
     "suitable_ripeness": ["overripe"],
     "prep_time": "15 menit",
     "difficulty": "Mudah",
@@ -37,12 +47,18 @@
       "Campurkan telur dan oatmeal, aduk rata hingga membentuk adonan pancake.",
       "Panaskan teflon anti-lengket dengan api kecil.",
       "Tuang 2 sendok makan adonan, masak hingga muncul gelembung lalu balik hingga matang keemasan."
-    ]
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
   },
   {
     "id": 3,
+    "name": "Salad Apel & Keju Segar",
     "title": "Salad Apel & Keju Segar",
+    "fruit_id": "apple",
     "fruit_label": "apple",
+    "ripeness_bucket": "ripe",
+    "type": "food",
     "suitable_ripeness": ["ripe", "unripe"],
     "prep_time": "10 menit",
     "difficulty": "Sangat Mudah",
@@ -58,12 +74,18 @@
       "Lumuri potongan apel dengan air lemon agar warnanya tetap cerah dan tidak mencokelat.",
       "Campurkan apel dengan daun selada dan keju dalam mangkuk.",
       "Beri minyak zaitun dan aduk perlahan sebelum disajikan."
-    ]
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
   },
   {
     "id": 4,
+    "name": "Selai Apel Kayu Manis Rumahan",
     "title": "Selai Apel Kayu Manis Rumahan",
+    "fruit_id": "apple",
     "fruit_label": "apple",
+    "ripeness_bucket": "very_ripe",
+    "type": "food",
     "suitable_ripeness": ["overripe", "ripe"],
     "prep_time": "25 menit",
     "difficulty": "Sedang",
@@ -78,12 +100,18 @@
       "Hancurkan apel menggunakan sendok kayu atau garpu.",
       "Tambahkan gula aren, aduk terus dengan api kecil hingga air menyusut dan mengental seperti selai.",
       "Simpan dalam toples kaca di kulkas setelah dingin."
-    ]
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
   },
   {
     "id": 5,
+    "name": "Guacamole Alpukat Segar",
     "title": "Guacamole Alpukat Segar",
+    "fruit_id": "avocado",
     "fruit_label": "avocado",
+    "ripeness_bucket": "ripe",
+    "type": "food",
     "suitable_ripeness": ["ripe"],
     "prep_time": "10 menit",
     "difficulty": "Sangat Mudah",
@@ -99,12 +127,18 @@
       "Lumatkan alpukat dengan garpu, biarkan sedikit bertekstur kasar.",
       "Campurkan tomat, perasan jeruk nipis, garam, dan lada.",
       "Aduk rata dan sajikan bersama keripik jagung atau olesan roti panggang."
-    ]
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
   },
   {
     "id": 6,
+    "name": "Puding Mangga Chia Seed",
     "title": "Puding Mangga Chia Seed",
+    "fruit_id": "mango",
     "fruit_label": "mango",
+    "ripeness_bucket": "ripe",
+    "type": "food",
     "suitable_ripeness": ["ripe", "overripe"],
     "prep_time": "15 menit + dingin",
     "difficulty": "Mudah",
@@ -119,12 +153,18 @@
       "Blender sebagian daging mangga hingga halus membentuk puree mangga.",
       "Potong dadu sisa mangga untuk topping.",
       "Susun puding chia di gelas, lapisi dengan puree mangga, dan beri potongan mangga di atasnya."
-    ]
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
   },
   {
     "id": 7,
+    "name": "Es Semangka Jeruk Nipis",
     "title": "Es Semangka Jeruk Nipis",
+    "fruit_id": "watermelon",
     "fruit_label": "watermelon",
+    "ripeness_bucket": "ripe",
+    "type": "drink",
     "suitable_ripeness": ["ripe"],
     "prep_time": "10 menit",
     "difficulty": "Sangat Mudah",
@@ -139,7 +179,133 @@
       "Campurkan perasan jeruk nipis dan daun mint yang sedikit dimemarkan.",
       "Masukkan es batu dan potongan semangka ke dalam gelas saji.",
       "Aduk lembut dan nikmati sensasi kesegaran alami pelepas dahaga."
-    ]
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
+  },
+  {
+    "id": 8,
+    "name": "Oatmeal Pisang Segar & Madu",
+    "title": "Oatmeal Pisang Segar & Madu",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
+    "ripeness_bucket": "ripe",
+    "type": "food",
+    "suitable_ripeness": ["ripe"],
+    "prep_time": "10 menit",
+    "difficulty": "Sangat Mudah",
+    "ingredients": [
+      "1 buah pisang matang pas, iris tipis",
+      "4 sendok makan oatmeal instan",
+      "200 ml susu hangat atau air panas",
+      "1 sendok teh madu dan taburan chia seed (opsional)"
+    ],
+    "steps": [
+      "Seduh oatmeal dengan susu hangat atau air panas hingga mengembang.",
+      "Tata irisan pisang matang di atas mangkuk oatmeal.",
+      "Tuangkan madu dan taburkan chia seed sebelum disajikan."
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
+  },
+  {
+    "id": 9,
+    "name": "Salad Buah Pisang Yoghurt",
+    "title": "Salad Buah Pisang Yoghurt",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
+    "ripeness_bucket": "ripe",
+    "type": "food",
+    "suitable_ripeness": ["ripe"],
+    "prep_time": "10 menit",
+    "difficulty": "Sangat Mudah",
+    "ingredients": [
+      "2 buah pisang matang pas (tekstur masih kokoh)",
+      "100 g yoghurt plain atau rasa vanila",
+      "1 sendok teh air perasan jeruk nipis",
+      "Kacang almond sangrai cincang secukupnya"
+    ],
+    "steps": [
+      "Kupas dan potong pisang berbentuk bulat seragam.",
+      "Aduk yoghurt dengan air jeruk nipis agar segar dan pisang tidak cepat berubah warna.",
+      "Campurkan potongan pisang, taburi almond sangrai, dan sajikan dingin."
+    ],
+    "safety_notes": null,
+    "is_reviewed": true
+  },
+  {
+    "id": 10,
+    "name": "Keripik Pisang Mentah Renyah",
+    "title": "Keripik Pisang Mentah Renyah",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
+    "ripeness_bucket": "unripe",
+    "type": "food",
+    "suitable_ripeness": ["unripe"],
+    "prep_time": "30 menit",
+    "difficulty": "Sedang",
+    "ingredients": [
+      "4 buah pisang mentah (kepok atau tanduk hijau)",
+      "1 liter air bersih + 1 sendok makan garam",
+      "1 sendok teh air kapur sirih (opsional, agar renyah)",
+      "Minyak goreng secukupnya"
+    ],
+    "steps": [
+      "Kupas pisang mentah di bawah air mengalir atau langsung rendam dalam air garam untuk menghilangkan getahnya.",
+      "Iris tipis merata dengan pisau atau alat pengiris.",
+      "Bilas kembali irisan pisang dengan air bersih hingga air rendaman tidak keruh, lalu tiriskan hingga kering.",
+      "Goreng dalam minyak panas dengan api sedang hingga matang keemasan dan renyah, lalu tiriskan."
+    ],
+    "safety_notes": "Pisang mentah mengandung getah dan pati resisten tinggi. Wajib dicuci/direndam air garam dan dimasak hingga benar-benar matang sebelum dikonsumsi; jangan dimakan mentah.",
+    "is_reviewed": true
+  },
+  {
+    "id": 11,
+    "name": "Pisang Mentah Rebus Garam",
+    "title": "Pisang Mentah Rebus Garam",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
+    "ripeness_bucket": "unripe",
+    "type": "food",
+    "suitable_ripeness": ["unripe"],
+    "prep_time": "25 menit",
+    "difficulty": "Mudah",
+    "ingredients": [
+      "3 buah pisang kepok mentah",
+      "Air secukupnya untuk merebus",
+      "1/2 sendok teh garam"
+    ],
+    "steps": [
+      "Cuci bersih kulit pisang dan potong kedua ujungnya agar getah keluar.",
+      "Rebus pisang bersama kulitnya dalam air bergaram selama 15-20 menit hingga daging empuk.",
+      "Angkat, tiriskan, kupas kulitnya saat hangat, dan sajikan."
+    ],
+    "safety_notes": "Wajib direbus hingga daging buah empuk dan matang sempurna untuk melunakkan pati serta menghilangkan rasa sepat dan getah pisang mentah.",
+    "is_reviewed": true
+  },
+  {
+    "id": 12,
+    "name": "Rujak Serut Mangga Muda",
+    "title": "Rujak Serut Mangga Muda",
+    "fruit_id": "mango",
+    "fruit_label": "mango",
+    "ripeness_bucket": "unripe",
+    "type": "food",
+    "suitable_ripeness": ["unripe"],
+    "prep_time": "15 menit",
+    "difficulty": "Mudah",
+    "ingredients": [
+      "1 buah mangga muda mengkal",
+      "50 g gula merah sisir",
+      "2 buah cabai rawit (sesuai selera)",
+      "1/4 sendok teh garam dan sedikit terasi bakar"
+    ],
+    "steps": [
+      "Kupas mangga muda, cuci bersih dengan air matang agar getah kulit hilang, lalu serut memanjang.",
+      "Ulek cabai, garam, terasi, dan gula merah hingga halus.",
+      "Campurkan bumbu rujak dengan serutan mangga, diamkan 10 menit di kulkas agar meresap."
+    ],
+    "safety_notes": "Cuci bersih mangga muda setelah dikupas untuk menghilangkan getah di sekitar pangkal tangkai yang dapat mengiritasi bibir/tenggorokan. Konsumsi secukupnya bagi penderita asam lambung.",
+    "is_reviewed": true
   }
 ]
-

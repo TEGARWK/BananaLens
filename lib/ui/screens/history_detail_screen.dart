@@ -141,7 +141,11 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
             _isFavorite
                 ? Icons.favorite_rounded
                 : Icons.favorite_border_rounded,
-            color: _isFavorite ? Colors.redAccent : harvest.muted,
+            color: _isFavorite
+                ? (Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFFFF6B70)
+                      : const Color(0xFFE5484D))
+                : harvest.muted,
             size: 24,
           ),
           onPressed: () {

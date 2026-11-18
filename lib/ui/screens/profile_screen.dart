@@ -9,6 +9,7 @@ import 'package:fruitlens/ui/widgets/fruitlens_app_bar.dart';
 import 'package:fruitlens/ui/widgets/profile_header_card.dart';
 import 'package:fruitlens/ui/widgets/profile_history_card.dart';
 import 'package:fruitlens/ui/widgets/profile_menu_section.dart';
+import 'package:fruitlens/ui/widgets/shimmer_box.dart';
 import 'package:fruitlens/ui/widgets/soft_button.dart';
 import 'package:fruitlens/ui/widgets/theme_picker_sheet.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +30,7 @@ class ProfileScreen extends ConsumerWidget {
         leadingIcon: Icons.person_rounded,
       ),
       body: authAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _ProfileSkeleton(),
         error: (_, _) => Center(
           child: SoftButton(
             text: 'Muat Ulang Profil',
@@ -97,7 +98,7 @@ class ProfileScreen extends ConsumerWidget {
         icon: Icons.menu_book_outlined,
         title: 'Panduan Penggunaan',
         subtitle: 'Lihat ulang cara kerja FruitLens',
-        onTap: () => context.go('/onboarding'),
+        onTap: () => context.push('/onboarding'),
       ),
       ProfileMenuItem(
         icon: Icons.info_outline_rounded,
@@ -209,8 +210,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
         title: const Text('FruitLens v1.0.0'),
         content: Text(
-          'Deteksi jenis & kematangan buah secara instan langsung di perangkat '
-          'dengan model TFLite offline-first, dilengkapi referensi nutrisi USDA & Kemenkes RI.',
+          'Deteksi jenis & kematangan buah secara instan langsung di HP meski tanpa internet, dilengkapi info nutrisi dan ide resep olahan.',
           style: theme.textTheme.bodyMedium?.copyWith(color: harvest.muted),
         ),
         actions: [
@@ -220,6 +220,24 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ProfileSkeleton extends StatelessWidget {
+  const _ProfileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(AppDimens.screenPadding),
+      children: const [
+        ShimmerBox(height: 112, radius: AppDimens.rCard),
+        SizedBox(height: AppDimens.s16),
+        ShimmerBox(height: 168, radius: AppDimens.rCard),
+        SizedBox(height: AppDimens.s16),
+        ShimmerBox(height: 140, radius: AppDimens.rCard),
+      ],
     );
   }
 }

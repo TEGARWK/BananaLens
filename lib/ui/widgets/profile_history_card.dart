@@ -8,6 +8,7 @@ import 'package:fruitlens/providers/history_providers.dart';
 import 'package:fruitlens/ui/widgets/app_card.dart';
 import 'package:fruitlens/ui/widgets/fruit_image.dart';
 import 'package:fruitlens/ui/widgets/ripeness_chip.dart';
+import 'package:fruitlens/ui/widgets/shimmer_box.dart';
 import 'package:go_router/go_router.dart';
 
 /// History summary card positioned right below the profile header card.
@@ -27,8 +28,14 @@ class ProfileHistoryCard extends ConsumerWidget {
           const SizedBox(height: AppDimens.s12),
           historyAsync.when(
             loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppDimens.s16),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              padding: EdgeInsets.symmetric(vertical: AppDimens.s8),
+              child: Column(
+                children: [
+                  ShimmerBox(height: 56, radius: AppDimens.s12),
+                  SizedBox(height: AppDimens.s8),
+                  ShimmerBox(height: 56, radius: AppDimens.s12),
+                ],
+              ),
             ),
             error: (_, _) => _buildEmptyOrError(
               context,

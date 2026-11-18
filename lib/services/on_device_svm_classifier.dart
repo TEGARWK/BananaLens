@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'on_device_image_preprocessor.dart';
 
 /// Prediction output from the on-device hybrid PCA + RBF SVM pipeline.
 class SvmPrediction {
@@ -98,8 +99,13 @@ class OnDeviceSvmClassifier {
     );
   }
 
-  /// Runs StandardScaler + PCA + RBF kernel + LIBSVM pairwise coupling probabilities.
-  SvmPrediction predict(Float32List cnn576, Float32List hsv30) {
+  /// Runs StandardScaler + PCA + RBF kernel + LIBSVM pairwise coupling probabilities,
+  /// optionally applying chlorophyll post-processing calibration for unripe green bananas.
+  SvmPrediction predict(
+    Float32List cnn576,
+    Float32List hsv30, {
+    PigmentRatios? pigmentRatios,
+  }) {
     const cnnDim = 576;
     const pcaDim = 100;
     const hsvDim = 30;
@@ -202,19 +208,64 @@ class OnDeviceSvmClassifier {
     final probs = _multiclassProbability(numClasses, pairwise);
 
     final probMap = <String, double>{};
-    int bestIdx = 0;
     for (int i = 0; i < numClasses; i++) {
       probMap[classNames[i]] = probs[i].clamp(0.0, 1.0);
-      if (probs[i] > probs[bestIdx]) {
-        bestIdx = i;
+    }
+
+    if (pigmentRatios != null) {
+      _applyChlorophyllCalibration(probMap, pigmentRatios);
+    }
+
+    String bestClass = classNames.first;
+    double bestProb = probMap[bestClass] ?? 0.0;
+    for (final entry in probMap.entries) {
+      if (entry.value > bestProb) {
+        bestProb = entry.value;
+        bestClass = entry.key;
       }
     }
 
     return SvmPrediction(
-      predictedClass: classNames[bestIdx],
-      confidence: probs[bestIdx].clamp(0.0, 1.0),
+      predictedClass: bestClass,
+      confidence: bestProb.clamp(0.0, 1.0),
       probabilities: probMap,
     );
+  }
+
+  /// Reinforces `unripe` over `ripe` when explicit chlorophyll green pigment
+  /// covers >= 30% of the fruit body and dominates yellow and brown/dark pixels.
+  static void _applyChlorophyllCalibration(
+    Map<String, double> probMap,
+    PigmentRatios pigment,
+  ) {
+    if (pigment.activePixelCount < 50) return;
+    if (pigment.greenRatio < 0.30) return;
+    if (pigment.greenRatio <= pigment.yellowRatio ||
+        pigment.greenRatio <= pigment.brownDarkRatio) {
+      return;
+    }
+
+    final svmUnripe = probMap['unripe'];
+    final svmRipe = probMap['ripe'];
+    if (svmUnripe == null || svmRipe == null) return;
+
+    final pairBudget = svmUnripe + svmRipe;
+    if (pairBudget <= 1e-6) return;
+
+    final svmUnripeShare = svmUnripe / pairBudget;
+    final colorGreenShare =
+        pigment.greenRatio / (pigment.greenRatio + pigment.yellowRatio + 1e-6);
+    final blendedUnripeShare =
+        (0.20 * svmUnripeShare) + (0.80 * colorGreenShare);
+    final calibratedUnripe = (pairBudget * blendedUnripeShare).clamp(
+      0.0,
+      pairBudget,
+    );
+
+    if (calibratedUnripe > svmUnripe) {
+      probMap['unripe'] = calibratedUnripe;
+      probMap['ripe'] = (pairBudget - calibratedUnripe).clamp(0.0, pairBudget);
+    }
   }
 
   static Float64List _multiclassProbability(int k, List<Float64List> r) {

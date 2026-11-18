@@ -56,6 +56,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _scrollToBottom();
   }
 
+  void _confirmClearChat(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Percakapan?'),
+        content: const Text(
+          'Semua riwayat tanya jawab dengan asisten AI pada sesi ini akan dibersihkan.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              ref.read(chatNotifierProvider.notifier).clearConversation();
+            },
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatNotifierProvider);
@@ -77,9 +102,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 color: theme.colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.auto_awesome_rounded,
-                color: Colors.white,
+                color: theme.colorScheme.onPrimary,
                 size: 20,
               ),
             ),
@@ -124,9 +149,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           IconButton(
             icon: Icon(Icons.refresh_rounded, color: harvest.muted),
             tooltip: 'Hapus Riwayat Chat',
-            onPressed: () {
-              ref.read(chatNotifierProvider.notifier).clearConversation();
-            },
+            onPressed: () => _confirmClearChat(context),
           ),
           const SizedBox(width: AppDimens.s8),
         ],
@@ -231,9 +254,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ),
 
-          // Chip Saran Cepat
+          // Chip Saran Cepat (Touch target >= 44dp)
           Container(
-            height: 38,
+            height: 44,
             margin: const EdgeInsets.only(bottom: AppDimens.s8),
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(
@@ -264,7 +287,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ),
 
-          // Kolom Input Pil & Tombol Kirim 40dp Bulat
+          // Kolom Input Pil & Tombol Kirim 48dp Bulat
           SafeArea(
             top: false,
             child: Padding(
@@ -291,20 +314,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   const SizedBox(width: AppDimens.s8),
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.send_rounded,
-                        color: Colors.white,
-                        size: 20,
+                  Semantics(
+                    button: true,
+                    label: 'Kirim pesan',
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        shape: BoxShape.circle,
                       ),
-                      onPressed: () => _sendMessage(),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.send_rounded,
+                          color: theme.colorScheme.onPrimary,
+                          size: 20,
+                        ),
+                        onPressed: () => _sendMessage(),
+                      ),
                     ),
                   ),
                 ],

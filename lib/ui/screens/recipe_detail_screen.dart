@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
+import '../../core/utils/fruit_name_helper.dart';
 import '../../data/models/recipe.dart';
 import '../../providers/chat_notifier.dart';
 import '../widgets/app_card.dart';
@@ -114,14 +115,16 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      recipe.fruitLabel.toUpperCase(),
+                      FruitNameHelper.toIndonesian(
+                        recipe.fruitLabel,
+                      ).toUpperCase(),
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),
                     ),
                     Text(
-                      'Bahan Utama',
+                      '${recipe.type.labelId} · ${recipe.ripenessBucket.labelId}',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: harvest.muted,
                         fontSize: 10,
@@ -133,6 +136,47 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             ),
           ),
           const SizedBox(height: AppDimens.s16),
+
+          if (recipe.safetyNotes != null &&
+              recipe.safetyNotes!.trim().isNotEmpty) ...<Widget>[
+            AppCard(
+              color: harvest.overripe.withValues(alpha: 0.12),
+              borderColor: harvest.overripe.withValues(alpha: 0.55),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(
+                    Icons.health_and_safety_rounded,
+                    color: harvest.overripe,
+                    size: 22,
+                  ),
+                  const SizedBox(width: AppDimens.s12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Catatan Keamanan Pengolahan',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: harvest.overripe,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: AppDimens.s4),
+                        Text(
+                          recipe.safetyNotes!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppDimens.s16),
+          ],
 
           // 2. Bahan-bahan yang Dibutuhkan (Interactive Checklist)
           Row(
@@ -191,10 +235,10 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                             ),
                           ),
                           child: isChecked
-                              ? const Icon(
+                              ? Icon(
                                   Icons.check_rounded,
                                   size: 15,
-                                  color: Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                 )
                               : null,
                         ),
@@ -263,8 +307,8 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                       child: Center(
                         child: Text(
                           '$idx',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),

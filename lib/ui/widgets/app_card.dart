@@ -32,12 +32,9 @@ class AppCard extends StatelessWidget {
     final resolvedBorderColor = borderColor ?? harvest.border;
     final resolvedColor = color ?? theme.colorScheme.surface;
 
-    final cardContent = Container(
-      padding: padding,
+    final card = Container(
       decoration: BoxDecoration(
-        color: resolvedColor,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: resolvedBorderColor, width: 1),
         boxShadow: [
           BoxShadow(
             color: isDark
@@ -48,26 +45,25 @@ class AppCard extends StatelessWidget {
           ),
         ],
       ),
-      child: child,
+      child: Material(
+        color: resolvedColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+          side: BorderSide(color: resolvedBorderColor, width: 1),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
     );
 
     if (margin != null) {
-      return Padding(padding: margin!, child: _wrapInk(cardContent));
+      return Padding(padding: margin!, child: card);
     }
 
-    return _wrapInk(cardContent);
-  }
-
-  Widget _wrapInk(Widget content) {
-    if (onTap == null) return content;
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(radius),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(radius),
-        child: content,
-      ),
-    );
+    return card;
   }
 }

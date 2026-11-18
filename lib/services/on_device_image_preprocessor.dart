@@ -2,11 +2,33 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 
+/// Pigment coverage ratios inside the center-cropped fruit region.
+class PigmentRatios {
+  const PigmentRatios({
+    required this.greenRatio,
+    required this.yellowRatio,
+    required this.brownDarkRatio,
+    required this.activePixelCount,
+  });
+
+  const PigmentRatios.empty()
+    : greenRatio = 0.0,
+      yellowRatio = 0.0,
+      brownDarkRatio = 0.0,
+      activePixelCount = 0;
+
+  final double greenRatio;
+  final double yellowRatio;
+  final double brownDarkRatio;
+  final int activePixelCount;
+}
+
 /// Preprocessed image payload ready for MobileNetV3 TFLite + Masked HSV extraction.
 class PreprocessedImageData {
   const PreprocessedImageData({
     required this.cnnInputTensor,
     required this.hsvFeatures,
+    this.pigmentRatios = const PigmentRatios.empty(),
   });
 
   /// Flattened `[224 * 224 * 3]` float32 RGB values in `[0.0, 255.0]` matching MobileNetV3Small.
@@ -14,6 +36,9 @@ class PreprocessedImageData {
 
   /// 30-dim weighted HSV histogram + moments vector matching the Python training pipeline.
   final Float32List hsvFeatures;
+
+  /// Explicit chlorophyll/yellow/brown pixel ratios for post-SVM color calibration.
+  final PigmentRatios pigmentRatios;
 }
 
 /// Pure-Dart image preprocessing matching OpenCV & PIL Colab preprocessing.
@@ -29,15 +54,21 @@ abstract final class OnDeviceImagePreprocessor {
   }) {
     final decoded = img.decodeImage(imageBytes);
     if (decoded == null) {
-      throw const FormatException('Gagal mendekode gambar dari file.');
+      throw const FormatException(
+        'Foto tidak bisa dibuka. Coba pilih atau ambil foto lain.',
+      );
     }
 
     final oriented = img.bakeOrientation(decoded);
+    final interpolation =
+        (oriented.width > inputSize * 1.5 || oriented.height > inputSize * 1.5)
+        ? img.Interpolation.average
+        : img.Interpolation.linear;
     final resized = img.copyResize(
       oriented,
       width: inputSize,
       height: inputSize,
-      interpolation: img.Interpolation.linear,
+      interpolation: interpolation,
     );
     final rgbImage =
         (resized.numChannels == 3 && resized.format == img.Format.uint8)
@@ -70,10 +101,70 @@ abstract final class OnDeviceImagePreprocessor {
       height: inputSize,
       hsvWeight: hsvWeight,
     );
+    final pigmentRatios = analyzePigmentRatios(
+      rgbBytes,
+      width: inputSize,
+      height: inputSize,
+    );
 
     return PreprocessedImageData(
       cnnInputTensor: cnnInput,
       hsvFeatures: hsvFeatures,
+      pigmentRatios: pigmentRatios,
+    );
+  }
+
+  /// Scans the center-cropped 224x224 region and separates fruit pixels from
+  /// neutral backgrounds (`S >= 28` and `V >= 20`) to measure chlorophyll green
+  /// dominance (`Hue 31..88` OpenCV scale and `G > R + 5`).
+  static PigmentRatios analyzePigmentRatios(
+    Uint8List rgbBytes, {
+    int width = inputSize,
+    int height = inputSize,
+  }) {
+    final mh = (height * cropMarginRatio).toInt();
+    final mw = (width * cropMarginRatio).toInt();
+    final startY = mh;
+    final endY = height - mh;
+    final startX = mw;
+    final endX = width - mw;
+
+    int activeCount = 0;
+    int greenCount = 0;
+    int yellowCount = 0;
+    int brownDarkCount = 0;
+
+    for (int y = startY; y < endY; y++) {
+      for (int x = startX; x < endX; x++) {
+        final p = (y * width + x) * 3;
+        final r = rgbBytes[p];
+        final g = rgbBytes[p + 1];
+        final b = rgbBytes[p + 2];
+        final (h, s, v) = rgbToOpenCvHsv(r, g, b);
+
+        // Ignore white paper, grey floors, or dark shadows outside fruit pigment.
+        if (s < 28 || v < 20) continue;
+
+        activeCount++;
+        if (h >= 31 && h <= 88 && g > r + 5) {
+          greenCount++;
+        } else if (h >= 16 && h <= 30 && v >= 90) {
+          yellowCount++;
+        } else if (h < 16 || v < 90) {
+          brownDarkCount++;
+        }
+      }
+    }
+
+    if (activeCount == 0) {
+      return const PigmentRatios.empty();
+    }
+
+    return PigmentRatios(
+      greenRatio: greenCount / activeCount,
+      yellowRatio: yellowCount / activeCount,
+      brownDarkRatio: brownDarkCount / activeCount,
+      activePixelCount: activeCount,
     );
   }
 

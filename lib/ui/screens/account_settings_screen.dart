@@ -10,6 +10,7 @@ import 'package:fruitlens/ui/widgets/app_card.dart';
 import 'package:fruitlens/ui/widgets/app_text_field.dart';
 import 'package:fruitlens/ui/widgets/empty_state.dart';
 import 'package:fruitlens/ui/widgets/fruitlens_app_bar.dart';
+import 'package:fruitlens/ui/widgets/shimmer_box.dart';
 import 'package:fruitlens/ui/widgets/soft_button.dart';
 import 'package:go_router/go_router.dart';
 
@@ -86,7 +87,18 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
         showBackButton: true,
       ),
       body: authAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(AppDimens.screenPadding),
+          children: const [
+            ShimmerBox(height: 56, radius: AppDimens.rCard),
+            SizedBox(height: AppDimens.s12),
+            ShimmerBox(height: 56, radius: AppDimens.rCard),
+            SizedBox(height: AppDimens.s16),
+            ShimmerBox(height: 120, radius: AppDimens.rCard),
+            SizedBox(height: AppDimens.s16),
+            ShimmerBox(height: 48, radius: AppDimens.rButton),
+          ],
+        ),
         error: (_, _) => Center(
           child: SoftButton(
             text: 'Muat Ulang Profil',

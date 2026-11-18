@@ -99,6 +99,11 @@ class OnDeviceScanService implements ScanService {
     try {
       // 1. Validasi objek buah/makanan secara on-device menggunakan Google ML Kit
       final validation = await _fruitValidator.validate(imagePath);
+      debugPrint(
+        'OnDeviceScanService ML Kit -> likelyFruit=${validation.isLikelyFruitOrFood}, '
+        'confidence=${validation.fruitConfidence.toStringAsFixed(2)}, '
+        'labels=${validation.detectedLabels}',
+      );
       if (!validation.isLikelyFruitOrFood) {
         return const ScanUncertain();
       }
@@ -119,9 +124,18 @@ class OnDeviceScanService implements ScanService {
       // 4. Ekstraksi fitur CNN MobileNetV3Small (576 fitur) via TFLite Isolate
       final cnn576 = await _extractCnn576(preprocessed.cnnInputTensor);
 
-      // 5. Klasifikasi PCA + RBF SVM + Platt Scaling di background Isolate
+      // 5. Klasifikasi PCA + RBF SVM + Platt Scaling + Kalibrasi Klorofil di background Isolate
       final prediction = await Isolate.run(
-        () => svm.predict(cnn576, preprocessed.hsvFeatures),
+        () => svm.predict(
+          cnn576,
+          preprocessed.hsvFeatures,
+          pigmentRatios: preprocessed.pigmentRatios,
+        ),
+      );
+      debugPrint(
+        'OnDeviceScanService SVM -> class=${prediction.predictedClass}, '
+        'confidence=${prediction.confidence.toStringAsFixed(3)}, '
+        'probs=${prediction.probabilities}',
       );
 
       final classCount = prediction.probabilities.length;
@@ -141,7 +155,9 @@ class OnDeviceScanService implements ScanService {
       return ScanFailure(e.message);
     } catch (e) {
       debugPrint('OnDeviceScanService error: $e');
-      return ScanFailure('Gagal memproses model on-device: $e');
+      return const ScanFailure(
+        'Foto tidak bisa diproses. Pastikan buah terlihat jelas lalu coba lagi.',
+      );
     }
   }
 
@@ -153,4 +169,3 @@ class OnDeviceScanService implements ScanService {
     await _fruitValidator.dispose();
   }
 }
-

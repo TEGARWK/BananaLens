@@ -77,7 +77,9 @@ class FirebaseAuthService implements AuthService {
       throw AuthException(_mapFirebaseError(e));
     } catch (e) {
       if (e is AuthException) rethrow;
-      throw AuthException('Terjadi kendala autentikasi: $e');
+      throw const AuthException(
+        'Gagal masuk ke akun. Periksa koneksi internet dan coba lagi.',
+      );
     }
   }
 
@@ -114,7 +116,9 @@ class FirebaseAuthService implements AuthService {
       throw AuthException(_mapFirebaseError(e));
     } catch (e) {
       if (e is AuthException) rethrow;
-      throw AuthException('Terjadi kendala registrasi: $e');
+      throw const AuthException(
+        'Pendaftaran belum berhasil. Periksa koneksi internet dan coba lagi.',
+      );
     }
   }
 
@@ -126,7 +130,9 @@ class FirebaseAuthService implements AuthService {
       throw AuthException(_mapFirebaseError(e));
     } catch (e) {
       if (e is AuthException) rethrow;
-      throw AuthException('Gagal mengirim email reset kata sandi: $e');
+      throw const AuthException(
+        'Gagal mengirim tautan atur ulang kata sandi. Coba lagi sebentar.',
+      );
     }
   }
 

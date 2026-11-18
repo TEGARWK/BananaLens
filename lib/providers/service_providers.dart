@@ -39,9 +39,9 @@ final chatServiceProvider = Provider<ChatService>((ref) {
 });
 
 final fruitInfoRepositoryProvider = Provider<FruitInfoRepository>(
-  (ref) => AssetFruitInfoRepository(),
+  (ref) => SqfliteFruitInfoRepository(),
 );
 
 final recipeRepositoryProvider = Provider<RecipeRepository>(
-  (ref) => AssetRecipeRepository(),
+  (ref) => SqfliteRecipeRepository(),
 );

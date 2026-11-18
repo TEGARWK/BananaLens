@@ -55,6 +55,16 @@ void main() {
       expect(result.isLikelyFruitOrFood, isTrue);
       expect(result.detectedFruitType, 'banana');
     });
+
+    test('accepts subtle fruit labels in 0.35..0.59 confidence range', () {
+      final result = MlKitFruitValidator.evaluateLabels([
+        (label: 'Food', confidence: 0.48),
+        (label: 'Tire', confidence: 0.62),
+      ]);
+
+      expect(result.isLikelyFruitOrFood, isTrue);
+      expect(result.fruitConfidence, closeTo(0.48, 0.001));
+    });
   });
 
   group('OnDeviceImagePreprocessor', () {
@@ -251,6 +261,77 @@ void main() {
 
         final outcome = await service.scan('/non/existent/file.jpg');
         expect(outcome, isA<ScanFailure>());
+      },
+    );
+
+    test(
+      'analyzePigmentRatios isolates green unripe pixels from white background',
+      () {
+        final greenImg = img.Image(width: 224, height: 224);
+        img.fill(greenImg, color: img.ColorRgb8(255, 255, 255));
+        img.fillRect(
+          greenImg,
+          x1: 60,
+          y1: 60,
+          x2: 164,
+          y2: 164,
+          color: img.ColorRgb8(95, 165, 55),
+        );
+        final processed = OnDeviceImagePreprocessor.processImageBytes(
+          Uint8List.fromList(img.encodePng(greenImg)),
+        );
+
+        expect(processed.pigmentRatios.greenRatio, greaterThan(0.90));
+        expect(processed.pigmentRatios.yellowRatio, lessThan(0.05));
+      },
+    );
+
+    test(
+      'chlorophyll calibration boosts unripe when greenRatio >= 0.30 and keeps yellow untouched',
+      () {
+        final classifier = OnDeviceSvmClassifier.fromAssets(
+          metaJson: metaJson,
+          weightsBytes: weightsBytes,
+        );
+        final dummyCnn = Float32List(576);
+        final dummyHsv = Float32List(30);
+
+        final rawPred = classifier.predict(dummyCnn, dummyHsv);
+        final yellowPred = classifier.predict(
+          dummyCnn,
+          dummyHsv,
+          pigmentRatios: const PigmentRatios(
+            greenRatio: 0.02,
+            yellowRatio: 0.90,
+            brownDarkRatio: 0.08,
+            activePixelCount: 5000,
+          ),
+        );
+        expect(
+          yellowPred.probabilities['ripe'],
+          closeTo(rawPred.probabilities['ripe']!, 1e-6),
+        );
+
+        final greenPred = classifier.predict(
+          dummyCnn,
+          dummyHsv,
+          pigmentRatios: const PigmentRatios(
+            greenRatio: 0.72,
+            yellowRatio: 0.15,
+            brownDarkRatio: 0.13,
+            activePixelCount: 5000,
+          ),
+        );
+        expect(greenPred.predictedClass, 'unripe');
+        expect(
+          greenPred.probabilities['unripe']!,
+          greaterThan(greenPred.probabilities['ripe']!),
+        );
+        final totalProb = greenPred.probabilities.values.fold<double>(
+          0.0,
+          (a, b) => a + b,
+        );
+        expect(totalProb, closeTo(1.0, 1e-5));
       },
     );
   });

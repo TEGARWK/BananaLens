@@ -9,7 +9,8 @@
     "vitamins": "Vitamin C, vitamin K",
     "benefits": "Serat pektin membantu pencernaan dan membuat kenyang lebih lama.",
     "storage_tips": "Simpan di kulkas, jauhkan dari buah lain karena melepas gas etilen.",
-    "allergen_note": "Dapat memicu alergi mulut pada penderita alergi serbuk sari birch."
+    "allergen_note": "Dapat memicu alergi mulut pada penderita alergi serbuk sari birch.",
+    "edible_when_unripe": false
   },
   {
     "label": "banana",
@@ -21,7 +22,8 @@
     "vitamins": "Vitamin B6, vitamin C, kalium",
     "benefits": "Sumber energi cepat dan kalium yang baik untuk otot.",
     "storage_tips": "Simpan di suhu ruang. Kulit menghitam tanda sangat matang, cocok untuk smoothie.",
-    "allergen_note": "Berkaitan dengan alergi lateks pada sebagian orang."
+    "allergen_note": "Berkaitan dengan alergi lateks pada sebagian orang.",
+    "edible_when_unripe": true
   },
   {
     "label": "orange",
@@ -33,7 +35,8 @@
     "vitamins": "Vitamin C, folat",
     "benefits": "Kaya vitamin C untuk mendukung daya tahan tubuh.",
     "storage_tips": "Tahan beberapa minggu di kulkas. Simpan utuh sampai akan dikupas.",
-    "allergen_note": "Buah sitrus dapat memicu alergi atau memperparah asam lambung."
+    "allergen_note": "Buah sitrus dapat memicu alergi atau memperparah asam lambung.",
+    "edible_when_unripe": false
   },
   {
     "label": "mango",
@@ -45,7 +48,8 @@
     "vitamins": "Vitamin C, vitamin A",
     "benefits": "Mengandung vitamin A dan antioksidan untuk kesehatan mata dan kulit.",
     "storage_tips": "Matangkan di suhu ruang, pindahkan ke kulkas setelah matang.",
-    "allergen_note": "Getah kulit dapat memicu iritasi pada orang yang sensitif."
+    "allergen_note": "Getah kulit dapat memicu iritasi pada orang yang sensitif.",
+    "edible_when_unripe": true
   },
   {
     "label": "avocado",
@@ -57,7 +61,8 @@
     "vitamins": "Vitamin K, vitamin E, folat",
     "benefits": "Lemak tak jenuh tunggal dan serat tinggi, gulanya rendah.",
     "storage_tips": "Matangkan di suhu ruang. Setelah dibelah, simpan dengan biji dan tutup rapat.",
-    "allergen_note": "Berkaitan dengan alergi lateks pada sebagian orang."
+    "allergen_note": "Berkaitan dengan alergi lateks pada sebagian orang.",
+    "edible_when_unripe": false
   },
   {
     "label": "tomato",
@@ -69,7 +74,8 @@
     "vitamins": "Vitamin C, vitamin K, likopen",
     "benefits": "Rendah kalori dan mengandung likopen sebagai antioksidan.",
     "storage_tips": "Simpan di suhu ruang agar rasa tetap baik, kulkas hanya untuk yang sudah sangat matang.",
-    "allergen_note": "Dapat memicu refluks pada penderita asam lambung."
+    "allergen_note": "Dapat memicu refluks pada penderita asam lambung.",
+    "edible_when_unripe": false
   },
   {
     "label": "strawberry",
@@ -81,7 +87,8 @@
     "vitamins": "Vitamin C, mangan, folat",
     "benefits": "Rendah gula dan tinggi vitamin C serta antioksidan.",
     "storage_tips": "Simpan di kulkas tanpa dicuci, cuci tepat sebelum dimakan.",
-    "allergen_note": "Cukup sering memicu alergi pada anak dan orang sensitif."
+    "allergen_note": "Cukup sering memicu alergi pada anak dan orang sensitif.",
+    "edible_when_unripe": false
   },
   {
     "label": "grape",
@@ -93,7 +100,8 @@
     "vitamins": "Vitamin K, vitamin C",
     "benefits": "Mengandung antioksidan polifenol, praktis dimakan langsung.",
     "storage_tips": "Simpan di kulkas dalam wadah berlubang, cuci sebelum dimakan.",
-    "allergen_note": "Gulanya relatif tinggi, perhatikan porsi bila menjaga gula darah."
+    "allergen_note": "Gulanya relatif tinggi, perhatikan porsi bila menjaga gula darah.",
+    "edible_when_unripe": false
   },
   {
     "label": "watermelon",
@@ -105,7 +113,8 @@
     "vitamins": "Vitamin C, vitamin A, likopen",
     "benefits": "Sekitar 90% air, membantu hidrasi dan rendah kalori.",
     "storage_tips": "Utuh di suhu ruang, potongan ditutup dan disimpan di kulkas maksimal 3 hari.",
-    "allergen_note": "Dapat memicu alergi mulut pada penderita alergi serbuk sari ragweed."
+    "allergen_note": "Dapat memicu alergi mulut pada penderita alergi serbuk sari ragweed.",
+    "edible_when_unripe": false
   },
   {
     "label": "pineapple",
@@ -117,7 +126,8 @@
     "vitamins": "Vitamin C, mangan, bromelain",
     "benefits": "Mengandung enzim bromelain yang membantu mencerna protein.",
     "storage_tips": "Simpan utuh di suhu ruang 1-2 hari, potongan di kulkas.",
-    "allergen_note": "Bromelain dapat membuat mulut perih dan memicu alergi pada orang sensitif."
+    "allergen_note": "Bromelain dapat membuat mulut perih dan memicu alergi pada orang sensitif.",
+    "edible_when_unripe": false
   }
 ]
 

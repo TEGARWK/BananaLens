@@ -15,6 +15,7 @@ class NutritionPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,20 +81,24 @@ class NutritionPanel extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark
+                      ? scheme.secondary.withValues(alpha: 0.18)
+                      : Colors.white,
                   shape: BoxShape.circle,
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: scheme.primary.withValues(alpha: 0.15),
+                      color: isDark
+                          ? Colors.transparent
+                          : scheme.primary.withValues(alpha: 0.15),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(
                     Icons.local_fire_department_rounded,
-                    color: AppColors.secondarySeed,
+                    color: isDark ? scheme.secondary : AppColors.secondarySeed,
                     size: 26,
                   ),
                 ),
@@ -111,21 +116,27 @@ class NutritionPanel extends StatelessWidget {
               _MacroBento(
                 label: AppStrings.resultCarbs,
                 value: info.carbs,
-                barColor: const Color(0xFFEF6C00),
+                barColor: isDark
+                    ? const Color(0xFFFFB74D)
+                    : const Color(0xFFEF6C00),
                 icon: Icons.grain_rounded,
               ),
               const SizedBox(width: AppSpacing.xs),
               _MacroBento(
                 label: AppStrings.resultSugar,
                 value: info.sugar,
-                barColor: const Color(0xFFF9A825),
+                barColor: isDark
+                    ? const Color(0xFFFFD54F)
+                    : const Color(0xFFF9A825),
                 icon: Icons.water_drop_rounded,
               ),
               const SizedBox(width: AppSpacing.xs),
               _MacroBento(
                 label: AppStrings.resultFiber,
                 value: info.fiber,
-                barColor: const Color(0xFF2E7D32),
+                barColor: isDark
+                    ? const Color(0xFF81C784)
+                    : const Color(0xFF2E7D32),
                 icon: Icons.eco_rounded,
               ),
             ],

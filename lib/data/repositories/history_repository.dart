@@ -1,5 +1,5 @@
 import 'package:fruitlens/data/models/scan_result.dart';
-import 'package:path/path.dart' as p;
+import 'package:fruitlens/data/sources/app_database.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Contract for managing scan history records.
@@ -15,44 +15,15 @@ abstract class HistoryRepository {
 
 /// SQLite-backed implementation of [HistoryRepository].
 class SqfliteHistoryRepository implements HistoryRepository {
-  SqfliteHistoryRepository({Database? db}) : _db = db;
+  SqfliteHistoryRepository({Database? db, AppDatabase? appDatabase})
+    : _db = db,
+      _appDatabase = appDatabase ?? AppDatabase.instance;
 
-  static const String tableName = 'scan_results';
+  static const String tableName = AppDatabase.scanResultsTable;
+  final AppDatabase _appDatabase;
   Database? _db;
 
-  Future<Database> get database async => _db ??= await _initDb();
-
-  static Future<Database> _initDb() async {
-    final dbPath = await getDatabasesPath();
-    final path = p.join(dbPath, 'fruitlens.db');
-
-    return openDatabase(
-      path,
-      version: 2,
-      onCreate: (Database db, int version) async {
-        await db.execute('''
-          CREATE TABLE $tableName (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL DEFAULT 'guest',
-            image_path TEXT NOT NULL,
-            fruit_label TEXT NOT NULL,
-            ripeness_label TEXT NOT NULL,
-            confidence REAL NOT NULL,
-            created_at TEXT NOT NULL,
-            is_favorite INTEGER NOT NULL DEFAULT 0,
-            synced INTEGER NOT NULL DEFAULT 0
-          )
-        ''');
-      },
-      onUpgrade: (Database db, int oldVersion, int newVersion) async {
-        if (oldVersion < 2) {
-          await db.execute(
-            'ALTER TABLE $tableName ADD COLUMN user_id TEXT NOT NULL DEFAULT "guest"',
-          );
-        }
-      },
-    );
-  }
+  Future<Database> get database async => _db ??= await _appDatabase.database;
 
   @override
   Future<List<ScanResult>> getAll({String? userId}) async {

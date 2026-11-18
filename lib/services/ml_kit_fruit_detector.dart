@@ -31,7 +31,7 @@ class MlKitFruitValidator implements FruitObjectValidator {
   MlKitFruitValidator({ImageLabeler? labeler})
     : _labeler =
           labeler ??
-          ImageLabeler(options: ImageLabelerOptions(confidenceThreshold: 0.45));
+          ImageLabeler(options: ImageLabelerOptions(confidenceThreshold: 0.35));
 
   final ImageLabeler _labeler;
 
@@ -185,4 +185,3 @@ class MlKitFruitValidator implements FruitObjectValidator {
   @override
   Future<void> dispose() => _labeler.close();
 }
-

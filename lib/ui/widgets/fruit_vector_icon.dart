@@ -86,21 +86,26 @@ class FruitVectorIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = _styleFor(fruitLabel);
     final innerSize = iconSize ?? (size * 0.66);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final resolvedBg = isDark
+        ? style.borderColor.withValues(alpha: 0.16)
+        : style.bgColor;
+    final resolvedBorder = isDark
+        ? style.borderColor.withValues(alpha: 0.35)
+        : style.borderColor.withValues(alpha: 0.22);
 
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: style.bgColor,
+        color: resolvedBg,
         shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
         borderRadius: isCircular ? null : AppRadius.roundedMd,
-        border: Border.all(
-          color: style.borderColor.withValues(alpha: 0.22),
-          width: 1,
-        ),
+        border: Border.all(color: resolvedBorder, width: 1),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: style.borderColor.withValues(alpha: 0.08),
+            color: style.borderColor.withValues(alpha: isDark ? 0.04 : 0.08),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),

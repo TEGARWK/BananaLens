@@ -97,7 +97,7 @@ abstract final class AppStrings {
   static const String serverSave = 'Simpan Pengaturan';
   static const String serverUseFallback =
       'Gunakan Model Lokal / Demo jika Server Offline';
-  static const String serverBreakdownTitle = 'Rincian Probabilitas 4 Kelas SVM';
+  static const String serverBreakdownTitle = 'Rincian Probabilitas Kelas SVM';
 
   // Rotten Fruit Safety & Guidance
   static const String rottenAdviceTitle = 'PERINGATAN KEAMANAN PANGAN';

@@ -5,6 +5,7 @@ import 'package:fruitlens/data/models/recipe.dart';
 import 'package:fruitlens/data/models/scan_result.dart';
 import 'package:fruitlens/data/models/user_profile.dart';
 import 'package:fruitlens/providers/auth_providers.dart';
+import 'package:fruitlens/providers/recipe_gating_provider.dart';
 import 'package:fruitlens/ui/screens/account_settings_screen.dart';
 import 'package:fruitlens/ui/screens/auth_screen.dart';
 import 'package:fruitlens/ui/screens/chat_screen.dart';
@@ -17,6 +18,7 @@ import 'package:fruitlens/ui/screens/profile_screen.dart';
 import 'package:fruitlens/ui/screens/recipe_detail_screen.dart';
 import 'package:fruitlens/ui/screens/recipes_list_screen.dart';
 import 'package:fruitlens/ui/screens/result_screen.dart';
+import 'package:fruitlens/ui/screens/scan_recipes_screen.dart';
 import 'package:fruitlens/ui/screens/scan_screen.dart';
 import 'package:fruitlens/ui/screens/splash_screen.dart';
 import 'package:fruitlens/ui/screens/theme_preview_screen.dart';
@@ -240,6 +242,15 @@ GoRouter createAppRouter({
           final fruit = state.uri.queryParameters['fruit'];
           final ripeness = state.uri.queryParameters['ripeness'];
           return RecipesListScreen(fruitLabel: fruit, ripenessLabel: ripeness);
+        },
+      ),
+      // Layar Rekomendasi Resep Hasil Scan (Live Gemini AI + Backup Lokal)
+      GoRoute(
+        path: '/scan-recipes',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) {
+          final args = state.extra! as ScanRecipesArgs;
+          return ScanRecipesScreen(args: args);
         },
       ),
       // Layar Detail Resep

@@ -214,9 +214,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           color: theme.colorScheme.error,
                           borderRadius: BorderRadius.circular(AppDimens.rCard),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.delete_outline_rounded,
-                          color: Colors.white,
+                          color: theme.colorScheme.onError,
                           size: 26,
                         ),
                       ),

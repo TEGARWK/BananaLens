@@ -2,8 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:fruitlens/data/models/fruit_info.dart';
+import 'package:fruitlens/data/sources/app_database.dart';
 
-/// Read access to static fruit nutrition data.
+/// Read access to fruit nutrition and unripe-edibility data.
 abstract class FruitInfoRepository {
   /// Returns info for a model [label], or null when the fruit is unknown.
   Future<FruitInfo?> getByLabel(String label);
@@ -27,8 +28,9 @@ class AssetFruitInfoRepository implements FruitInfoRepository {
   @override
   Future<FruitInfo?> getByLabel(String label) async {
     final all = await getAll();
+    final normalized = label.trim().toLowerCase();
     for (final info in all) {
-      if (info.label == label) {
+      if (info.label.toLowerCase() == normalized) {
         return info;
       }
     }
@@ -41,5 +43,49 @@ class AssetFruitInfoRepository implements FruitInfoRepository {
     return decoded
         .map((e) => FruitInfo.fromJson(e! as Map<String, Object?>))
         .toList(growable: false);
+  }
+}
+
+/// SQLite-backed implementation of [FruitInfoRepository] reading from `fruits` table.
+class SqfliteFruitInfoRepository implements FruitInfoRepository {
+  SqfliteFruitInfoRepository({
+    AppDatabase? appDatabase,
+    AssetFruitInfoRepository? fallbackAssetRepo,
+  }) : _appDatabase = appDatabase ?? AppDatabase.instance,
+       _fallbackAssetRepo = fallbackAssetRepo ?? AssetFruitInfoRepository();
+
+  final AppDatabase _appDatabase;
+  final AssetFruitInfoRepository _fallbackAssetRepo;
+
+  @override
+  Future<List<FruitInfo>> getAll() async {
+    try {
+      final db = await _appDatabase.database;
+      final rows = await db.query(AppDatabase.fruitsTable);
+      return rows.map(FruitInfo.fromMap).toList(growable: false);
+    } on MissingPluginException {
+      return _fallbackAssetRepo.getAll();
+    } on StateError {
+      return _fallbackAssetRepo.getAll();
+    }
+  }
+
+  @override
+  Future<FruitInfo?> getByLabel(String label) async {
+    try {
+      final db = await _appDatabase.database;
+      final rows = await db.query(
+        AppDatabase.fruitsTable,
+        where: 'LOWER(label) = ?',
+        whereArgs: <Object>[label.trim().toLowerCase()],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      return FruitInfo.fromMap(rows.first);
+    } on MissingPluginException {
+      return _fallbackAssetRepo.getByLabel(label);
+    } on StateError {
+      return _fallbackAssetRepo.getByLabel(label);
+    }
   }
 }

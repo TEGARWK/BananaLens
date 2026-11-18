@@ -185,12 +185,31 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
     return Scaffold(
       backgroundColor: Colors.black,
       body: permAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
-        error: (err, _) => Center(
-          child: Text(
-            'Error: $err',
-            style: const TextStyle(color: Colors.white),
+        loading: () => _buildCameraSkeleton(),
+        error: (_, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimens.screenPadding),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.camera_alt_outlined,
+                  size: 52,
+                  color: Colors.white70,
+                ),
+                const SizedBox(height: AppDimens.s12),
+                const Text(
+                  'Kamera belum siap digunakan. Coba lagi atau pilih foto dari galeri.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: AppDimens.s16),
+                ElevatedButton(
+                  onPressed: () => ref.invalidate(cameraPermissionProvider),
+                  child: const Text(AppStrings.cameraRetry),
+                ),
+              ],
+            ),
           ),
         ),
         data: (status) {
@@ -208,14 +227,51 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
     );
   }
 
+  Widget _buildCameraSkeleton() {
+    return Container(
+      color: Colors.black,
+      padding: const EdgeInsets.all(AppDimens.screenPadding),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 240,
+              height: 240,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppDimens.rHero),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: const Icon(
+                Icons.center_focus_weak_rounded,
+                size: 48,
+                color: Colors.white54,
+              ),
+            ),
+            const SizedBox(height: AppDimens.s16),
+            const Text(
+              'Menyiapkan kamera…',
+              style: TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildCameraView() {
     final theme = Theme.of(context);
     final harvest = context.harvest;
 
     if (_isCameraInitializing) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
-      );
+      return _buildCameraSkeleton();
     }
 
     if (_cameraError != null || _controller == null) {
@@ -420,63 +476,90 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Tombol Galeri (44dp bulat)
-                  GestureDetector(
-                    onTap: _pickFromGallery,
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.photo_library_outlined,
-                        color: Colors.white,
-                        size: 22,
+                  // Tombol Galeri (Touch target >= 48dp)
+                  Semantics(
+                    button: true,
+                    label: AppStrings.pickFromGallery,
+                    child: Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        onTap: _pickFromGallery,
+                        customBorder: const CircleBorder(),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.photo_library_outlined,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   // Tombol Shutter (Luar 66dp putih, Dalam 50dp accent/primary)
-                  GestureDetector(
-                    onTap: _takePicture,
-                    child: Container(
-                      width: 66,
-                      height: 66,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3.5),
-                      ),
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: harvest.accent,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt_rounded,
-                          color: Colors.white,
-                          size: 26,
+                  Semantics(
+                    button: true,
+                    label: AppStrings.shutterLabel,
+                    child: Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        onTap: _takePicture,
+                        customBorder: const CircleBorder(),
+                        child: Container(
+                          width: 66,
+                          height: 66,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3.5),
+                          ),
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: harvest.accent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.camera_alt_rounded,
+                              color: harvest.onAccent,
+                              size: 26,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  // Tombol Balik Kamera (44dp bulat)
-                  GestureDetector(
-                    onTap: _flipCamera,
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.flip_camera_ios_outlined,
-                        color: Colors.white,
-                        size: 22,
+                  // Tombol Balik Kamera (Touch target >= 48dp)
+                  Semantics(
+                    button: true,
+                    label: 'Balik kamera',
+                    child: Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        onTap: _flipCamera,
+                        customBorder: const CircleBorder(),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.flip_camera_ios_outlined,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
                       ),
                     ),
                   ),

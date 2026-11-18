@@ -222,6 +222,34 @@ abstract final class AppTheme {
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.roundedFull),
       ),
+      dividerTheme: const DividerThemeData(
+        color: border,
+        thickness: 1,
+        space: 1,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.lText,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: AppColors.lSurface,
+          fontWeight: FontWeight.w500,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.rCard),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.sheetTopRadius),
+      ),
     );
   }
 
@@ -256,7 +284,7 @@ abstract final class AppTheme {
         surface: surface,
         onSurface: textPrimary,
         error: error,
-        onError: Colors.white,
+        onError: AppColors.dOnPrimary,
         outline: border,
         outlineVariant: border,
       ),
@@ -339,6 +367,35 @@ abstract final class AppTheme {
         foregroundColor: AppColors.dOnPrimary,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.roundedFull),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: border,
+        thickness: 1,
+        space: 1,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: surface,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: textPrimary,
+          fontWeight: FontWeight.w500,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
+          side: const BorderSide(color: border, width: 1),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.rCard),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.sheetTopRadius),
       ),
     );
   }

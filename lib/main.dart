@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fruitlens/app.dart';
 import 'package:fruitlens/core/theme/theme_controller.dart';
+import 'package:fruitlens/firebase_options.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Bootstrap: initialize SharedPreferences, optional Firebase, and start app.
@@ -20,7 +21,9 @@ Future<void> main() async {
   }
 
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     developer.log('Firebase initialized successfully', name: 'FruitLens');
   } catch (e) {
     developer.log(

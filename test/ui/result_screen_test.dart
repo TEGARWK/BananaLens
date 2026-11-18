@@ -142,11 +142,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Rincian Probabilitas 4 Kelas SVM'), findsOneWidget);
-      expect(find.text('Mentah (Unripe)'), findsOneWidget);
-      expect(find.text('Matang (Ripe)'), findsOneWidget);
-      expect(find.text('Terlalu Matang (Overripe)'), findsOneWidget);
-      expect(find.text('Busuk (Rotten)'), findsOneWidget);
+      expect(find.text('Detail Analisis Kematangan'), findsOneWidget);
+      expect(find.text('Mentah'), findsOneWidget);
+      expect(find.text('Matang'), findsWidgets);
+      expect(find.text('Terlalu Matang'), findsOneWidget);
+      expect(find.text('Busuk'), findsOneWidget);
       expect(find.text('94.5%'), findsOneWidget);
     },
   );
@@ -194,11 +194,62 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Rincian Probabilitas 3 Kelas SVM'), findsOneWidget);
-      expect(find.text('Mentah (Unripe)'), findsOneWidget);
-      expect(find.text('Matang (Ripe)'), findsOneWidget);
-      expect(find.text('Busuk (Rotten)'), findsOneWidget);
-      expect(find.text('Terlalu Matang (Overripe)'), findsNothing);
+      expect(find.text('Detail Analisis Kematangan'), findsOneWidget);
+      expect(find.text('Mentah'), findsOneWidget);
+      expect(find.text('Matang'), findsWidgets);
+      expect(find.text('Busuk'), findsOneWidget);
+      expect(find.text('Terlalu Matang'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows low-confidence banner when ripenessConfidence < 60% (>= 35%)',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      const report = ScanReport(
+        imagePath: 'dummy_transition.jpg',
+        outcome: ScanSuccess(
+          fruitLabel: 'banana',
+          ripenessLabel: 'rotten',
+          fruitConfidence: 0.48,
+          ripenessConfidence: 0.57,
+          classProbabilities: {'ripe': 0.424, 'rotten': 0.573, 'unripe': 0.003},
+        ),
+        fruitInfo: FruitInfo(
+          label: 'banana',
+          nameId: 'Pisang',
+          calories: 89,
+          carbs: 22.8,
+          sugar: 12.2,
+          fiber: 2.6,
+          vitamins: 'Vitamin B6, C, Kalium',
+          benefits: 'Sumber energi cepat',
+          storageTips: 'Simpan pada suhu ruang',
+          allergenNote: 'Jarang alergi',
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            scanProvider.overrideWith(() => _FakeScanNotifier(report)),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const ResultScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Hasil foto kurang jelas (<60%)'),
+        findsOneWidget,
+      );
+      expect(find.text('57%'), findsOneWidget);
     },
   );
 }

@@ -1,4 +1,4 @@
-/// Static nutrition info for one fruit, values are per 100 g.
+/// Static nutrition & ripeness-edibility info for one fruit, values are per 100 g.
 class FruitInfo {
   const FruitInfo({
     required this.label,
@@ -11,9 +11,15 @@ class FruitInfo {
     required this.benefits,
     required this.storageTips,
     required this.allergenNote,
+    this.edibleWhenUnripe = false,
   });
 
   factory FruitInfo.fromJson(Map<String, Object?> json) {
+    final rawEdible = json['edible_when_unripe'];
+    final edible = rawEdible is bool
+        ? rawEdible
+        : (rawEdible is num ? rawEdible != 0 : false);
+
     return FruitInfo(
       label: json['label']! as String,
       nameId: json['name_id']! as String,
@@ -25,7 +31,27 @@ class FruitInfo {
       benefits: json['benefits']! as String,
       storageTips: json['storage_tips']! as String,
       allergenNote: json['allergen_note']! as String,
+      edibleWhenUnripe: edible,
     );
+  }
+
+  factory FruitInfo.fromMap(Map<String, Object?> map) =>
+      FruitInfo.fromJson(map);
+
+  Map<String, Object?> toMap() {
+    return <String, Object?>{
+      'label': label,
+      'name_id': nameId,
+      'calories': calories,
+      'carbs': carbs,
+      'sugar': sugar,
+      'fiber': fiber,
+      'vitamins': vitamins,
+      'benefits': benefits,
+      'storage_tips': storageTips,
+      'allergen_note': allergenNote,
+      'edible_when_unripe': edibleWhenUnripe ? 1 : 0,
+    };
   }
 
   /// Model label, e.g. `apple`. Must match labels_fruit.txt.
@@ -39,4 +65,5 @@ class FruitInfo {
   final String benefits;
   final String storageTips;
   final String allergenNote;
+  final bool edibleWhenUnripe;
 }

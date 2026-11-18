@@ -28,6 +28,12 @@ class _FakeRecipeRepo implements RecipeRepository {
     String fruitLabel, {
     String? ripenessLabel,
   }) async => getAll();
+
+  @override
+  Future<List<Recipe>> getReviewedByFruitAndBucket(
+    String fruitId,
+    RipenessBucket bucket,
+  ) async => getAll();
 }
 
 void main() {
