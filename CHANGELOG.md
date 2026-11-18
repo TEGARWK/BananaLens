@@ -18,6 +18,7 @@
 - **Penyederhanaan UX & Pengaturan Akun:** Menyederhanakan teks error/label agar ramah pengguna awam serta menambahkan layar `AccountSettingsScreen` (`/account-settings`) *(commit `eb97203`)*.
 
 ### Dokumentasi, Laporan Testing & Pengujian
+- **Pembaruan `README.md`:** Menyelaraskan deskripsi fitur, arsitektur folder `lib/` & `backend/`, panduan instalasi/env, `104` automated tests, kalibrasi warna, gating resep AI, dan skenario demo terbaru.
 - **Folder Laporan Testing:** Menambahkan `hasil_testing/LAPORAN_TESTING_MOBILE.md` beserta 12 screenshot uji di `hasil_testing/screenshots/` *(commit `eb97203`)*.
 - **Tambalan Proposal PM2:** Menambahkan `proposal-pm2-update-terbaru.md` untuk pembaruan laporan proposal *(commit `eb97203`)*.
 - **Verifikasi:** `flutter analyze` bersih (`No issues found!`) dan `104 / 104` automated tests lulus *(termasuk test baru di `test/services/on_device_scan_service_test.dart`)*.
