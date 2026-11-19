@@ -57,7 +57,7 @@ void main() {
 
     expect(find.text('Apel'), findsOneWidget);
     expect(find.text(AppStrings.ripenessRipe), findsWidgets);
-    expect(find.byIcon(Icons.star_outline_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.star_outline_rounded), findsNothing);
     expect(find.byIcon(Icons.delete_outline_rounded), findsWidgets);
   });
 

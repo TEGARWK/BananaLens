@@ -5,8 +5,8 @@ import 'package:fruitlens/core/theme/harvest_colors.dart';
 import 'package:fruitlens/data/models/ripeness.dart';
 import 'package:fruitlens/data/models/scan_result.dart';
 import 'package:fruitlens/providers/history_providers.dart';
-import 'package:fruitlens/ui/widgets/app_card.dart';
 import 'package:fruitlens/ui/widgets/fruit_image.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 import 'package:fruitlens/ui/widgets/ripeness_chip.dart';
 import 'package:fruitlens/ui/widgets/shimmer_box.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +19,7 @@ class ProfileHistoryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(historyListProvider);
 
-    return AppCard(
+    return IndustrialSpecimenCard(
       padding: const EdgeInsets.all(AppDimens.s16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -73,6 +73,7 @@ class ProfileHistoryCard extends ConsumerWidget {
   Widget _buildHeader(BuildContext context, List<ScanResult> items) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
     final favoriteCount = items.where((item) => item.isFavorite).length;
 
     return Row(
@@ -83,23 +84,42 @@ class ProfileHistoryCard extends ConsumerWidget {
             children: [
               Text(
                 'Riwayat Pemindaian',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 '${items.length} scan · $favoriteCount favorit',
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: theme.textTheme.labelSmall?.copyWith(
                   color: harvest.muted,
                 ),
               ),
             ],
           ),
         ),
-        TextButton(
-          onPressed: () => context.go('/history'),
-          child: const Text('Lihat Semua'),
+        InkWell(
+          onTap: () => context.go('/history'),
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimens.s12,
+              vertical: AppDimens.s8 - 2,
+            ),
+            decoration: BoxDecoration(
+              color: harvest.primarySoft,
+              borderRadius: BorderRadius.circular(AppDimens.rSharp),
+              border: Border.all(color: ink, width: 1.2),
+            ),
+            child: Text(
+              'Lihat Semua',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: ink,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -114,10 +134,20 @@ class ProfileHistoryCard extends ConsumerWidget {
   }) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
 
     return Row(
       children: [
-        Icon(icon, color: harvest.muted, size: 22),
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: harvest.primarySoft,
+            borderRadius: BorderRadius.circular(AppDimens.rSharp),
+            border: Border.all(color: harvest.border),
+          ),
+          child: Icon(icon, color: ink, size: 18),
+        ),
         const SizedBox(width: AppDimens.s12),
         Expanded(
           child: Text(
@@ -125,7 +155,37 @@ class ProfileHistoryCard extends ConsumerWidget {
             style: theme.textTheme.bodySmall?.copyWith(color: harvest.muted),
           ),
         ),
-        TextButton(onPressed: onAction, child: Text(actionLabel)),
+        const SizedBox(width: AppDimens.s8),
+        InkWell(
+          onTap: onAction,
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimens.s12,
+              vertical: AppDimens.s8 - 2,
+            ),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(AppDimens.rSharp),
+              border: Border.all(color: ink, width: 1.4),
+              boxShadow: [
+                BoxShadow(
+                  color: ink,
+                  offset: const Offset(2, 2),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: Text(
+              actionLabel,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onPrimary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

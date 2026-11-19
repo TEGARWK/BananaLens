@@ -7,8 +7,9 @@ import '../../core/theme/harvest_colors.dart';
 import '../../core/utils/fruit_name_helper.dart';
 import '../../data/models/recipe.dart';
 import '../../providers/chat_notifier.dart';
-import '../widgets/app_card.dart';
 import '../widgets/fruit_vector_icon.dart';
+import '../widgets/fruitlens_app_bar.dart';
+import '../widgets/industrial_art.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/soft_button.dart';
 
@@ -39,98 +40,77 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        centerTitle: false,
-        leading: Padding(
-          padding: const EdgeInsets.all(AppDimens.s8),
-          child: IconButton(
-            tooltip: 'Kembali',
-            onPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.go('/recipes');
-              }
-            },
-            icon: const Icon(Icons.arrow_back_rounded, size: 20),
-            style: IconButton.styleFrom(
-              backgroundColor: harvest.primarySoft,
-              foregroundColor: theme.colorScheme.primary,
-              shape: const CircleBorder(),
-            ),
-          ),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              recipe.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-            ),
-            Text(
-              'Panduan langkah demi langkah olahan sehat',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: harvest.muted,
-                fontSize: 10.5,
-              ),
-            ),
-          ],
-        ),
+      appBar: FruitLensAppBar(
+        title: recipe.title,
+        subtitle: 'Panduan langkah demi langkah olahan sehat',
+        showBackButton: true,
+        onBackPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/recipes');
+          }
+        },
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppDimens.screenPadding),
         children: <Widget>[
           // 1. Metric Summary Card
-          AppCard(
+          IndustrialSpecimenCard(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                _InfoItem(
-                  icon: Icons.timer_outlined,
-                  iconColor: theme.colorScheme.primary,
-                  label: 'Waktu Masak',
-                  value: recipe.prepTime,
+                Expanded(
+                  child: _InfoItem(
+                    icon: Icons.timer_outlined,
+                    iconColor: theme.colorScheme.onSurface,
+                    label: 'Waktu Masak',
+                    value: recipe.prepTime,
+                  ),
                 ),
                 Container(height: 38, width: 1, color: harvest.border),
-                _InfoItem(
-                  icon: Icons.bar_chart_rounded,
-                  iconColor: harvest.accent,
-                  label: 'Kesulitan',
-                  value: recipe.difficulty,
+                Expanded(
+                  child: _InfoItem(
+                    icon: Icons.bar_chart_rounded,
+                    iconColor: theme.colorScheme.onSurface,
+                    label: 'Kesulitan',
+                    value: recipe.difficulty,
+                  ),
                 ),
                 Container(height: 38, width: 1, color: harvest.border),
-                Column(
-                  children: <Widget>[
-                    FruitVectorIcon(
-                      fruitLabel: recipe.fruitLabel,
-                      size: 28,
-                      iconSize: 18,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      FruitNameHelper.toIndonesian(
-                        recipe.fruitLabel,
-                      ).toUpperCase(),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: <Widget>[
+                      FruitVectorIcon(
+                        fruitLabel: recipe.fruitLabel,
+                        size: 28,
+                        iconSize: 18,
                       ),
-                    ),
-                    Text(
-                      '${recipe.type.labelId} · ${recipe.ripenessBucket.labelId}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: harvest.muted,
-                        fontSize: 10,
+                      const SizedBox(height: 3),
+                      Text(
+                        FruitNameHelper.toIndonesian(
+                          recipe.fruitLabel,
+                        ).toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                  ],
+                      Text(
+                        '${recipe.type.labelId} · ${recipe.ripenessBucket.labelId}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: harvest.muted,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -139,16 +119,26 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
           if (recipe.safetyNotes != null &&
               recipe.safetyNotes!.trim().isNotEmpty) ...<Widget>[
-            AppCard(
-              color: harvest.overripe.withValues(alpha: 0.12),
-              borderColor: harvest.overripe.withValues(alpha: 0.55),
+            IndustrialSpecimenCard(
+              backgroundColor: harvest.overripe.withValues(alpha: 0.12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Icon(
-                    Icons.health_and_safety_rounded,
-                    color: harvest.overripe,
-                    size: 22,
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: harvest.overripe.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                      border: Border.all(
+                        color: theme.colorScheme.onSurface,
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.health_and_safety_rounded,
+                      color: theme.colorScheme.onSurface,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: AppDimens.s12),
                   Expanded(
@@ -158,7 +148,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                         Text(
                           'Catatan Keamanan Pengolahan',
                           style: theme.textTheme.titleSmall?.copyWith(
-                            color: harvest.overripe,
+                            color: theme.colorScheme.onSurface,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -166,6 +156,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                         Text(
                           recipe.safetyNotes!,
                           style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface,
                             height: 1.4,
                           ),
                         ),
@@ -184,7 +175,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
               Icon(
                 Icons.shopping_basket_outlined,
                 size: 20,
-                color: theme.colorScheme.primary,
+                color: theme.colorScheme.onSurface,
               ),
               const SizedBox(width: AppDimens.s8),
               Text(
@@ -196,7 +187,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             ],
           ),
           const SizedBox(height: AppDimens.s8),
-          AppCard(
+          IndustrialSpecimenCard(
             child: Column(
               children: recipe.ingredients.asMap().entries.map((entry) {
                 final idx = entry.key;
@@ -213,7 +204,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                       }
                     });
                   },
-                  borderRadius: BorderRadius.circular(AppDimens.s8),
+                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
@@ -225,12 +216,12 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                           decoration: BoxDecoration(
                             color: isChecked
                                 ? theme.colorScheme.primary
-                                : harvest.primarySoft,
-                            shape: BoxShape.circle,
+                                : theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(
+                              AppDimens.rSharp,
+                            ),
                             border: Border.all(
-                              color: isChecked
-                                  ? theme.colorScheme.primary
-                                  : harvest.border,
+                              color: theme.colorScheme.onSurface,
                               width: 1.5,
                             ),
                           ),
@@ -275,7 +266,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
               Icon(
                 Icons.soup_kitchen_outlined,
                 size: 20,
-                color: theme.colorScheme.primary,
+                color: theme.colorScheme.onSurface,
               ),
               const SizedBox(width: AppDimens.s8),
               Text(
@@ -293,7 +284,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
             return Padding(
               padding: const EdgeInsets.only(bottom: AppDimens.s8),
-              child: AppCard(
+              child: IndustrialSpecimenCard(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -302,14 +293,18 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                       height: 28,
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(AppDimens.s8),
+                        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                        border: Border.all(
+                          color: theme.colorScheme.onSurface,
+                          width: 1.3,
+                        ),
                       ),
                       child: Center(
                         child: Text(
                           '$idx',
                           style: TextStyle(
                             color: theme.colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                             fontSize: 13,
                           ),
                         ),
@@ -332,16 +327,26 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           const SizedBox(height: AppDimens.s12),
 
           // 4. Tips Ahli Nutrisi FruitLens
-          AppCard(
-            color: harvest.primarySoft.withValues(alpha: 0.5),
-            borderColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+          IndustrialSpecimenCard(
+            backgroundColor: harvest.primarySoft,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(
-                  Icons.tips_and_updates_rounded,
-                  size: 20,
-                  color: theme.colorScheme.primary,
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                    border: Border.all(
+                      color: theme.colorScheme.onSurface,
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.tips_and_updates_rounded,
+                    size: 16,
+                    color: theme.colorScheme.onPrimary,
+                  ),
                 ),
                 const SizedBox(width: AppDimens.s12),
                 Expanded(
@@ -351,15 +356,17 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                       Text(
                         'Tips Nutrisi Segar',
                         style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: AppDimens.s4),
                       Text(
                         'Konsumsi segera setelah dibuat untuk mendapatkan vitamin C dan enzim alami aktif secara maksimal tanpa oksidasi.',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: harvest.muted,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.8,
+                          ),
                           height: 1.4,
                         ),
                       ),
@@ -378,7 +385,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             onPressed: () {
               final prompt =
                   'Halo, saya ingin membuat resep "${recipe.title}" dengan bahan utama ${recipe.fruitLabel}. Bisakah beri saran modifikasi atau pengganti bahan yang lebih sehat / rendah kalori?';
-              ref.read(chatNotifierProvider.notifier).setScanContext(prompt);
+              ref
+                  .read(chatNotifierProvider.notifier)
+                  .startNewChatAndSend(prompt);
               context.go('/chat');
             },
           ),
@@ -425,6 +434,9 @@ class _InfoItem extends StatelessWidget {
         const SizedBox(height: 3),
         Text(
           value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 13,
@@ -432,6 +444,9 @@ class _InfoItem extends StatelessWidget {
         ),
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
           style: theme.textTheme.labelSmall?.copyWith(
             color: harvest.muted,
             fontSize: 10,

@@ -1,4 +1,4 @@
-/// Standard dimensions, spacing, and border radiuses for FruitLens Fresh Harvest theme.
+/// Standard dimensions, spacing, and border radiuses for BananaLens Industrial theme.
 abstract final class AppDimens {
   // Spacing (kelipatan 4)
   static const double s4 = 4;
@@ -10,9 +10,10 @@ abstract final class AppDimens {
   static const double s32 = 32;
 
   // Layar
-  static const double screenPadding = 16;
+  static const double screenPadding = 20;
 
   // Radius
+  static const double rSharp = 4;
   static const double rCard = 20;
   static const double rButton = 14;
   static const double rHero = 22;

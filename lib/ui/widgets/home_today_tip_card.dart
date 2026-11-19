@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
-import 'app_card.dart';
 import 'fruit_vector_icon.dart';
+import 'industrial_art.dart';
+import 'primary_button.dart';
 
 /// Item data for a daily fruit storage and wellness tip.
 class FruitTipItem {
@@ -86,86 +87,113 @@ class HomeTodayTipCard extends StatelessWidget {
   static void showTipDialog(BuildContext context, FruitTipItem tip) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
 
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return Container(
-          padding: const EdgeInsets.all(AppDimens.s20),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: theme.scaffoldBackgroundColor,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppDimens.rSheet),
+              top: Radius.circular(AppDimens.rHero),
             ),
+            border: Border(top: BorderSide(color: ink, width: 1.6)),
+          ),
+          padding: const EdgeInsets.fromLTRB(
+            AppDimens.s20,
+            AppDimens.s12,
+            AppDimens.s20,
+            AppDimens.s24,
           ),
           child: SafeArea(
+            top: false,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
                   child: Container(
-                    width: 38,
-                    height: 4,
+                    width: 44,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: AppDimens.s16),
                     decoration: BoxDecoration(
-                      color: harvest.border,
-                      borderRadius: BorderRadius.circular(AppDimens.rPill),
+                      color: ink.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
                     ),
                   ),
                 ),
-                const SizedBox(height: AppDimens.s16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    FruitVectorIcon(
-                      fruitLabel: tip.fruit,
-                      size: 44,
-                      isCircular: true,
+                    const IndustrialTagChip(
+                      label: 'TIPS // HARIAN',
+                      accent: true,
                     ),
-                    const SizedBox(width: AppDimens.s12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tip.title,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          Text(
-                            'Tips Kesehatan FruitLens',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: harvest.muted,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      'BANANALENS',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: harvest.muted,
+                        letterSpacing: 1.3,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppDimens.s16),
-                Text(
-                  tip.fullText,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: harvest.muted,
-                    height: 1.45,
+                const SizedBox(height: AppDimens.s12),
+                IndustrialSpecimenCard(
+                  padding: const EdgeInsets.all(AppDimens.s16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          FruitVectorIcon(
+                            fruitLabel: tip.fruit,
+                            size: 44,
+                            isCircular: false,
+                          ),
+                          const SizedBox(width: AppDimens.s12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tip.title,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                Text(
+                                  'Tips Kesehatan FruitLens',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: harvest.muted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppDimens.s12),
+                      Divider(height: 1, color: harvest.border),
+                      const SizedBox(height: AppDimens.s12),
+                      Text(
+                        tip.fullText,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: ink.withValues(alpha: 0.88),
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: AppDimens.s20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppDimens.rButton),
-                      ),
-                    ),
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Tutup Tips'),
-                  ),
+                PrimaryButton(
+                  text: 'Tutup Tips',
+                  icon: Icons.check_rounded,
+                  onPressed: () => Navigator.of(ctx).pop(),
                 ),
               ],
             ),
@@ -179,11 +207,13 @@ class HomeTodayTipCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
 
     final dayIndex = DateTime.now().weekday % tipsList.length;
     final tip = tipsList[dayIndex];
 
-    return AppCard(
+    return IndustrialSpecimenCard(
+      backgroundColor: harvest.primarySoft,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -194,13 +224,14 @@ class HomeTodayTipCard extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: harvest.primarySoft,
-                  shape: BoxShape.circle,
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                  border: Border.all(color: ink, width: 1.3),
                 ),
                 alignment: Alignment.center,
                 child: Icon(
                   Icons.lightbulb_outline_rounded,
-                  color: theme.colorScheme.primary,
+                  color: theme.colorScheme.onPrimary,
                   size: 20,
                 ),
               ),
@@ -212,7 +243,7 @@ class HomeTodayTipCard extends StatelessWidget {
                     Text(
                       'Tips Hari Ini: ${tip.title}',
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: AppDimens.s4),
@@ -221,7 +252,7 @@ class HomeTodayTipCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: harvest.muted,
+                        color: ink.withValues(alpha: 0.8),
                         height: 1.35,
                       ),
                     ),
@@ -230,16 +261,21 @@ class HomeTodayTipCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppDimens.s8),
+          const SizedBox(height: AppDimens.s12),
           Align(
             alignment: Alignment.centerRight,
             child: InkWell(
               onTap: () => showTipDialog(context, tip),
-              borderRadius: BorderRadius.circular(AppDimens.rPill),
-              child: Padding(
+              borderRadius: BorderRadius.circular(AppDimens.rSharp),
+              child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimens.s8,
-                  vertical: 4,
+                  horizontal: AppDimens.s12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                  border: Border.all(color: ink, width: 1.2),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -247,16 +283,12 @@ class HomeTodayTipCard extends StatelessWidget {
                     Text(
                       'Baca selengkapnya',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
+                        color: ink,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(width: 2),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 13,
-                      color: theme.colorScheme.primary,
-                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_rounded, size: 13, color: ink),
                   ],
                 ),
               ),

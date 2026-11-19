@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
+import 'package:fruitlens/core/theme/app_theme.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
 import 'package:fruitlens/providers/auth_providers.dart';
 import 'package:fruitlens/services/auth_service.dart';
 import 'package:fruitlens/ui/widgets/app_text_field.dart';
 import 'package:fruitlens/ui/widgets/auth_widgets.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 import 'package:fruitlens/ui/widgets/primary_button.dart';
 import 'package:go_router/go_router.dart';
 
@@ -92,34 +94,35 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Center(
-                  child: SizedBox(
-                    height: 168,
-                    child: Image.asset(
-                      'assets/images/auth/auth_forgot.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => Icon(
-                        Icons.lock_reset_rounded,
-                        size: 64,
-                        color: theme.colorScheme.primary,
+                IndustrialSpecimenCard(
+                  padding: const EdgeInsets.all(AppDimens.s20),
+                  child: Column(
+                    children: <Widget>[
+                      const IndustrialTagChip(
+                        label: 'MOD-SEC // RESET SANDI',
+                        accent: true,
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppDimens.s12),
-                Text(
-                  'Lupa Kata Sandi?',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: AppDimens.s4),
-                Text(
-                  'Masukkan email terdaftar dan buat kata sandi baru untuk akunmu.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: harvest.muted,
+                      const SizedBox(height: AppDimens.s16),
+                      const IndustrialBananaMark(size: 56),
+                      const SizedBox(height: AppDimens.s16),
+                      Text(
+                        'Lupa Kata Sandi?',
+                        textAlign: TextAlign.center,
+                        style: AppTheme.pixelDisplayStyle(
+                          context,
+                          fontSize: 19,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: AppDimens.s4),
+                      Text(
+                        'Masukkan email terdaftar dan buat kata sandi baru untuk akunmu.',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: harvest.muted,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (_errorMessage != null) ...<Widget>[

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
+import 'package:fruitlens/core/theme/app_theme.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
 import 'package:fruitlens/data/models/user_profile.dart';
-import 'package:fruitlens/ui/widgets/app_card.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 import 'package:fruitlens/ui/widgets/primary_button.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,18 +20,34 @@ class AccountIdentityBanner extends StatelessWidget {
     final name = user.name.trim().isNotEmpty ? user.name.trim() : 'Pengguna';
     final initial = name[0].toUpperCase();
 
-    return AppCard(
+    final ink = theme.colorScheme.onSurface;
+
+    return IndustrialSpecimenCard(
       padding: const EdgeInsets.all(AppDimens.s16),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: harvest.primarySoft,
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
+              border: Border.all(color: ink, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: ink,
+                  offset: const Offset(2, 2),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
             child: Text(
               initial,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w700,
+              style: AppTheme.pixelDisplayStyle(
+                context,
+                fontSize: 18,
+                color: theme.colorScheme.onPrimary,
               ),
             ),
           ),
@@ -72,50 +89,52 @@ class AccountPasswordTile extends StatelessWidget {
     final theme = Theme.of(context);
     final harvest = context.harvest;
 
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimens.s16,
-        vertical: AppDimens.s12,
-      ),
+    final ink = theme.colorScheme.onSurface;
+
+    return InkWell(
       onTap: () =>
           context.push('/forgot-password?email=${Uri.encodeComponent(email)}'),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: harvest.primarySoft,
-              borderRadius: BorderRadius.circular(AppDimens.rButton),
+      borderRadius: BorderRadius.circular(AppDimens.rCard),
+      child: IndustrialSpecimenCard(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimens.s16,
+          vertical: AppDimens.s12,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(AppDimens.rButton - 2),
+                border: Border.all(color: ink, width: 1.3),
+              ),
+              child: Icon(Icons.lock_reset_rounded, size: 20, color: ink),
             ),
-            child: Icon(
-              Icons.lock_reset_rounded,
-              size: 20,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(width: AppDimens.s12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Ubah Kata Sandi',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            const SizedBox(width: AppDimens.s12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ubah Kata Sandi',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                Text(
-                  'Perbarui kata sandi keamanan akunmu',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: harvest.muted,
+                  Text(
+                    'Perbarui kata sandi keamanan akunmu',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: harvest.muted,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Icon(Icons.chevron_right_rounded, color: harvest.muted),
-        ],
+            Icon(Icons.chevron_right_rounded, color: ink),
+          ],
+        ),
       ),
     );
   }

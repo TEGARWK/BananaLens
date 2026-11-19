@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
+import '../widgets/industrial_art.dart';
 import '../widgets/splash_scanner_mark.dart';
 
 /// Animated brand launch splash screen showcasing the FruitLens scanner mark.
@@ -139,17 +140,8 @@ class _SplashBackgroundAura extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0, -0.25),
-          radius: 1.05,
-          colors: [
-            harvest.primarySoft.withValues(alpha: 0.72),
-            theme.scaffoldBackgroundColor,
-          ],
-        ),
-      ),
+    return ColoredBox(
+      color: theme.scaffoldBackgroundColor,
       child: const SizedBox.expand(),
     );
   }
@@ -188,35 +180,20 @@ class _AnimatedBrandWordmark extends StatelessWidget {
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
-                color: theme.colorScheme.primary,
-                letterSpacing: -0.8,
+                color: theme.colorScheme.onSurface,
+                letterSpacing: -0.6,
               ),
             ),
           ),
         ),
-        const SizedBox(height: AppDimens.s8),
+        const SizedBox(height: AppDimens.s12),
         Opacity(
           opacity: subT,
           child: Transform.translate(
             offset: Offset(0, (1.0 - subT) * 10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimens.s12,
-                vertical: AppDimens.s4,
-              ),
-              decoration: BoxDecoration(
-                color: harvest.primarySoft,
-                borderRadius: BorderRadius.circular(AppDimens.rPill),
-                border: Border.all(color: harvest.border),
-              ),
-              child: Text(
-                AppStrings.splashBadge,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
-                ),
-              ),
+            child: const IndustrialTagChip(
+              label: AppStrings.splashBadge,
+              accent: true,
             ),
           ),
         ),
@@ -255,27 +232,22 @@ class _OpticalProgressPill extends StatelessWidget {
 
     return Opacity(
       opacity: barFade,
-      child: SizedBox(
-        width: 112,
-        height: 5,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
-          child: Stack(
-            children: [
-              ColoredBox(color: harvest.border, child: const SizedBox.expand()),
-              FractionallySizedBox(
-                widthFactor: fillFraction.clamp(0.08, 1.0),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [theme.colorScheme.primary, harvest.accent],
-                    ),
-                    borderRadius: BorderRadius.circular(AppDimens.rPill),
-                  ),
-                  child: const SizedBox.expand(),
-                ),
-              ),
-            ],
+      child: Container(
+        width: 140,
+        height: 8,
+        decoration: BoxDecoration(
+          color: harvest.primarySoft,
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          border: Border.all(color: theme.colorScheme.onSurface, width: 1.2),
+        ),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: FractionallySizedBox(
+            widthFactor: fillFraction.clamp(0.08, 1.0),
+            child: ColoredBox(
+              color: theme.colorScheme.primary,
+              child: const SizedBox.expand(),
+            ),
           ),
         ),
       ),

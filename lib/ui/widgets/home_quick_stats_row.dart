@@ -4,7 +4,7 @@ import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../core/utils/fruit_name_helper.dart';
 import '../../data/models/scan_result.dart';
-import 'app_card.dart';
+import 'industrial_art.dart';
 
 /// 3 Quick Stat Cards: Total Scan, Buah Matang, Buah Favorit
 class HomeQuickStatsRow extends StatelessWidget {
@@ -44,7 +44,7 @@ class HomeQuickStatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.qr_code_scanner_rounded,
-            iconColor: theme.colorScheme.primary,
+            badgeColor: theme.colorScheme.primary,
             title: '$totalScan',
             subtitle: 'Total Scan',
             harvest: harvest,
@@ -55,7 +55,7 @@ class HomeQuickStatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.check_circle_outline_rounded,
-            iconColor: harvest.ripe,
+            badgeColor: harvest.ripe.withValues(alpha: 0.25),
             title: '$ripeCount',
             subtitle: 'Buah Matang',
             harvest: harvest,
@@ -66,9 +66,7 @@ class HomeQuickStatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.favorite_border_rounded,
-            iconColor: theme.brightness == Brightness.dark
-                ? const Color(0xFFFF6B70)
-                : const Color(0xFFE5484D),
+            badgeColor: harvest.primarySoft,
             title: favoriteFruit,
             subtitle: 'Buah Favorit',
             harvest: harvest,
@@ -83,7 +81,7 @@ class HomeQuickStatsRow extends StatelessWidget {
 class _StatCard extends StatelessWidget {
   const _StatCard({
     required this.icon,
-    required this.iconColor,
+    required this.badgeColor,
     required this.title,
     required this.subtitle,
     required this.harvest,
@@ -91,7 +89,7 @@ class _StatCard extends StatelessWidget {
   });
 
   final IconData icon;
-  final Color iconColor;
+  final Color badgeColor;
   final String title;
   final String subtitle;
   final HarvestColors harvest;
@@ -99,27 +97,20 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimens.s12,
-        vertical: AppDimens.s12,
-      ),
+    final ink = theme.colorScheme.onSurface;
+    return IndustrialSpecimenCard(
+      padding: const EdgeInsets.all(AppDimens.s12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, size: 16, color: iconColor),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.6),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
+          Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: badgeColor,
+              borderRadius: BorderRadius.circular(AppDimens.rSharp),
+              border: Border.all(color: ink, width: 1.1),
+            ),
+            child: Icon(icon, size: 15, color: ink),
           ),
           const SizedBox(height: AppDimens.s8),
           Text(

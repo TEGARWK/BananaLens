@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,11 +10,13 @@ import '../../core/theme/harvest_colors.dart';
 import '../../data/models/ripeness.dart';
 import '../../data/models/scan_result.dart';
 import '../../providers/history_providers.dart';
-import '../widgets/app_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/fruit_image.dart';
+import '../widgets/fruitlens_app_bar.dart';
+import '../widgets/industrial_art.dart';
 import '../widgets/ripeness_chip.dart';
 import '../widgets/shimmer_box.dart';
+import '../widgets/soft_button.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -25,9 +29,38 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   String _selectedFilter = 'all';
   String _searchQuery = '';
   final _searchController = TextEditingController();
+  Timer? _hintTimer;
+  int _hintIndex = 0;
+
+  static const List<String> _searchHints = <String>[
+    'Cari buah berdasarkan kematangan...',
+    'Cari: Pisang, Matang, Mentah...',
+    'Ketik nama buah atau status busuk...',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startHintTimer();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    _startHintTimer();
+  }
+
+  void _startHintTimer() {
+    _hintTimer?.cancel();
+    _hintTimer = Timer.periodic(const Duration(milliseconds: 2500), (_) {
+      if (!mounted || _searchQuery.isNotEmpty) return;
+      setState(() => _hintIndex = (_hintIndex + 1) % _searchHints.length);
+    });
+  }
 
   @override
   void dispose() {
+    _hintTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -36,7 +69,22 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return items.where((item) {
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
-        if (!item.fruitLabel.toLowerCase().contains(query)) {
+        final fruitId = _formatFruitName(item.fruitLabel).toLowerCase();
+        final fruitEn = item.fruitLabel.toLowerCase();
+        final ripenessId = switch (Ripeness.fromLabel(item.ripenessLabel)) {
+          Ripeness.unripe => 'mentah',
+          Ripeness.ripe => 'matang',
+          Ripeness.overripe => 'terlalu matang',
+          Ripeness.rotten => 'busuk',
+          null => '',
+        };
+        final ripenessEn = item.ripenessLabel.toLowerCase();
+        final matchesQuery =
+            fruitId.contains(query) ||
+            fruitEn.contains(query) ||
+            ripenessId.contains(query) ||
+            ripenessEn.contains(query);
+        if (!matchesQuery) {
           return false;
         }
       }
@@ -44,7 +92,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       return switch (_selectedFilter) {
         'ripe' => item.ripenessLabel == 'ripe',
         'unripe' => item.ripenessLabel == 'unripe',
-        'overripe' => item.ripenessLabel == 'overripe',
         'rotten' => item.ripenessLabel == 'rotten',
         _ => true,
       };
@@ -53,27 +100,92 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Future<void> _confirmDelete(BuildContext context, ScanResult item) async {
     final theme = Theme.of(context);
+    final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rCard),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: AppDimens.s24),
+        child: IndustrialSpecimenCard(
+          padding: const EdgeInsets.all(AppDimens.s20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const IndustrialTagChip(label: 'HAPUS // RIWAYAT'),
+                  Icon(
+                    Icons.delete_outline_rounded,
+                    size: 20,
+                    color: theme.colorScheme.error,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppDimens.s16),
+              Text(
+                'Hapus Riwayat?',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: AppDimens.s8),
+              Text(
+                'Riwayat scan ${_formatFruitName(item.fruitLabel)} akan dihapus permanen.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: harvest.muted,
+                ),
+              ),
+              const SizedBox(height: AppDimens.s20),
+              Row(
+                children: [
+                  Expanded(
+                    child: SoftButton(
+                      text: 'Batal',
+                      height: 48,
+                      fullWidth: true,
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                    ),
+                  ),
+                  const SizedBox(width: AppDimens.s12),
+                  Expanded(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
+                        boxShadow: [
+                          BoxShadow(
+                            color: ink,
+                            offset: const Offset(0, 4),
+                            blurRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.error,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppDimens.rButton,
+                            ),
+                            side: BorderSide(color: ink, width: 1.5),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text('Hapus'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        title: const Text('Hapus Riwayat?'),
-        content: Text('Riwayat scan ${item.fruitLabel} akan dihapus permanen.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: theme.colorScheme.error,
-            ),
-            child: const Text('Hapus'),
-          ),
-        ],
       ),
     );
 
@@ -90,25 +202,25 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
     final historyAsync = ref.watch(historyListProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Riwayat Scan'),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+      appBar: const FruitLensAppBar(
+        title: 'Riwayat Scan',
+        leadingIcon: Icons.history_rounded,
       ),
       body: historyAsync.when(
         loading: () => const Padding(
           padding: EdgeInsets.all(AppDimens.screenPadding),
           child: Column(
             children: [
-              ShimmerBox(height: 48, radius: AppDimens.rPill),
+              ShimmerBox(height: 48, radius: AppDimens.rButton),
               SizedBox(height: AppDimens.s16),
-              ShimmerBox(height: 80, radius: AppDimens.rCard),
+              ShimmerBox(height: 84, radius: AppDimens.rCard),
               SizedBox(height: AppDimens.s12),
-              ShimmerBox(height: 80, radius: AppDimens.rCard),
+              ShimmerBox(height: 84, radius: AppDimens.rCard),
             ],
           ),
         ),
@@ -134,10 +246,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           return ListView(
             padding: const EdgeInsets.symmetric(
               horizontal: AppDimens.screenPadding,
-              vertical: AppDimens.s8,
+              vertical: AppDimens.s12,
             ),
             children: [
-              // 1. Kolom cari bentuk pil
+              // 1. Kolom cari bergaya instrumen
               TextField(
                 controller: _searchController,
                 onChanged: (val) {
@@ -146,15 +258,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   });
                 },
                 decoration: InputDecoration(
-                  hintText: 'Cari riwayat buah...',
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    color: theme.colorScheme.primary,
-                    size: 20,
-                  ),
+                  hintText: _searchHints[_hintIndex],
+                  prefixIcon: Icon(Icons.search_rounded, color: ink, size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, size: 18),
+                          icon: Icon(Icons.clear_rounded, size: 18, color: ink),
                           onPressed: () {
                             _searchController.clear();
                             setState(() => _searchQuery = '');
@@ -165,7 +273,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
               const SizedBox(height: AppDimens.s12),
 
-              // 2. Chip filter horizontal
+              // 2. Chip filter horizontal (tanpa "Terlalu matang")
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -175,8 +283,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     _buildFilterChip('ripe', 'Matang'),
                     const SizedBox(width: AppDimens.s8),
                     _buildFilterChip('unripe', 'Mentah'),
-                    const SizedBox(width: AppDimens.s8),
-                    _buildFilterChip('overripe', 'Terlalu matang'),
                     const SizedBox(width: AppDimens.s8),
                     _buildFilterChip('rotten', 'Busuk'),
                   ],
@@ -205,7 +311,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       direction: DismissDirection.endToStart,
                       confirmDismiss: (_) async {
                         await _confirmDelete(context, item);
-                        return false; // Notifier updates UI state
+                        return false;
                       },
                       background: Container(
                         alignment: Alignment.centerRight,
@@ -213,6 +319,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         decoration: BoxDecoration(
                           color: theme.colorScheme.error,
                           borderRadius: BorderRadius.circular(AppDimens.rCard),
+                          border: Border.all(color: ink, width: 1.5),
                         ),
                         child: Icon(
                           Icons.delete_outline_rounded,
@@ -220,72 +327,63 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           size: 26,
                         ),
                       ),
-                      child: AppCard(
-                        padding: const EdgeInsets.all(AppDimens.s12),
+                      child: InkWell(
                         onTap: () =>
                             context.push('/history-detail', extra: item),
-                        child: Row(
-                          children: [
-                            FruitImage(
-                              imagePath: item.imagePath,
-                              fruitLabel: item.fruitLabel,
-                              width: 64,
-                              height: 64,
-                              radius: AppDimens.s12,
-                            ),
-                            const SizedBox(width: AppDimens.s12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _formatFruitName(item.fruitLabel),
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.w700),
+                        borderRadius: BorderRadius.circular(AppDimens.rCard),
+                        child: IndustrialSpecimenCard(
+                          padding: const EdgeInsets.all(AppDimens.s12),
+                          child: Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                    AppDimens.s12,
                                   ),
-                                  const SizedBox(height: AppDimens.s4),
-                                  Text(
-                                    _formatDate(item.createdAt),
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: harvest.muted,
+                                  border: Border.all(color: ink, width: 1.2),
+                                ),
+                                child: FruitImage(
+                                  imagePath: item.imagePath,
+                                  fruitLabel: item.fruitLabel,
+                                  width: 60,
+                                  height: 60,
+                                  radius: AppDimens.s12 - 1,
+                                ),
+                              ),
+                              const SizedBox(width: AppDimens.s12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _formatFruitName(item.fruitLabel),
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                          ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: AppDimens.s4),
+                                    Text(
+                                      _formatDate(item.createdAt),
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(color: harvest.muted),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            if (ripeness != null)
-                              RipenessChip(ripeness: ripeness),
-                            const SizedBox(width: AppDimens.s4),
-                            IconButton(
-                              icon: Icon(
-                                item.isFavorite
-                                    ? Icons.star_rounded
-                                    : Icons.star_outline_rounded,
-                                color: item.isFavorite
-                                    ? Colors.amber
-                                    : harvest.muted,
-                                size: 22,
+                              if (ripeness != null)
+                                RipenessChip(ripeness: ripeness),
+                              const SizedBox(width: AppDimens.s4),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 20,
+                                ),
+                                color: harvest.muted,
+                                onPressed: () => _confirmDelete(context, item),
                               ),
-                              onPressed: () {
-                                if (item.id != null) {
-                                  ref
-                                      .read(historyListProvider.notifier)
-                                      .toggleFavorite(
-                                        item.id!,
-                                        item.isFavorite,
-                                      );
-                                }
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline_rounded,
-                                size: 20,
-                              ),
-                              color: harvest.muted,
-                              onPressed: () => _confirmDelete(context, item),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -301,26 +399,49 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _buildFilterChip(String key, String label) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
+    final ink = theme.colorScheme.onSurface;
     final isSelected = _selectedFilter == key;
 
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => setState(() => _selectedFilter = key),
-      labelStyle: theme.textTheme.labelSmall?.copyWith(
-        color: isSelected ? theme.colorScheme.onPrimary : harvest.muted,
-        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-      ),
-      selectedColor: theme.colorScheme.primary,
-      backgroundColor: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimens.rPill),
-        side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary : harvest.border,
-          width: 1,
+    final (selectedBg, selectedFg) = switch (key) {
+      'unripe' => (const Color(0xFF3E7D28), Colors.white),
+      'rotten' => (const Color(0xFFC43E2B), Colors.white),
+      _ => (theme.colorScheme.primary, theme.colorScheme.onPrimary),
+    };
+
+    return InkWell(
+      onTap: () => setState(() => _selectedFilter = key),
+      borderRadius: BorderRadius.circular(AppDimens.rSharp),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimens.s12 + 2,
+          vertical: AppDimens.s8,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? selectedBg : harvest.primarySoft,
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          border: Border.all(
+            color: isSelected ? ink : harvest.border,
+            width: isSelected ? 1.5 : 1.0,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: ink,
+                    offset: const Offset(2, 2),
+                    blurRadius: 0,
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: isSelected ? selectedFg : harvest.muted,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+          ),
         ),
       ),
-      showCheckmark: false,
     );
   }
 

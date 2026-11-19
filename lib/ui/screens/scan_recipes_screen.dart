@@ -6,10 +6,11 @@ import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/recipe.dart';
 import '../../providers/recipe_gating_provider.dart';
-import '../widgets/app_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/error_state.dart';
 import '../widgets/fruit_vector_icon.dart';
+import '../widgets/fruitlens_app_bar.dart';
+import '../widgets/industrial_art.dart';
 import '../widgets/shimmer_box.dart';
 
 /// Dedicated screen displaying recipes generated live by Gemini AI at the top,
@@ -44,53 +45,50 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        centerTitle: false,
-        leading: Padding(
-          padding: const EdgeInsets.all(AppDimens.s8),
-          child: IconButton(
-            tooltip: 'Kembali',
-            onPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.go('/');
-              }
-            },
-            icon: const Icon(Icons.arrow_back_rounded, size: 20),
-            style: IconButton.styleFrom(
-              backgroundColor: harvest.primarySoft,
-              foregroundColor: theme.colorScheme.primary,
-              shape: const CircleBorder(),
-            ),
-          ),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Rekomendasi Resep ${widget.args.fruitName}',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-            ),
-            Text(
-              '${widget.args.bucket.labelId} · Keyakinan $pct%',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: harvest.muted,
-                fontSize: 10.5,
-              ),
-            ),
-          ],
-        ),
+      appBar: FruitLensAppBar(
+        title: 'Rekomendasi Resep ${widget.args.fruitName}',
+        subtitle: '${widget.args.bucket.labelId} · Keyakinan $pct%',
+        showBackButton: true,
+        onBackPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/');
+          }
+        },
         actions: [
-          IconButton(
-            tooltip: 'Buat Variasi AI Baru',
-            onPressed: () => ref.invalidate(scanRecipesProvider(activeArgs)),
-            icon: const Icon(Icons.refresh_rounded),
+          Padding(
+            padding: const EdgeInsets.only(right: AppDimens.s12),
+            child: Tooltip(
+              message: 'Buat Variasi AI Baru',
+              child: InkWell(
+                onTap: () => ref.invalidate(scanRecipesProvider(activeArgs)),
+                borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                    border: Border.all(
+                      color: theme.colorScheme.onSurface,
+                      width: 1.4,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.onSurface,
+                        offset: const Offset(2, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.refresh_rounded,
+                    size: 18,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -103,32 +101,55 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppDimens.screenPadding,
-                vertical: AppDimens.s4,
+                vertical: AppDimens.s8,
               ),
               itemCount: RecipePreference.values.length,
               separatorBuilder: (_, _) => const SizedBox(width: AppDimens.s8),
               itemBuilder: (context, idx) {
                 final pref = RecipePreference.values[idx];
                 final isSelected = _selectedPref == pref;
-                return ChoiceChip(
-                  label: Text(pref.labelId),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (!selected && isSelected) return;
-                    setState(() => _selectedPref = pref);
+                return GestureDetector(
+                  onTap: () {
+                    if (!isSelected) {
+                      setState(() => _selectedPref = pref);
+                    }
                   },
-                  selectedColor: theme.colorScheme.primary,
-                  backgroundColor: theme.colorScheme.surface,
-                  side: BorderSide(
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : harvest.border,
-                  ),
-                  labelStyle: theme.textTheme.labelMedium?.copyWith(
-                    color: isSelected
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onSurface,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 140),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimens.s12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                      border: Border.all(
+                        color: theme.colorScheme.onSurface,
+                        width: isSelected ? 1.5 : 1.0,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: theme.colorScheme.onSurface,
+                                offset: const Offset(2, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      pref.labelId,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface,
+                        fontWeight: isSelected
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                      ),
+                    ),
                   ),
                 );
               },
@@ -155,23 +176,33 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
                   padding: const EdgeInsets.all(AppDimens.screenPadding),
                   children: [
                     // Source indicator banner (Live Gemini AI vs Offline Backup)
-                    AppCard(
-                      color: result.isFromLiveAi
+                    IndustrialSpecimenCard(
+                      backgroundColor: result.isFromLiveAi
                           ? harvest.primarySoft
-                          : harvest.accent.withValues(alpha: 0.12),
-                      borderColor: result.isFromLiveAi
-                          ? theme.colorScheme.primary.withValues(alpha: 0.3)
-                          : harvest.accent.withValues(alpha: 0.45),
+                          : theme.colorScheme.surface,
                       child: Row(
                         children: [
-                          Icon(
-                            result.isFromLiveAi
-                                ? Icons.auto_awesome_rounded
-                                : Icons.offline_pin_rounded,
-                            size: 20,
-                            color: result.isFromLiveAi
-                                ? theme.colorScheme.primary
-                                : harvest.accent,
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: result.isFromLiveAi
+                                  ? theme.colorScheme.primary
+                                  : harvest.primarySoft,
+                              borderRadius: BorderRadius.circular(
+                                AppDimens.rSharp,
+                              ),
+                              border: Border.all(
+                                color: theme.colorScheme.onSurface,
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Icon(
+                              result.isFromLiveAi
+                                  ? Icons.auto_awesome_rounded
+                                  : Icons.offline_pin_rounded,
+                              size: 16,
+                              color: theme.colorScheme.onSurface,
+                            ),
                           ),
                           const SizedBox(width: AppDimens.s12),
                           Expanded(
@@ -181,6 +212,7 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
                                   : (result.fallbackReason ??
                                         'Menampilkan resep pilihan yang tersimpan di aplikasi.'),
                               style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -194,7 +226,7 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
                       _SectionLabel(
                         icon: Icons.auto_awesome_rounded,
                         title: 'Ide Resep Spesial AI',
-                        color: theme.colorScheme.primary,
+                        color: theme.colorScheme.onSurface,
                       ),
                       const SizedBox(height: AppDimens.s8),
                       ...result.aiRecipes.map(
@@ -213,9 +245,7 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
                         title: result.aiRecipes.isNotEmpty
                             ? 'Resep Pilihan Lainnya'
                             : 'Resep Pilihan Offline',
-                        color: result.aiRecipes.isNotEmpty
-                            ? harvest.muted
-                            : harvest.accent,
+                        color: theme.colorScheme.onSurface,
                       ),
                       const SizedBox(height: AppDimens.s8),
                       ...result.backupRecipes.map(
@@ -252,7 +282,7 @@ class _ScanRecipesSkeleton extends StatelessWidget {
         ),
         const SizedBox(height: AppDimens.s12),
         for (var i = 0; i < 4; i++) ...[
-          const AppCard(
+          const IndustrialSpecimenCard(
             child: Row(
               children: [
                 ShimmerBox(width: 52, height: 52, radius: AppDimens.rCard),
@@ -331,124 +361,131 @@ class _ScanRecipeCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.s12),
-      child: AppCard(
+      child: InkWell(
         onTap: () => context.push('/recipe-detail', extra: recipe),
-        child: Row(
-          children: [
-            FruitVectorIcon(
-              fruitLabel: recipe.fruitLabel,
-              size: 52,
-              isCircular: false,
-            ),
-            const SizedBox(width: AppDimens.s12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          recipe.name,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+        child: IndustrialSpecimenCard(
+          child: Row(
+            children: [
+              FruitVectorIcon(
+                fruitLabel: recipe.fruitLabel,
+                size: 52,
+                isCircular: false,
+              ),
+              const SizedBox(width: AppDimens.s12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            recipe.name,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
-                      if (isAiGenerated) ...[
-                        const SizedBox(width: AppDimens.s8),
+                        if (isAiGenerated) ...[
+                          const SizedBox(width: AppDimens.s8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppDimens.s8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              borderRadius: BorderRadius.circular(
+                                AppDimens.rSharp,
+                              ),
+                              border: Border.all(
+                                color: theme.colorScheme.onSurface,
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.auto_awesome_rounded,
+                                  size: 11,
+                                  color: theme.colorScheme.onPrimary,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  'AI',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onPrimary,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: AppDimens.s4),
+                    Row(
+                      children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppDimens.s8,
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: harvest.accent.withValues(alpha: 0.16),
+                            color: harvest.primarySoft,
                             borderRadius: BorderRadius.circular(
-                              AppDimens.rPill,
+                              AppDimens.rSharp,
                             ),
-                            border: Border.all(
-                              color: harvest.accent.withValues(alpha: 0.4),
+                            border: Border.all(color: harvest.border),
+                          ),
+                          child: Text(
+                            recipe.type.labelId,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.auto_awesome_rounded,
-                                size: 11,
-                                color: harvest.accent,
-                              ),
-                              const SizedBox(width: 3),
-                              Text(
-                                'AI',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: harvest.accent,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: AppDimens.s4),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppDimens.s8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: harvest.primarySoft,
-                          borderRadius: BorderRadius.circular(AppDimens.rPill),
-                        ),
-                        child: Text(
-                          recipe.type.labelId,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppDimens.s8),
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 13,
-                        color: harvest.muted,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        recipe.prepTime,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: harvest.muted,
-                          fontSize: 11,
-                        ),
-                      ),
-                      if (hasSafety) ...[
                         const SizedBox(width: AppDimens.s8),
                         Icon(
-                          Icons.health_and_safety_rounded,
-                          size: 14,
-                          color: harvest.overripe,
+                          Icons.timer_outlined,
+                          size: 13,
+                          color: harvest.muted,
                         ),
+                        const SizedBox(width: 3),
+                        Text(
+                          recipe.prepTime,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: harvest.muted,
+                            fontSize: 11,
+                          ),
+                        ),
+                        if (hasSafety) ...[
+                          const SizedBox(width: AppDimens.s8),
+                          Icon(
+                            Icons.health_and_safety_rounded,
+                            size: 14,
+                            color: harvest.overripe,
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: AppDimens.s8),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 14,
-              color: harvest.muted,
-            ),
-          ],
+              const SizedBox(width: AppDimens.s8),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: harvest.muted,
+              ),
+            ],
+          ),
         ),
       ),
     );

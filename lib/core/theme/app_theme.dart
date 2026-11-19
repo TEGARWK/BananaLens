@@ -7,9 +7,9 @@ import 'app_radius.dart';
 import 'app_spacing.dart';
 import 'harvest_colors.dart';
 
-/// Central theme provider generating Material 3 themes for FruitLens:
-/// - Light: Fresh Harvest
-/// - Dark: Night Harvest
+/// Central theme provider generating Material 3 themes for BananaLens:
+/// - Light: Technical Paper (Tactile Industrial Minimalism)
+/// - Dark: Night Instrument
 abstract final class AppTheme {
   static TextStyle _font(
     TextStyle Function({TextStyle? textStyle}) fontLoader,
@@ -30,78 +30,118 @@ abstract final class AppTheme {
     return binding.runtimeType.toString().contains('TestWidgetsFlutterBinding');
   }
 
+  /// Pixel-matrix LCD readout typography for numeric gauges and badges.
+  static TextStyle pixelDisplayStyle(
+    BuildContext context, {
+    double fontSize = 36,
+    Color? color,
+  }) {
+    final ink = color ?? Theme.of(context).colorScheme.onSurface;
+    return _font(
+      GoogleFonts.silkscreen,
+      TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w700,
+        color: ink,
+        letterSpacing: 1.2,
+        height: 1.05,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    );
+  }
+
   static TextTheme _buildTextTheme(Color textColor, Color mutedColor) {
     return TextTheme(
       headlineLarge: _font(
-        GoogleFonts.poppins,
+        GoogleFonts.spaceGrotesk,
         TextStyle(
           fontSize: 26,
           fontWeight: FontWeight.w700,
+          letterSpacing: -0.4,
           color: textColor,
-          fontFamily: 'Poppins',
         ),
       ),
       headlineMedium: _font(
-        GoogleFonts.poppins,
+        GoogleFonts.spaceGrotesk,
         TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontSize: 21,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.3,
           color: textColor,
-          fontFamily: 'Poppins',
+        ),
+      ),
+      headlineSmall: _font(
+        GoogleFonts.spaceGrotesk,
+        TextStyle(
+          fontSize: 19,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.25,
+          color: textColor,
         ),
       ),
       titleLarge: _font(
-        GoogleFonts.poppins,
+        GoogleFonts.spaceGrotesk,
         TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.2,
           color: textColor,
-          fontFamily: 'Poppins',
         ),
       ),
       titleMedium: _font(
-        GoogleFonts.poppins,
+        GoogleFonts.spaceGrotesk,
         TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.1,
           color: textColor,
-          fontFamily: 'Poppins',
         ),
       ),
       bodyLarge: _font(
         GoogleFonts.inter,
         TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontSize: 14.5,
+          fontWeight: FontWeight.w500,
           color: textColor,
-          fontFamily: 'Inter',
         ),
       ),
       bodyMedium: _font(
         GoogleFonts.inter,
         TextStyle(
-          fontSize: 12.5,
+          fontSize: 13.5,
           fontWeight: FontWeight.w400,
           color: textColor,
-          fontFamily: 'Inter',
         ),
       ),
-      labelLarge: _font(
+      bodySmall: _font(
         GoogleFonts.inter,
+        TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: mutedColor),
+      ),
+      labelLarge: _font(
+        GoogleFonts.jetBrainsMono,
         TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.1,
           color: textColor,
-          fontFamily: 'Inter',
+        ),
+      ),
+      labelMedium: _font(
+        GoogleFonts.jetBrainsMono,
+        TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.0,
+          color: textColor,
         ),
       ),
       labelSmall: _font(
-        GoogleFonts.inter,
+        GoogleFonts.jetBrainsMono,
         TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.1,
           color: mutedColor,
-          fontFamily: 'Inter',
         ),
       ),
     );
@@ -166,27 +206,27 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surface,
+        fillColor: AppColors.lPrimarySoft,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.mdSm,
         ),
-        hintStyle: textTheme.bodyLarge?.copyWith(color: textMuted),
+        hintStyle: textTheme.bodyMedium?.copyWith(color: textMuted),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
           borderSide: const BorderSide(color: border, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
           borderSide: const BorderSide(color: border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
-          borderSide: const BorderSide(color: primary, width: 1.5),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
+          borderSide: const BorderSide(color: textPrimary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
-          borderSide: const BorderSide(color: error, width: 1),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
+          borderSide: const BorderSide(color: error, width: 1.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -196,10 +236,11 @@ abstract final class AppTheme {
           minimumSize: const Size(88, 48),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimens.rButton),
+            side: const BorderSide(color: AppColors.lText, width: 1.5),
           ),
           elevation: 0,
           textStyle: textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -230,12 +271,15 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.lText,
         contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: AppColors.lSurface,
-          fontWeight: FontWeight.w500,
+          color: AppColors.lPrimary,
+          fontWeight: FontWeight.w700,
         ),
+        actionTextColor: AppColors.lPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.rButton),
+          side: const BorderSide(color: AppColors.lPrimary, width: 1.5),
         ),
+        elevation: 4,
         behavior: SnackBarBehavior.floating,
       ),
       dialogTheme: DialogThemeData(
@@ -243,6 +287,7 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.rCard),
+          side: const BorderSide(color: textPrimary, width: 1.5),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
@@ -312,27 +357,27 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surface,
+        fillColor: AppColors.dPrimarySoft,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.mdSm,
         ),
-        hintStyle: textTheme.bodyLarge?.copyWith(color: textMuted),
+        hintStyle: textTheme.bodyMedium?.copyWith(color: textMuted),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
           borderSide: const BorderSide(color: border, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
           borderSide: const BorderSide(color: border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
           borderSide: const BorderSide(color: primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.rPill),
-          borderSide: const BorderSide(color: error, width: 1),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
+          borderSide: const BorderSide(color: error, width: 1.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -342,10 +387,11 @@ abstract final class AppTheme {
           minimumSize: const Size(88, 48),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimens.rButton),
+            side: const BorderSide(color: primary, width: 1.5),
           ),
           elevation: 0,
           textStyle: textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -374,15 +420,17 @@ abstract final class AppTheme {
         space: 1,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: surface,
+        backgroundColor: AppColors.dPrimary,
         contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: textPrimary,
-          fontWeight: FontWeight.w500,
+          color: AppColors.dOnPrimary,
+          fontWeight: FontWeight.w700,
         ),
+        actionTextColor: AppColors.dOnPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.rButton),
-          side: const BorderSide(color: border, width: 1),
+          side: const BorderSide(color: AppColors.dBorder, width: 1.5),
         ),
+        elevation: 4,
         behavior: SnackBarBehavior.floating,
       ),
       dialogTheme: DialogThemeData(
@@ -390,6 +438,7 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.rCard),
+          side: const BorderSide(color: primary, width: 1.5),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(

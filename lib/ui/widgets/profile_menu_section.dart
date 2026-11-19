@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
-import 'package:fruitlens/ui/widgets/app_card.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 
 /// Configuration row model for grouped settings sections.
 class ProfileMenuItem {
@@ -20,7 +20,7 @@ class ProfileMenuItem {
   final bool isDestructive;
 }
 
-/// Clean grouped menu card for Account Settings and General Settings.
+/// Tactile grouped menu card for Account Settings and General Settings.
 class ProfileMenuSection extends StatelessWidget {
   const ProfileMenuSection({
     required this.title,
@@ -41,22 +41,39 @@ class ProfileMenuSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: AppDimens.s4),
-          child: Text(
-            title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: harvest.muted,
-              fontWeight: FontWeight.w700,
-            ),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  border: Border.all(
+                    color: theme.colorScheme.onSurface,
+                    width: 1.2,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppDimens.s8),
+              Text(
+                title,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: AppDimens.s8),
-        AppCard(
+        IndustrialSpecimenCard(
           padding: EdgeInsets.zero,
           child: Column(
             children: [
               for (var i = 0; i < items.length; i++) ...[
                 _MenuRowTile(item: items[i]),
-                if (i < items.length - 1) const Divider(height: 1),
+                if (i < items.length - 1)
+                  Divider(height: 1, color: harvest.border),
               ],
             ],
           ),
@@ -75,12 +92,12 @@ class _MenuRowTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final accent = item.isDestructive
-        ? theme.colorScheme.error
-        : theme.colorScheme.primary;
+    final ink = theme.colorScheme.onSurface;
+    final iconColor = item.isDestructive ? theme.colorScheme.error : ink;
     final badgeBg = item.isDestructive
-        ? theme.colorScheme.error.withValues(alpha: 0.12)
-        : harvest.primarySoft;
+        ? theme.colorScheme.error.withValues(alpha: 0.14)
+        : theme.colorScheme.primary.withValues(alpha: 0.45);
+    final badgeBorder = item.isDestructive ? theme.colorScheme.error : ink;
 
     return InkWell(
       onTap: item.onTap,
@@ -93,13 +110,14 @@ class _MenuRowTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: badgeBg,
-                borderRadius: BorderRadius.circular(AppDimens.rButton),
+                borderRadius: BorderRadius.circular(AppDimens.rButton - 2),
+                border: Border.all(color: badgeBorder, width: 1.3),
               ),
-              child: Icon(item.icon, size: 20, color: accent),
+              child: Icon(item.icon, size: 19, color: iconColor),
             ),
             const SizedBox(width: AppDimens.s12),
             Expanded(
@@ -109,8 +127,8 @@ class _MenuRowTile extends StatelessWidget {
                   Text(
                     item.title,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: item.isDestructive ? accent : null,
+                      fontWeight: FontWeight.w700,
+                      color: item.isDestructive ? theme.colorScheme.error : ink,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -123,7 +141,10 @@ class _MenuRowTile extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: harvest.muted),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: ink.withValues(alpha: 0.7),
+            ),
           ],
         ),
       ),

@@ -26,7 +26,7 @@ void main() {
       'system instruction contains nutrition, culinary, guardrail, and anti-greeting guidelines',
       () {
         final instruction = GeminiChatService.systemInstruction.toLowerCase();
-        expect(instruction, contains('fruitlens ai'));
+        expect(instruction, contains('bananalens ai'));
         expect(instruction, contains('kematangan'));
         expect(instruction, contains('peringatan keselamatan pangan'));
         expect(instruction, contains('batasan pembahasan'));

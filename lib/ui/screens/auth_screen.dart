@@ -6,11 +6,10 @@ import 'package:fruitlens/services/auth_service.dart';
 import 'package:fruitlens/ui/widgets/app_text_field.dart';
 import 'package:fruitlens/ui/widgets/auth_widgets.dart';
 import 'package:fruitlens/ui/widgets/primary_button.dart';
-import 'package:fruitlens/ui/widgets/soft_button.dart';
 import 'package:go_router/go_router.dart';
 
-/// Authentication screen supporting Login, Registration (via bottom link),
-/// navigation to Forgot Password page, and 1-click Demo Login.
+/// Authentication screen supporting Login, Registration (via animated switch),
+/// and navigation to Forgot Password page.
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key, this.initialRegister = false});
 
@@ -56,6 +55,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   void _navigateBackOrHome() {
     if (!mounted) return;
+    showAuthSuccessOverlay(context, isRegister: _isRegister);
     context.go('/');
   }
 
@@ -81,22 +81,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     } catch (_) {
       if (mounted) {
         setState(() => _errorMessage = 'Autentikasi gagal. Silakan coba lagi.');
-      }
-    }
-  }
-
-  Future<void> _loginAsDemo() async {
-    setState(() => _errorMessage = null);
-    try {
-      await ref
-          .read(authNotifierProvider.notifier)
-          .login(LocalAuthService.demoEmail, LocalAuthService.demoPassword);
-      _navigateBackOrHome();
-    } on AuthException catch (e) {
-      if (mounted) setState(() => _errorMessage = e.message);
-    } catch (_) {
-      if (mounted) {
-        setState(() => _errorMessage = 'Gagal masuk ke akun demo.');
       }
     }
   }
@@ -217,9 +201,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               onPressed: isLoading ? null : _openForgotPassword,
               child: Text(
                 'Lupa kata sandi?',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                  decoration: TextDecoration.underline,
                 ),
               ),
             ),
@@ -243,7 +228,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(_isRegister ? 'Daftar Akun' : 'Masuk ke FruitLens'),
+        title: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 240),
+          child: Text(
+            _isRegister ? 'Daftar Akun' : 'Masuk ke BananaLens',
+            key: ValueKey<bool>(_isRegister),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -259,15 +250,37 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   AuthErrorBanner(message: _errorMessage!),
                 ],
                 const SizedBox(height: AppDimens.s20),
-                _buildFormFields(context, isLoading),
-                const SizedBox(height: AppDimens.s12),
-                const AuthDivider(),
-                const SizedBox(height: AppDimens.s12),
-                SoftButton(
-                  text: 'Masuk Cepat (Akun Demo)',
-                  icon: Icons.bolt_rounded,
-                  fullWidth: true,
-                  onPressed: isLoading ? null : _loginAsDemo,
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 280),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
+                  child: ClipRect(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 280),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                            final isIncoming =
+                                child.key == ValueKey<bool>(_isRegister);
+                            final direction = _isRegister ? 1.0 : -1.0;
+                            final beginOffset = isIncoming
+                                ? Offset(direction, 0)
+                                : Offset(-direction, 0);
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: beginOffset,
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            );
+                          },
+                      child: KeyedSubtree(
+                        key: ValueKey<bool>(_isRegister),
+                        child: _buildFormFields(context, isLoading),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fruitlens/core/constants/app_strings.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
+import 'package:fruitlens/providers/auth_providers.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 import 'package:fruitlens/ui/widgets/onboarding_slide_content.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,14 +18,14 @@ final onboardingSeenProvider = FutureProvider<bool>((ref) async {
 });
 
 /// Screen showcasing 3 illustrated slides introducing FruitLens capabilities.
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -61,9 +64,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _handleNextOrStart() {
+  void _finishGuide() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/');
+    }
+  }
+
+  void _handleNextOrStart(bool isLoggedIn) {
     if (_currentPage == _slides.length - 1) {
-      _completeOnboarding(destination: '/auth?mode=register');
+      if (isLoggedIn) {
+        _finishGuide();
+      } else {
+        _completeOnboarding(destination: '/auth?mode=register');
+      }
       return;
     }
     _pageController.nextPage(
@@ -82,17 +97,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLast = _currentPage == _slides.length - 1;
+    final isLoggedIn = ref.watch(authNotifierProvider).asData?.value != null;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        leading: isLoggedIn && context.canPop()
+            ? IconButton(
+                tooltip: 'Kembali',
+                onPressed: _finishGuide,
+                icon: const Icon(Icons.arrow_back_rounded),
+              )
+            : null,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(Icons.eco_rounded, color: theme.colorScheme.primary, size: 22),
+            const IndustrialBananaMark(size: 28),
             const SizedBox(width: AppDimens.s8),
             Text(
-              'FruitLens',
+              isLoggedIn ? 'Panduan Penggunaan' : AppStrings.appName,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
@@ -102,12 +125,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         actions: <Widget>[
           if (!isLast)
             TextButton(
-              onPressed: () => _completeOnboarding(),
+              onPressed: isLoggedIn
+                  ? _finishGuide
+                  : () => _completeOnboarding(),
               child: Text(
-                'Lewati',
-                style: theme.textTheme.labelLarge?.copyWith(
+                isLoggedIn ? 'Tutup' : 'Lewati',
+                style: theme.textTheme.labelMedium?.copyWith(
                   color: context.harvest.muted,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -129,7 +154,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             OnboardingBottomBar(
               slideCount: _slides.length,
               currentIndex: _currentPage,
-              onNextOrStart: _handleNextOrStart,
+              isLoggedIn: isLoggedIn,
+              onNextOrStart: () => _handleNextOrStart(isLoggedIn),
               onGoToAuth: () => _completeOnboarding(destination: '/auth'),
             ),
           ],

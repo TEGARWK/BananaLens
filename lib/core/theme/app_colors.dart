@@ -1,32 +1,35 @@
 import 'package:flutter/material.dart';
 
-/// Central color definitions and brand seeds for FruitLens "Fresh Harvest" & "Night Harvest".
+/// Central color definitions and brand seeds for BananaLens
+/// "Instrument-Panel / Tactile Industrial Minimalism" (Light & Night).
 abstract final class AppColors {
-  // Fresh Harvest (terang)
-  static const Color lPrimary = Color(0xFF2E9E5B);
-  static const Color lOnPrimary = Color(0xFFFFFFFF);
-  static const Color lPrimarySoft = Color(0xFFE3F4E9);
-  static const Color lAccent = Color(0xFFFF8A3D);
-  static const Color lBackground = Color(0xFFF6FBF7);
-  static const Color lSurface = Color(0xFFFFFFFF);
-  static const Color lText = Color(0xFF1F2D26);
-  static const Color lMuted = Color(0xFF6B7F73);
-  static const Color lBorder = Color(0xFFE1EEE5);
-  static const Color lError = Color(0xFFE5484D);
+  // Light: Technical Paper + Banana Volt Yellow
+  static const Color lPrimary = Color(0xFFF5D51E);
+  static const Color lOnPrimary = Color(0xFF181A16);
+  static const Color lPrimarySoft = Color(0xFFEAECE2);
+  static const Color lAccent = Color(0xFFDEC010);
+  static const Color lBackground = Color(0xFFF5F6F1);
+  static const Color lSurface = Color(0xFFEBEDE3);
+  static const Color lText = Color(0xFF181A16);
+  static const Color lMuted = Color(0xFF6B7062);
+  static const Color lBorder = Color(0xFFD8DBD0);
+  static const Color lError = Color(0xFFC43E2B);
 
-  // Night Harvest (gelap)
-  static const Color dPrimary = Color(0xFF4ADE80);
-  static const Color dOnPrimary = Color(0xFF0F1A14);
-  static const Color dPrimarySoft = Color(0xFF1B3326);
-  static const Color dAccent = Color(0xFFFACC15);
-  static const Color dBackground = Color(0xFF0F1A14);
-  static const Color dSurface = Color(0xFF16261D);
-  static const Color dText = Color(0xFFE8F5EC);
-  static const Color dMuted = Color(0xFF8FA89A);
-  static const Color dBorder = Color(0xFF23382C);
-  static const Color dError = Color(0xFFFF6B70);
+  // Dark: Night Instrument + Banana Volt Yellow
+  static const Color dPrimary = Color(0xFFF5D51E);
+  static const Color dOnPrimary = Color(0xFF181A16);
+  static const Color dPrimarySoft = Color(0xFF262821);
+  static const Color dAccent = Color(0xFFDEC010);
+  static const Color dBackground = Color(0xFF121310);
+  static const Color dSurface = Color(0xFF1B1D18);
+  static const Color dText = Color(0xFFF2F3EE);
+  static const Color dMuted = Color(0xFF9A9F90);
+  static const Color dBorder = Color(0xFF31342B);
+  static const Color dError = Color(0xFFFF6B57);
 
-  static const Color onAccent = Color(0xFF2B1A05);
+  static const Color onAccent = Color(0xFF181A16);
+  static const Color instrumentInk = Color(0xFF181A16);
+  static const Color trackInactive = Color(0xFFD4D7CC);
 
   // Backward compatibility alias
   static const Color primarySeed = lPrimary;

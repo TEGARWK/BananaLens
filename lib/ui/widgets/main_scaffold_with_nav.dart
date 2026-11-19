@@ -81,22 +81,36 @@ class MainScaffoldWithNav extends StatelessWidget {
                       ),
                       // Tengah: Tombol Scan FAB (Branch 2) terintegrasi rapi di dalam bar
                       SizedBox(
-                        width: 64,
+                        width: 68,
                         child: Center(
-                          child: SizedBox(
+                          child: Container(
                             width: 48,
                             height: 48,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.colorScheme.onSurface,
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.colorScheme.onSurface,
+                                  offset: const Offset(0, 2.5),
+                                  blurRadius: 0,
+                                ),
+                              ],
+                            ),
                             child: FloatingActionButton(
                               onPressed: () => _onDestinationSelected(2),
                               elevation: 0,
-                              highlightElevation: 2,
+                              highlightElevation: 0,
                               backgroundColor: theme.colorScheme.primary,
                               foregroundColor: theme.colorScheme.onPrimary,
                               shape: const CircleBorder(),
                               tooltip: AppStrings.navScan,
                               child: const Icon(
                                 Icons.center_focus_strong_rounded,
-                                size: 24,
+                                size: 22,
                               ),
                             ),
                           ),
@@ -150,7 +164,8 @@ class _NavTabItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final color = isSelected ? theme.colorScheme.primary : harvest.muted;
+    final ink = theme.colorScheme.onSurface;
+    final color = isSelected ? ink : harvest.muted;
 
     return InkWell(
       onTap: onTap,
@@ -160,8 +175,19 @@ class _NavTabItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(isSelected ? activeIcon : icon, color: color, size: 22),
-          const SizedBox(height: AppDimens.s4),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppDimens.rSharp),
+              border: isSelected ? Border.all(color: ink, width: 1.2) : null,
+            ),
+            child: Icon(isSelected ? activeIcon : icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 2),
           Text(
             label,
             maxLines: 1,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 import 'package:fruitlens/ui/widgets/primary_button.dart';
 
 /// Immutable data describing a single onboarding slide.
@@ -29,7 +30,6 @@ class OnboardingSlidePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final harvest = context.harvest;
 
     return SingleChildScrollView(
@@ -40,21 +40,24 @@ class OnboardingSlidePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _IllustrationFrame(
-            imagePath: slide.imagePath,
-            fallbackIcon: slide.fallbackIcon,
-          ),
-          const SizedBox(height: AppDimens.s24),
-          Text(
-            slide.eyebrow,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.1,
+          IndustrialSpecimenCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimens.s16,
+              vertical: AppDimens.s24,
+            ),
+            child: Column(
+              children: <Widget>[
+                _AnimatedIllustrationFrame(
+                  key: ValueKey<String>(slide.imagePath),
+                  imagePath: slide.imagePath,
+                  fallbackIcon: slide.fallbackIcon,
+                ),
+                const SizedBox(height: AppDimens.s16),
+                IndustrialTagChip(label: slide.eyebrow, accent: true),
+              ],
             ),
           ),
-          const SizedBox(height: AppDimens.s8),
+          const SizedBox(height: AppDimens.s24),
           Text(
             slide.title,
             textAlign: TextAlign.center,
@@ -85,12 +88,14 @@ class OnboardingBottomBar extends StatelessWidget {
     required this.currentIndex,
     required this.onNextOrStart,
     required this.onGoToAuth,
+    this.isLoggedIn = false,
   });
 
   final int slideCount;
   final int currentIndex;
   final VoidCallback onNextOrStart;
   final VoidCallback onGoToAuth;
+  final bool isLoggedIn;
 
   @override
   Widget build(BuildContext context) {
@@ -115,28 +120,41 @@ class OnboardingBottomBar extends StatelessWidget {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 240),
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: active ? 24 : 8,
+                width: active ? 28 : 10,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: active ? colorScheme.primary : harvest.border,
-                  borderRadius: BorderRadius.circular(AppDimens.rPill),
+                  color: active ? colorScheme.primary : harvest.primarySoft,
+                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                  border: Border.all(
+                    color: active ? colorScheme.onSurface : harvest.border,
+                    width: 1.2,
+                  ),
                 ),
               );
             }),
           ),
           const SizedBox(height: AppDimens.s20),
           PrimaryButton(
-            text: isLast ? 'Daftar Akun Baru' : 'Lanjut',
+            text: isLast
+                ? (isLoggedIn ? 'Selesai' : 'Daftar Akun Baru')
+                : 'Lanjut',
             icon: isLast
-                ? Icons.person_add_rounded
+                ? (isLoggedIn ? Icons.check_rounded : Icons.person_add_rounded)
                 : Icons.chevron_right_rounded,
             onPressed: onNextOrStart,
           ),
-          if (isLast) ...<Widget>[
+          if (isLast && !isLoggedIn) ...<Widget>[
             const SizedBox(height: AppDimens.s8),
             TextButton(
               onPressed: onGoToAuth,
-              child: const Text('Sudah punya akun? Masuk di sini'),
+              child: Text(
+                'Sudah punya akun? Masuk di sini',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
             ),
           ],
         ],
@@ -145,30 +163,95 @@ class OnboardingBottomBar extends StatelessWidget {
   }
 }
 
-class _IllustrationFrame extends StatelessWidget {
-  const _IllustrationFrame({
+class _AnimatedIllustrationFrame extends StatefulWidget {
+  const _AnimatedIllustrationFrame({
     required this.imagePath,
     required this.fallbackIcon,
+    super.key,
   });
 
   final String imagePath;
   final IconData fallbackIcon;
 
   @override
+  State<_AnimatedIllustrationFrame> createState() =>
+      _AnimatedIllustrationFrameState();
+}
+
+class _AnimatedIllustrationFrameState extends State<_AnimatedIllustrationFrame>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 850),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final reducedMotion = MediaQuery.disableAnimationsOf(context);
 
-    return Center(
+    final imageWidget = Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 300, maxHeight: 270),
         child: Image.asset(
-          imagePath,
+          widget.imagePath,
           fit: BoxFit.contain,
           errorBuilder: (_, _, _) => Center(
-            child: Icon(fallbackIcon, size: 72, color: colorScheme.primary),
+            child: Icon(
+              widget.fallbackIcon,
+              size: 72,
+              color: colorScheme.primary,
+            ),
           ),
         ),
       ),
+    );
+
+    if (reducedMotion) return imageWidget;
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, Widget? child) {
+        final t = _controller.value;
+        final pop = const Interval(
+          0.0,
+          0.55,
+          curve: Curves.easeOutBack,
+        ).transform(t);
+        final sway = const Interval(
+          0.35,
+          1.0,
+          curve: Curves.easeInOut,
+        ).transform(t);
+        final angle =
+            (-0.035 * (1.0 - pop)) +
+            (0.018 * (sway < 0.5 ? sway * 2 : (1.0 - sway) * 2));
+        final dy = 14.0 * (1.0 - pop);
+
+        return Opacity(
+          opacity: t.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(0, dy),
+            child: Transform.rotate(
+              angle: angle,
+              child: Transform.scale(scale: 0.9 + (0.1 * pop), child: child),
+            ),
+          ),
+        );
+      },
+      child: imageWidget,
     );
   }
 }

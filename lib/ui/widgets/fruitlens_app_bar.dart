@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fruitlens/core/theme/app_colors.dart';
 import 'package:fruitlens/core/theme/app_radius.dart';
 import 'package:fruitlens/core/theme/app_spacing.dart';
 import 'package:go_router/go_router.dart';
@@ -74,7 +73,7 @@ class FruitLensAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       );
     } else if (leadingIcon != null) {
-      final isDark = theme.brightness == Brightness.dark;
+      final ink = colorScheme.onSurface;
       leadingWidget = Padding(
         padding: const EdgeInsets.only(left: AppSpacing.md),
         child: Center(
@@ -82,38 +81,18 @@ class FruitLensAppBar extends StatelessWidget implements PreferredSizeWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isDark
-                    ? <Color>[
-                        colorScheme.primary.withValues(alpha: 0.35),
-                        colorScheme.surface,
-                      ]
-                    : const <Color>[AppColors.primarySeed, Color(0xFF1B5E20)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: colorScheme.primary,
               borderRadius: AppRadius.roundedMd,
-              border: isDark
-                  ? Border.all(
-                      color: colorScheme.primary.withValues(alpha: 0.3),
-                      width: 1,
-                    )
-                  : null,
+              border: Border.all(color: ink, width: 1.5),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: isDark
-                      ? Colors.transparent
-                      : AppColors.primarySeed.withValues(alpha: 0.2),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+                  color: ink,
+                  offset: const Offset(2, 2),
+                  blurRadius: 0,
                 ),
               ],
             ),
-            child: Icon(
-              leadingIcon,
-              color: isDark ? colorScheme.primary : Colors.white,
-              size: 20,
-            ),
+            child: Icon(leadingIcon, color: colorScheme.onPrimary, size: 20),
           ),
         ),
       );

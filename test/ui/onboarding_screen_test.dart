@@ -47,7 +47,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp.router(theme: AppTheme.lightTheme, routerConfig: router),
+      ProviderScope(
+        child: MaterialApp.router(
+          theme: AppTheme.lightTheme,
+          routerConfig: router,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -128,6 +133,64 @@ void main() {
       await container.read(authNotifierProvider.future);
       final router = container.read(appRouterProvider);
       expect(router.routeInformationProvider.value.uri.path, '/');
+    },
+  );
+
+  testWidgets(
+    'logged-in user sees Panduan Penggunaan mode without login/register prompts',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final router = GoRouter(
+        initialLocation: '/onboarding',
+        routes: <RouteBase>[
+          GoRoute(
+            path: '/onboarding',
+            builder: (_, _) => const OnboardingScreen(),
+          ),
+          GoRoute(
+            path: '/',
+            builder: (_, _) => const Scaffold(body: Text('Beranda Target')),
+          ),
+          GoRoute(
+            path: '/auth',
+            builder: (_, _) => const Scaffold(body: Text('Auth Target')),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authNotifierProvider.overrideWith(() => _LoggedInAuthNotifier()),
+          ],
+          child: MaterialApp.router(
+            theme: AppTheme.lightTheme,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Panduan Penggunaan'), findsOneWidget);
+      expect(find.text('Tutup'), findsOneWidget);
+      expect(find.text('Lewati'), findsNothing);
+
+      // Step to slide 3
+      await tester.tap(find.text('Lanjut'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Lanjut'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Selesai'), findsOneWidget);
+      expect(find.text('Daftar Akun Baru'), findsNothing);
+      expect(find.text('Sudah punya akun? Masuk di sini'), findsNothing);
+
+      await tester.tap(find.text('Selesai'));
+      await tester.pumpAndSettle();
+      expect(find.text('Beranda Target'), findsOneWidget);
     },
   );
 }
