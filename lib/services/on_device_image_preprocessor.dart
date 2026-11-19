@@ -33,11 +33,15 @@ class PreprocessedImageData {
   const PreprocessedImageData({
     required this.cnnInputTensor,
     required this.hsvFeatures,
+    required this.rgbBytes,
     this.pigmentRatios = const PigmentRatios.empty(),
   });
 
   /// Flattened `[224 * 224 * 3]` float32 RGB values in `[0.0, 255.0]` matching MobileNetV3Small.
   final Float32List cnnInputTensor;
+
+  /// Flattened `[224 * 224 * 3]` uint8 RGB bytes for quantized TFLite models (e.g. Banana Gate).
+  final Uint8List rgbBytes;
 
   /// 30-dim weighted HSV histogram + moments vector matching the Python training pipeline.
   final Float32List hsvFeatures;
@@ -114,6 +118,7 @@ abstract final class OnDeviceImagePreprocessor {
 
     return PreprocessedImageData(
       cnnInputTensor: cnnInput,
+      rgbBytes: rgbBytes,
       hsvFeatures: hsvFeatures,
       pigmentRatios: pigmentRatios,
     );

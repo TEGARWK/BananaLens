@@ -84,6 +84,7 @@ flutter:
     - assets/data/recipes.json
     - assets/models/labels_fruit.txt
     - assets/models/labels_ripeness.txt
+    - assets/models/imagenet_banana_gate.tflite
     - assets/models/mobilenet_v3_extractor.tflite
     - assets/models/svm_pisang_meta.json
     - assets/models/svm_pisang_weights.bin

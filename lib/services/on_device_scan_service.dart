@@ -6,32 +6,39 @@ import 'package:flutter/services.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import '../data/models/scan_outcome.dart';
 import 'ml_kit_fruit_detector.dart';
+import 'on_device_banana_gate.dart';
 import 'on_device_image_preprocessor.dart';
 import 'on_device_svm_classifier.dart';
 import 'scan_service.dart';
 
 /// On-device hybrid AI scanner combining:
-/// 1. Google ML Kit Image Labeling (fruit/food pre-validation),
-/// 2. TFLite MobileNetV3Small feature extractor (576 dims, isolate-executed),
-/// 3. Masked HSV color descriptor (30 dims, isolate-executed),
-/// 4. PCA + RBF SVM with Platt calibration (100% offline, no Python or .pkl).
+/// 1. Google ML Kit Image Labeling (fast non-fruit/selfie pre-validation),
+/// 2. Stage-1 ImageNet EfficientNet-Lite0 TFLite Banana Gate (class #954 = banana),
+/// 3. Stage-2 TFLite MobileNetV3Small feature extractor (576 dims, isolate-executed),
+/// 4. Masked HSV color descriptor (30 dims, isolate-executed),
+/// 5. PCA + RBF SVM with Platt calibration (100% offline, no Python or .pkl).
 class OnDeviceScanService implements ScanService {
   OnDeviceScanService({
     FruitObjectValidator? fruitValidator,
+    BananaGate? bananaGate,
     Future<Float32List> Function(Float32List cnnInput)? extractCnnFeatures,
     Future<String> Function(String key)? loadString,
     Future<ByteData> Function(String key)? loadBinary,
     double minBananaKernelSimilarity = defaultMinBananaKernelSimilarity,
   }) : _fruitValidator = fruitValidator ?? MlKitFruitValidator(),
+       _bananaGate =
+           bananaGate ??
+           (extractCnnFeatures == null ? TfliteImageNetBananaGate() : null),
        _customExtractCnnFeatures = extractCnnFeatures,
        _loadString = loadString ?? rootBundle.loadString,
        _loadBinary = loadBinary ?? rootBundle.load,
        _minBananaKernelSimilarity = minBananaKernelSimilarity;
 
-  /// Minimum RBF kernel similarity to the nearest banana support vector.
-  /// Calibrated against banana support-vector distribution (median 0.83, p10 0.57)
-  /// vs. non-banana green/yellow produce (e.g. avocado ~0.49).
-  static const double defaultMinBananaKernelSimilarity = 0.54;
+  /// Optional minimum RBF kernel similarity threshold (disabled by default at 0.0
+  /// because real-world banana bunches and rotten peels can have very low RBF
+  /// kernel proximity in 130-dim feature space while still being classified
+  /// accurately by the SVM decision boundary).
+  static const double defaultMinBananaKernelSimilarity = 0.0;
 
   static const String tfliteAssetPath =
       'assets/models/mobilenet_v3_extractor.tflite';
@@ -40,6 +47,7 @@ class OnDeviceScanService implements ScanService {
       'assets/models/svm_pisang_weights.bin';
 
   final FruitObjectValidator _fruitValidator;
+  final BananaGate? _bananaGate;
   final Future<Float32List> Function(Float32List cnnInput)?
   _customExtractCnnFeatures;
   final Future<String> Function(String key) _loadString;
@@ -140,6 +148,21 @@ class OnDeviceScanService implements ScanService {
         return const ScanUncertain();
       }
 
+      // 3c. Stage-1 Banana Gate (ImageNet EfficientNet-Lite0, class #954 = banana)
+      final gate = _bananaGate;
+      if (gate != null) {
+        final gateResult = await gate.checkBanana(preprocessed.rgbBytes);
+        debugPrint(
+          'OnDeviceScanService BananaGate -> isBanana=${gateResult.isBanana}, '
+          'bananaProb=${gateResult.bananaProbability.toStringAsFixed(4)}, '
+          'rank=${gateResult.bananaRank}, '
+          'topClass=${gateResult.topClassIndex} (${gateResult.topProbability.toStringAsFixed(3)})',
+        );
+        if (!gateResult.isBanana) {
+          return const ScanUncertain();
+        }
+      }
+
       // 4. Ekstraksi fitur CNN MobileNetV3Small (576 fitur) via TFLite Isolate
       final cnn576 = await _extractCnn576(preprocessed.cnnInputTensor);
 
@@ -158,8 +181,9 @@ class OnDeviceScanService implements ScanService {
         'probs=${prediction.probabilities}',
       );
 
-      // 5b. Tolak objek di luar distribusi pisang (OOD), misal alpukat/mangga/terong
-      if (prediction.maxKernelSimilarity < _minBananaKernelSimilarity) {
+      // 5b. Opsional: penolakan OOD jika threshold diaktifkan secara eksplisit
+      if (_minBananaKernelSimilarity > 0 &&
+          prediction.maxKernelSimilarity < _minBananaKernelSimilarity) {
         debugPrint(
           'OnDeviceScanService -> Rejected OOD non-banana '
           'maxSim=${prediction.maxKernelSimilarity.toStringAsFixed(4)} '
@@ -196,6 +220,7 @@ class OnDeviceScanService implements ScanService {
     _isolateInterpreter = null;
     _interpreter?.close();
     _interpreter = null;
+    await _bananaGate?.dispose();
     await _fruitValidator.dispose();
   }
 }

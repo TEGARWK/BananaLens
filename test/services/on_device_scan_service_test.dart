@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fruitlens/data/models/scan_outcome.dart';
 import 'package:fruitlens/services/ml_kit_fruit_detector.dart';
+import 'package:fruitlens/services/on_device_banana_gate.dart';
 import 'package:fruitlens/services/on_device_image_preprocessor.dart';
 import 'package:fruitlens/services/on_device_scan_service.dart';
 import 'package:fruitlens/services/on_device_svm_classifier.dart';
@@ -15,6 +16,18 @@ class _FakeValidator implements FruitObjectValidator {
 
   @override
   Future<FruitValidationResult> validate(String imagePath) async => _result;
+
+  @override
+  Future<void> dispose() async {}
+}
+
+class _FakeBananaGate implements BananaGate {
+  _FakeBananaGate(this._result);
+
+  final BananaGateResult _result;
+
+  @override
+  Future<BananaGateResult> checkBanana(Uint8List rgb224Bytes) async => _result;
 
   @override
   Future<void> dispose() async {}
@@ -95,6 +108,73 @@ void main() {
         expect(selfieResult.rejectionReason, contains('Person'));
       },
     );
+
+    test(
+      'accepts banana bunch when ML Kit emits Shoe alongside Fruit/Food',
+      () {
+        final bunchResult = MlKitFruitValidator.evaluateLabels([
+          (label: 'Shoe', confidence: 0.72),
+          (label: 'Fruit', confidence: 0.68),
+          (label: 'Food', confidence: 0.61),
+        ]);
+        expect(bunchResult.isLikelyFruitOrFood, isTrue);
+        expect(bunchResult.detectedFruitType, 'banana');
+      },
+    );
+  });
+
+  group('TfliteImageNetBananaGate', () {
+    test('accepts banana when class #954 has strong probability', () {
+      final probs = List<double>.filled(1000, 0.0001);
+      probs[954] = 0.72;
+      final result = TfliteImageNetBananaGate.evaluateProbabilities(probs);
+
+      expect(result.isBanana, isTrue);
+      expect(result.bananaRank, 1);
+      expect(result.topClassIndex, 954);
+    });
+
+    test('accepts rotten/dark banana when class #954 is within top-5', () {
+      final probs = List<double>.filled(1000, 0.0001);
+      probs[111] = 0.074;
+      probs[112] = 0.060;
+      probs[113] = 0.050;
+      probs[114] = 0.040;
+      probs[954] = 0.0352;
+      final result = TfliteImageNetBananaGate.evaluateProbabilities(probs);
+
+      expect(result.isBanana, isTrue);
+      expect(result.bananaRank, 5);
+    });
+
+    test(
+      'rejects avocado when banana is weak top-5 compared to dominant top-1 class',
+      () {
+        final probs = List<double>.filled(1000, 0.0001);
+        probs[941] = 0.379; // acorn squash / avocado look-alike
+        probs[940] = 0.120;
+        probs[942] = 0.090;
+        probs[943] = 0.040;
+        probs[954] = 0.0273; // banana rank 5 but only 7.2% of top-1
+        final result = TfliteImageNetBananaGate.evaluateProbabilities(probs);
+
+        expect(result.isBanana, isFalse);
+        expect(result.bananaRank, 5);
+        expect(result.topClassIndex, 941);
+      },
+    );
+
+    test('rejects mango/avocado when banana probability is negligible', () {
+      final probs = List<double>.filled(1000, 0.0001);
+      probs[950] = 0.65; // orange / other fruit
+      probs[951] = 0.18; // lemon
+      probs[956] = 0.08; // custard apple
+      probs[954] = 0.0005; // banana
+      final result = TfliteImageNetBananaGate.evaluateProbabilities(probs);
+
+      expect(result.isBanana, isFalse);
+      expect(result.topClassIndex, 950);
+    });
   });
 
   group('OnDeviceImagePreprocessor', () {
@@ -229,8 +309,6 @@ void main() {
           extractCnnFeatures: (_) async => Float32List(576),
           loadString: (_) async => metaJson,
           loadBinary: (_) async => ByteData.sublistView(weightsBytes),
-          // Synthetic all-zero CNN vector is out-of-distribution (~0.52 maxSim).
-          minBananaKernelSimilarity: 0.0,
         );
 
         final outcome = await service.scan(imgFile.path);
@@ -251,28 +329,78 @@ void main() {
           if (await tempDir.exists()) await tempDir.delete(recursive: true);
         });
 
-        final greenYellowImg = img.Image(width: 240, height: 240);
-        img.fill(greenYellowImg, color: img.ColorRgb8(180, 200, 50));
-        final imgFile = File('${tempDir.path}/avocado.jpg');
-        await imgFile.writeAsBytes(img.encodeJpg(greenYellowImg));
+        final yellowMangoImg = img.Image(width: 240, height: 240);
+        img.fill(yellowMangoImg, color: img.ColorRgb8(245, 200, 30));
+        final imgFile = File('${tempDir.path}/mango.jpg');
+        await imgFile.writeAsBytes(img.encodeJpg(yellowMangoImg));
 
+        final oodCnn = Float32List.fromList(List<double>.filled(576, 5.0));
         final service = OnDeviceScanService(
           fruitValidator: _FakeValidator(
             const FruitValidationResult(
               isLikelyFruitOrFood: true,
               detectedLabels: ['Food', 'Fruit', 'Plant', 'Vegetable'],
               detectedFruitType: 'banana',
+              fruitConfidence: 0.63,
+            ),
+          ),
+          // Distant CNN feature vector produces very low maxSim (< 0.35).
+          extractCnnFeatures: (_) async => oodCnn,
+          loadString: (_) async => metaJson,
+          loadBinary: (_) async => ByteData.sublistView(weightsBytes),
+          minBananaKernelSimilarity: 0.35,
+        );
+
+        final outcome = await service.scan(imgFile.path);
+        expect(outcome, isA<ScanUncertain>());
+      },
+    );
+
+    test(
+      'OnDeviceScanService rejects yellow non-banana (mango/avocado) when Stage-1 BananaGate returns false',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'on_device_gate_',
+        );
+        addTearDown(() async {
+          if (await tempDir.exists()) await tempDir.delete(recursive: true);
+        });
+
+        final yellowImg = img.Image(width: 240, height: 240);
+        img.fill(yellowImg, color: img.ColorRgb8(245, 210, 40));
+        final imgFile = File('${tempDir.path}/mango_yellow.jpg');
+        await imgFile.writeAsBytes(img.encodeJpg(yellowImg));
+
+        bool stage2CnnCalled = false;
+        final service = OnDeviceScanService(
+          fruitValidator: _FakeValidator(
+            const FruitValidationResult(
+              isLikelyFruitOrFood: true,
+              detectedLabels: ['Food', 'Fruit', 'Plant'],
+              detectedFruitType: 'banana',
               fruitConfidence: 0.93,
             ),
           ),
-          // All-zero CNN vector is far from real banana support vectors (< 0.54).
-          extractCnnFeatures: (_) async => Float32List(576),
+          bananaGate: _FakeBananaGate(
+            const BananaGateResult(
+              isBanana: false,
+              bananaProbability: 0.001,
+              bananaRank: 85,
+              topClassIndex: 951,
+              topProbability: 0.78,
+            ),
+          ),
+          extractCnnFeatures: (_) async {
+            stage2CnnCalled = true;
+            return Float32List(576);
+          },
           loadString: (_) async => metaJson,
           loadBinary: (_) async => ByteData.sublistView(weightsBytes),
         );
 
         final outcome = await service.scan(imgFile.path);
         expect(outcome, isA<ScanUncertain>());
+        expect(stage2CnnCalled, isFalse);
       },
     );
 

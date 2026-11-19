@@ -12,7 +12,7 @@ Proyek ini merupakan integrasi tugas besar untuk 3 mata kuliah di **Politeknik N
 ## ✨ Fitur Utama
 
 - **Pindai Pisang Kamera & Galeri (*On-Device Offline*):** Ambil foto langsung atau pilih dari galeri; inferensi berjalan di background `Isolate` tanpa koneksi internet, lengkap dengan grafik probabilitas 3 kelas (`Mentah`, `Matang`, `Busuk`) dan banner peringatan bila keyakinan `< 60%`.
-- **Penolakan Objek & Buah Non-Pisang (*Multi-Layer Gate*):** Menolak objek non-buah/wajah melalui Google ML Kit, buah berwarna non-pisang dominan (merah/oranye cerah/ungu seperti jeruk, apel merah, stroberi) via `nonBananaVividRatio`, serta buah kuning/hijau non-pisang (seperti alpukat, mangga, terong) via deteksi *Out-of-Distribution* (`maxKernelSimilarity < 0.54` terhadap 6.162 *support vector* pisang).
+- **Stage-1 Banana Gate (*2-Stage Cascade On-Device*):** Menggabungkan Google ML Kit, filter spektrum pigmen (`nonBananaVividRatio >= 0.45`), dan model TFLite resmi Google **EfficientNet-Lite0 INT8 ImageNet** (`imagenet_banana_gate.tflite`, kelas #954 = `banana`) di background `IsolateInterpreter` untuk menolak mangga, alpukat, jeruk, terong, wajah, dan benda non-pisang sebelum diteruskan ke Stage-2 SVM kematangan pisang.
 - **Kalibrasi Pigmen Klorofil & *Overripe*:** Penyesuaian pasca-SVM untuk menjaga akurasi pada pisang hijau mentah berlatar beragam serta pisang kuning berbintik *sugar spots* agar masuk kategori `Matang Banget` (layak olah), sementara pisang busuk merata tetap ditandai `Busuk`.
 - **Gating Keamanan Pangan & Rekomendasi Resep Pisang AI:**
   - **Busuk:** Menampilkan peringatan `"Buang saja, jangan dikonsumsi"` dan tombol **Tips Daur Ulang** (kompos), tanpa memanggil AI.

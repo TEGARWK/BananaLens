@@ -85,13 +85,16 @@ class MlKitFruitValidator implements FruitObjectValidator {
     'lychee',
   };
 
-  static const Set<String> _nonFruitKeywords = {
+  static const Set<String> _personSelfieKeywords = {
     'person',
     'human',
     'face',
     'selfie',
     'smile',
     'portrait',
+  };
+
+  static const Set<String> _nonFruitKeywords = {
     'computer',
     'laptop',
     'keyboard',
@@ -155,6 +158,8 @@ class MlKitFruitValidator implements FruitObjectValidator {
     double bestBananaConfidence = 0.0;
     double bestOtherFruitConfidence = 0.0;
     String? strongestOtherFruitLabel;
+    double bestPersonConfidence = 0.0;
+    String? strongestPersonLabel;
     double bestNonFruitConfidence = 0.0;
     String? strongestNonFruitLabel;
 
@@ -183,6 +188,14 @@ class MlKitFruitValidator implements FruitObjectValidator {
         bestFruitConfidence = item.confidence;
       }
 
+      final isPersonMatch = _personSelfieKeywords.any(
+        (kw) => lower == kw || lower.contains(kw),
+      );
+      if (isPersonMatch && item.confidence > bestPersonConfidence) {
+        bestPersonConfidence = item.confidence;
+        strongestPersonLabel = item.label;
+      }
+
       final isNonFruitMatch = _nonFruitKeywords.any(
         (kw) => lower == kw || lower.contains(kw),
       );
@@ -205,10 +218,21 @@ class MlKitFruitValidator implements FruitObjectValidator {
       );
     }
 
-    // Reject strong non-fruit subjects (e.g. person/face/selfie/electronics) when
-    // no explicit banana label is detected, or when zero produce clue exists.
-    if ((bestNonFruitConfidence >= 0.65 && bestBananaConfidence == 0.0) ||
-        (bestFruitConfidence == 0.0 && bestNonFruitConfidence >= 0.60)) {
+    // Reject dominant person/selfie photos when no explicit banana label is present.
+    if (bestPersonConfidence >= 0.70 && bestBananaConfidence == 0.0) {
+      return FruitValidationResult(
+        isLikelyFruitOrFood: false,
+        detectedLabels: normalizedNames,
+        fruitConfidence: 0.0,
+        rejectionReason:
+            'Terdeteksi objek bukan pisang ($strongestPersonLabel) oleh Google ML Kit.',
+      );
+    }
+
+    // Reject non-fruit objects (e.g. car, laptop, shoe) ONLY when zero produce/fruit
+    // clue is present so real banana bunches occasionally mislabeled as Shoe alongside
+    // Fruit/Food still pass cleanly.
+    if (bestFruitConfidence == 0.0 && bestNonFruitConfidence >= 0.60) {
       return FruitValidationResult(
         isLikelyFruitOrFood: false,
         detectedLabels: normalizedNames,
