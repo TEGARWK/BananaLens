@@ -53,132 +53,128 @@
   },
   {
     "id": 3,
-    "name": "Salad Apel & Keju Segar",
-    "title": "Salad Apel & Keju Segar",
-    "fruit_id": "apple",
-    "fruit_label": "apple",
+    "name": "Es Susu Pisang Kayu Manis",
+    "title": "Es Susu Pisang Kayu Manis",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
     "ripeness_bucket": "ripe",
-    "type": "food",
-    "suitable_ripeness": ["ripe", "unripe"],
-    "prep_time": "10 menit",
+    "type": "drink",
+    "suitable_ripeness": ["ripe"],
+    "prep_time": "8 menit",
     "difficulty": "Sangat Mudah",
     "ingredients": [
-      "1 buah apel merah atau fuji segar",
-      "1 sendok makan perasan air lemon",
-      "Segenggam daun selada segar",
-      "30 g keju parut atau keju feta",
-      "1 sendok makan minyak zaitun extra virgin"
+      "1 buah pisang ambon atau cavendish matang pas",
+      "250 ml susu UHT dingin",
+      "1/4 sendok teh bubuk kayu manis",
+      "1 sendok teh madu atau sirup mapel (opsional)"
     ],
     "steps": [
-      "Cuci bersih apel, lalu potong dadu atau iris tipis sesuai selera.",
-      "Lumuri potongan apel dengan air lemon agar warnanya tetap cerah dan tidak mencokelat.",
-      "Campurkan apel dengan daun selada dan keju dalam mangkuk.",
-      "Beri minyak zaitun dan aduk perlahan sebelum disajikan."
+      "Kupas dan potong pisang menjadi beberapa bagian.",
+      "Blender pisang bersama susu dingin dan kayu manis hingga halus berbusa.",
+      "Tuangkan ke gelas saji, tambahkan madu jika suka lebih manis, lalu sajikan dingin."
     ],
     "safety_notes": null,
     "is_reviewed": true
   },
   {
     "id": 4,
-    "name": "Selai Apel Kayu Manis Rumahan",
-    "title": "Selai Apel Kayu Manis Rumahan",
-    "fruit_id": "apple",
-    "fruit_label": "apple",
+    "name": "Bolu Pisang Kukus Lembut",
+    "title": "Bolu Pisang Kukus Lembut",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
     "ripeness_bucket": "very_ripe",
     "type": "food",
     "suitable_ripeness": ["overripe", "ripe"],
-    "prep_time": "25 menit",
-    "difficulty": "Sedang",
+    "prep_time": "35 menit",
+    "difficulty": "Mudah",
     "ingredients": [
-      "2 buah apel, kupas dan potong kecil",
-      "2 sendok makan gula aren atau madu",
-      "1/2 batang kayu manis",
-      "50 ml air matang"
+      "3 buah pisang matang banget / berbintik cokelat",
+      "100 g tepung terigu protein sedang",
+      "2 butir telur ayam",
+      "60 g gula aren atau gula pasir",
+      "60 ml minyak sayur atau mentega leleh",
+      "1/2 sendok teh baking soda"
     ],
     "steps": [
-      "Rebus potongan apel dan kayu manis dengan air di atas api sedang hingga apel melunak.",
-      "Hancurkan apel menggunakan sendok kayu atau garpu.",
-      "Tambahkan gula aren, aduk terus dengan api kecil hingga air menyusut dan mengental seperti selai.",
-      "Simpan dalam toples kaca di kulkas setelah dingin."
+      "Haluskan pisang dengan garpu hingga lembut.",
+      "Kocok telur dan gula hingga larut, lalu masukkan tepung terigu dan baking soda sambil diayak.",
+      "Masukkan pisang halus dan minyak sayur, aduk balik hingga rata.",
+      "Tuang ke loyang beroles minyak, lalu kukus selama 25 menit hingga matang mengembang."
     ],
     "safety_notes": null,
     "is_reviewed": true
   },
   {
     "id": 5,
-    "name": "Guacamole Alpukat Segar",
-    "title": "Guacamole Alpukat Segar",
-    "fruit_id": "avocado",
-    "fruit_label": "avocado",
+    "name": "Pisang Bakar Madu Keju",
+    "title": "Pisang Bakar Madu Keju",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
     "ripeness_bucket": "ripe",
     "type": "food",
     "suitable_ripeness": ["ripe"],
-    "prep_time": "10 menit",
+    "prep_time": "15 menit",
     "difficulty": "Sangat Mudah",
     "ingredients": [
-      "1 buah alpukat matang sempurna",
-      "1/2 buah tomat matang, buang biji dan potong dadu",
-      "1 sendok makan perasan jeruk nipis",
-      "Sejumput garam dan lada hitam bubuk",
-      "Daun ketumbar cincang (opsional)"
+      "3 buah pisang raja atau kepok matang pas",
+      "1 sendok makan mentega",
+      "1 sendok makan madu murni",
+      "Keju parut secukupnya"
     ],
     "steps": [
-      "Belah alpukat, buang bijinya, dan kerok dagingnya ke dalam mangkuk.",
-      "Lumatkan alpukat dengan garpu, biarkan sedikit bertekstur kasar.",
-      "Campurkan tomat, perasan jeruk nipis, garam, dan lada.",
-      "Aduk rata dan sajikan bersama keripik jagung atau olesan roti panggang."
+      "Kupas pisang dan pipihkan sedikit menggunakan spatula.",
+      "Panaskan mentega di teflon, panggang pisang di kedua sisi hingga kecokelatan dan harum.",
+      "Angkat ke piring saji, olesi madu hangat, lalu taburi keju parut di atasnya."
     ],
     "safety_notes": null,
     "is_reviewed": true
   },
   {
     "id": 6,
-    "name": "Puding Mangga Chia Seed",
-    "title": "Puding Mangga Chia Seed",
-    "fruit_id": "mango",
-    "fruit_label": "mango",
-    "ripeness_bucket": "ripe",
-    "type": "food",
-    "suitable_ripeness": ["ripe", "overripe"],
-    "prep_time": "15 menit + dingin",
-    "difficulty": "Mudah",
+    "name": "Banana Latte Dingin",
+    "title": "Banana Latte Dingin",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
+    "ripeness_bucket": "very_ripe",
+    "type": "drink",
+    "suitable_ripeness": ["overripe", "ripe"],
+    "prep_time": "10 menit",
+    "difficulty": "Sangat Mudah",
     "ingredients": [
-      "1 buah mangga matang manis",
-      "2 sendok makan chia seed",
-      "150 ml susu kelapa atau susu almond",
-      "1 sendok teh madu"
+      "1 buah pisang sangat matang (manis alami)",
+      "150 ml susu segar dingin",
+      "1 shot espresso atau 50 ml kopi hitam pekat dingin",
+      "Es batu secukupnya"
     ],
     "steps": [
-      "Campurkan chia seed, susu, dan madu dalam wadah, aduk rata dan diamkan di kulkas minimal 2 jam.",
-      "Blender sebagian daging mangga hingga halus membentuk puree mangga.",
-      "Potong dadu sisa mangga untuk topping.",
-      "Susun puding chia di gelas, lapisi dengan puree mangga, dan beri potongan mangga di atasnya."
+      "Blender pisang bersama susu segar hingga lembut menjadi susu pisang.",
+      "Isi gelas dengan es batu, lalu tuang susu pisang hingga 3/4 gelas.",
+      "Tuangkan kopi dingin perlahan di atasnya agar terbentuk gradasi, lalu aduk sebelum diminum."
     ],
     "safety_notes": null,
     "is_reviewed": true
   },
   {
     "id": 7,
-    "name": "Es Semangka Jeruk Nipis",
-    "title": "Es Semangka Jeruk Nipis",
-    "fruit_id": "watermelon",
-    "fruit_label": "watermelon",
+    "name": "Kolak Pisang Santan Gula Aren",
+    "title": "Kolak Pisang Santan Gula Aren",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
     "ripeness_bucket": "ripe",
-    "type": "drink",
+    "type": "food",
     "suitable_ripeness": ["ripe"],
-    "prep_time": "10 menit",
-    "difficulty": "Sangat Mudah",
+    "prep_time": "25 menit",
+    "difficulty": "Mudah",
     "ingredients": [
-      "300 g semangka merah matang",
-      "1 buah jeruk nipis, peras airnya",
-      "Beberapa lembar daun mint",
-      "Es batu secukupnya"
+      "4 buah pisang kepok atau pisang raja matang pas, potong serong",
+      "400 ml santan cair",
+      "100 g gula aren sisir",
+      "2 lembar daun pandan dan sejumput garam"
     ],
     "steps": [
-      "Potong semangka dadu kecil atau cetak bulat dengan scoop.",
-      "Campurkan perasan jeruk nipis dan daun mint yang sedikit dimemarkan.",
-      "Masukkan es batu dan potongan semangka ke dalam gelas saji.",
-      "Aduk lembut dan nikmati sensasi kesegaran alami pelepas dahaga."
+      "Rebus santan, gula aren, daun pandan, dan garam sambil diaduk agar santan tidak pecah.",
+      "Setelah gula larut dan mendidih ringan, masukkan potongan pisang.",
+      "Masak dengan api kecil selama 8-10 menit hingga pisang empuk dan kuah meresap, sajikan hangat atau dingin."
     ],
     "safety_notes": null,
     "is_reviewed": true
@@ -285,27 +281,27 @@
   },
   {
     "id": 12,
-    "name": "Rujak Serut Mangga Muda",
-    "title": "Rujak Serut Mangga Muda",
-    "fruit_id": "mango",
-    "fruit_label": "mango",
+    "name": "Stik Pisang Goreng Krispi Gurih",
+    "title": "Stik Pisang Goreng Krispi Gurih",
+    "fruit_id": "banana",
+    "fruit_label": "banana",
     "ripeness_bucket": "unripe",
     "type": "food",
     "suitable_ripeness": ["unripe"],
-    "prep_time": "15 menit",
+    "prep_time": "25 menit",
     "difficulty": "Mudah",
     "ingredients": [
-      "1 buah mangga muda mengkal",
-      "50 g gula merah sisir",
-      "2 buah cabai rawit (sesuai selera)",
-      "1/4 sendok teh garam dan sedikit terasi bakar"
+      "3 buah pisang kepok atau nangka mentah",
+      "1 sendok teh garam + 1/2 sendok teh bawang putih bubuk",
+      "500 ml air untuk merendam getah",
+      "Minyak goreng secukupnya"
     ],
     "steps": [
-      "Kupas mangga muda, cuci bersih dengan air matang agar getah kulit hilang, lalu serut memanjang.",
-      "Ulek cabai, garam, terasi, dan gula merah hingga halus.",
-      "Campurkan bumbu rujak dengan serutan mangga, diamkan 10 menit di kulkas agar meresap."
+      "Kupas pisang mentah sambil direndam air garam agar getah hilang dan warnanya tetap bersih.",
+      "Potong memanjang seperti stik kentang goreng, lalu bilas dan tiriskan.",
+      "Taburi sedikit garam dan bawang putih bubuk, lalu goreng dalam minyak panas hingga kering renyah keemasan."
     ],
-    "safety_notes": "Cuci bersih mangga muda setelah dikupas untuk menghilangkan getah di sekitar pangkal tangkai yang dapat mengiritasi bibir/tenggorokan. Konsumsi secukupnya bagi penderita asam lambung.",
+    "safety_notes": "Pastikan pisang mentah direndam bersih dan digoreng hingga matang merata sebelum disantap.",
     "is_reviewed": true
   }
 ]

@@ -27,23 +27,47 @@ class RecipesListScreen extends ConsumerStatefulWidget {
 }
 
 class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
-  String _selectedFruitFilter = 'Semua';
+  String _selectedFilter = 'all';
 
-  static const List<_FruitFilterItem> _filters = <_FruitFilterItem>[
-    _FruitFilterItem(label: 'Semua', name: 'Semua'),
-    _FruitFilterItem(label: 'banana', name: 'Pisang'),
-    _FruitFilterItem(label: 'apple', name: 'Apel'),
-    _FruitFilterItem(label: 'avocado', name: 'Alpukat'),
-    _FruitFilterItem(label: 'mango', name: 'Mangga'),
-    _FruitFilterItem(label: 'watermelon', name: 'Semangka'),
-    _FruitFilterItem(label: 'orange', name: 'Jeruk'),
+  static const List<_RecipeFilterItem> _filters = <_RecipeFilterItem>[
+    _RecipeFilterItem(
+      key: 'all',
+      label: 'Semua',
+      icon: Icons.grid_view_rounded,
+    ),
+    _RecipeFilterItem(key: 'unripe', label: 'Mentah', icon: Icons.eco_rounded),
+    _RecipeFilterItem(
+      key: 'ripe',
+      label: 'Matang',
+      icon: Icons.check_circle_outline_rounded,
+    ),
+    _RecipeFilterItem(
+      key: 'very_ripe',
+      label: 'Matang Banget',
+      icon: Icons.local_fire_department_rounded,
+    ),
+    _RecipeFilterItem(
+      key: 'food',
+      label: 'Makanan',
+      icon: Icons.restaurant_rounded,
+    ),
+    _RecipeFilterItem(
+      key: 'drink',
+      label: 'Minuman',
+      icon: Icons.local_cafe_rounded,
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
-    if (widget.fruitLabel != null && widget.fruitLabel!.isNotEmpty) {
-      _selectedFruitFilter = widget.fruitLabel!;
+    if (widget.ripenessLabel != null && widget.ripenessLabel!.isNotEmpty) {
+      final norm = widget.ripenessLabel!.trim().toLowerCase();
+      if (norm == 'overripe' || norm == 'very_ripe') {
+        _selectedFilter = 'very_ripe';
+      } else if (norm == 'unripe' || norm == 'ripe') {
+        _selectedFilter = norm;
+      }
     }
   }
 
@@ -107,12 +131,7 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
           }
 
           final allRecipes = snapshot.data ?? <Recipe>[];
-          final filteredRecipes = _selectedFruitFilter == 'Semua'
-              ? allRecipes
-              : allRecipes.where((r) {
-                  return r.fruitLabel.toLowerCase() ==
-                      _selectedFruitFilter.toLowerCase();
-                }).toList();
+          final filteredRecipes = _applyFilter(allRecipes);
 
           return ListView(
             padding: const EdgeInsets.all(AppDimens.screenPadding),
@@ -154,7 +173,7 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                             ),
                             const SizedBox(height: AppDimens.s8),
                             Text(
-                              'Optimalkan Nutrisi Buahmu',
+                              'Optimalkan Nutrisi Pisangmu',
                               style: TextStyle(
                                 color: theme.colorScheme.onSurface,
                                 fontWeight: FontWeight.w800,
@@ -163,7 +182,7 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                             ),
                             const SizedBox(height: AppDimens.s4),
                             Text(
-                              'Inspirasi smoothie, salad, dan camilan sesuai tingkat kematangan buah segar.',
+                              'Inspirasi smoothie, camilan, dan olahan lezat sesuai tingkat kematangan pisang.',
                               style: TextStyle(
                                 color: theme.colorScheme.onSurface.withValues(
                                   alpha: 0.8,
@@ -217,12 +236,12 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                         const SizedBox(width: AppDimens.s8),
                     itemBuilder: (BuildContext context, int idx) {
                       final item = _filters[idx];
-                      final isSelected = _selectedFruitFilter == item.label;
+                      final isSelected = _selectedFilter == item.key;
 
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            _selectedFruitFilter = item.label;
+                            _selectedFilter = item.key;
                           });
                         },
                         child: AnimatedContainer(
@@ -254,23 +273,16 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (item.label == 'Semua')
-                                Icon(
-                                  Icons.grid_view_rounded,
-                                  size: 15,
-                                  color: isSelected
-                                      ? theme.colorScheme.onPrimary
-                                      : theme.colorScheme.onSurface,
-                                )
-                              else
-                                FruitVectorIcon(
-                                  fruitLabel: item.label,
-                                  size: 20,
-                                  iconSize: 14,
-                                ),
+                              Icon(
+                                item.icon,
+                                size: 15,
+                                color: isSelected
+                                    ? theme.colorScheme.onPrimary
+                                    : theme.colorScheme.onSurface,
+                              ),
                               const SizedBox(width: 6),
                               Text(
-                                item.name,
+                                item.label,
                                 style: TextStyle(
                                   color: isSelected
                                       ? theme.colorScheme.onPrimary
@@ -310,7 +322,7 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                       ),
                       const SizedBox(height: AppDimens.s4),
                       Text(
-                        'Pilih kategori buah lain untuk melihat inspirasi olahan lezat.',
+                        'Pilih filter kematangan atau kategori olahan lain untuk melihat inspirasi resep pisang.',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: harvest.muted,
@@ -339,6 +351,7 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                             // 3D Fruit Illustration Thumbnail
                             FruitVectorIcon(
                               fruitLabel: recipe.fruitLabel,
+                              ripeness: recipe.ripenessBucket.dbValue,
                               size: 56,
                               isCircular: false,
                             ),
@@ -471,11 +484,16 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
               // AI Recipe Creator CTA Banner
               InkWell(
                 onTap: () {
-                  final fruit = _selectedFruitFilter != 'Semua'
-                      ? FruitNameHelper.toIndonesian(_selectedFruitFilter)
-                      : 'buah segar';
+                  final filterContext = switch (_selectedFilter) {
+                    'unripe' => 'pisang mentah',
+                    'ripe' => 'pisang matang',
+                    'very_ripe' => 'pisang matang banget',
+                    'drink' => 'pisang untuk minuman segar',
+                    'food' => 'pisang untuk makanan atau camilan',
+                    _ => 'pisang',
+                  };
                   final prompt =
-                      'Saya punya bahan $fruit di rumah. Tolong buatkan 1 ide kreasi olahan atau camilan sehat yang mudah dibuat dengan bahan sederhana.';
+                      'Saya punya bahan $filterContext di rumah. Tolong buatkan 1 ide kreasi olahan sehat yang mudah dibuat dengan bahan sederhana.';
                   ref
                       .read(chatNotifierProvider.notifier)
                       .startNewChatAndSend(prompt);
@@ -566,11 +584,34 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
     }
     return null;
   }
+
+  List<Recipe> _applyFilter(List<Recipe> recipes) {
+    return switch (_selectedFilter) {
+      'unripe' =>
+        recipes
+            .where((r) => r.ripenessBucket == RipenessBucket.unripe)
+            .toList(),
+      'ripe' =>
+        recipes.where((r) => r.ripenessBucket == RipenessBucket.ripe).toList(),
+      'very_ripe' =>
+        recipes
+            .where((r) => r.ripenessBucket == RipenessBucket.veryRipe)
+            .toList(),
+      'food' => recipes.where((r) => r.type == RecipeType.food).toList(),
+      'drink' => recipes.where((r) => r.type == RecipeType.drink).toList(),
+      _ => recipes,
+    };
+  }
 }
 
-class _FruitFilterItem {
-  const _FruitFilterItem({required this.label, required this.name});
+class _RecipeFilterItem {
+  const _RecipeFilterItem({
+    required this.key,
+    required this.label,
+    required this.icon,
+  });
 
+  final String key;
   final String label;
-  final String name;
+  final IconData icon;
 }

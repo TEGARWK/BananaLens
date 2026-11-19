@@ -86,6 +86,7 @@ class HomeRecentScansSection extends StatelessWidget {
                           children: [
                             FruitVectorIcon(
                               fruitLabel: recents[i].fruitLabel,
+                              ripeness: recents[i].ripenessLabel,
                               size: 44,
                               isCircular: false,
                             ),

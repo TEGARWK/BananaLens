@@ -21,10 +21,17 @@ class OnDeviceScanService implements ScanService {
     Future<Float32List> Function(Float32List cnnInput)? extractCnnFeatures,
     Future<String> Function(String key)? loadString,
     Future<ByteData> Function(String key)? loadBinary,
+    double minBananaKernelSimilarity = defaultMinBananaKernelSimilarity,
   }) : _fruitValidator = fruitValidator ?? MlKitFruitValidator(),
        _customExtractCnnFeatures = extractCnnFeatures,
        _loadString = loadString ?? rootBundle.loadString,
-       _loadBinary = loadBinary ?? rootBundle.load;
+       _loadBinary = loadBinary ?? rootBundle.load,
+       _minBananaKernelSimilarity = minBananaKernelSimilarity;
+
+  /// Minimum RBF kernel similarity to the nearest banana support vector.
+  /// Calibrated against banana support-vector distribution (median 0.83, p10 0.57)
+  /// vs. non-banana green/yellow produce (e.g. avocado ~0.49).
+  static const double defaultMinBananaKernelSimilarity = 0.54;
 
   static const String tfliteAssetPath =
       'assets/models/mobilenet_v3_extractor.tflite';
@@ -37,6 +44,7 @@ class OnDeviceScanService implements ScanService {
   _customExtractCnnFeatures;
   final Future<String> Function(String key) _loadString;
   final Future<ByteData> Function(String key) _loadBinary;
+  final double _minBananaKernelSimilarity;
 
   OnDeviceSvmClassifier? _svmClassifier;
   Interpreter? _interpreter;
@@ -121,6 +129,17 @@ class OnDeviceScanService implements ScanService {
         ),
       );
 
+      // 3b. Tolak buah non-pisang berwarna merah/oranye cerah/ungu dominan (jeruk, apel merah, stroberi, dll.)
+      final pigment = preprocessed.pigmentRatios;
+      if (pigment.activePixelCount >= 50 &&
+          pigment.nonBananaVividRatio >= 0.45) {
+        debugPrint(
+          'OnDeviceScanService -> Rejected vivid non-banana color '
+          'ratio=${pigment.nonBananaVividRatio.toStringAsFixed(2)}',
+        );
+        return const ScanUncertain();
+      }
+
       // 4. Ekstraksi fitur CNN MobileNetV3Small (576 fitur) via TFLite Isolate
       final cnn576 = await _extractCnn576(preprocessed.cnnInputTensor);
 
@@ -135,8 +154,19 @@ class OnDeviceScanService implements ScanService {
       debugPrint(
         'OnDeviceScanService SVM -> class=${prediction.predictedClass}, '
         'confidence=${prediction.confidence.toStringAsFixed(3)}, '
+        'maxSim=${prediction.maxKernelSimilarity.toStringAsFixed(4)}, '
         'probs=${prediction.probabilities}',
       );
+
+      // 5b. Tolak objek di luar distribusi pisang (OOD), misal alpukat/mangga/terong
+      if (prediction.maxKernelSimilarity < _minBananaKernelSimilarity) {
+        debugPrint(
+          'OnDeviceScanService -> Rejected OOD non-banana '
+          'maxSim=${prediction.maxKernelSimilarity.toStringAsFixed(4)} '
+          '< ${_minBananaKernelSimilarity.toStringAsFixed(4)}',
+        );
+        return const ScanUncertain();
+      }
 
       final classCount = prediction.probabilities.length;
       final uncertaintyThreshold = classCount <= 3 ? 0.35 : 0.25;

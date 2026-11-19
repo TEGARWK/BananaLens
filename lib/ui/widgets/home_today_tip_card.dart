@@ -26,60 +26,52 @@ class HomeTodayTipCard extends StatelessWidget {
 
   static const List<FruitTipItem> tipsList = [
     FruitTipItem(
-      title: 'Pisang Berbintik Hitam',
+      title: 'Pisang Berbintik Cokelat',
       shortText:
-          'Bintik hitam justru menandakan kadar antioksidan dan rasa manis alami tertinggi.',
+          'Bintik cokelat kecil menandakan kadar gula alami dan antioksidan pisang sedang tinggi.',
       fullText:
-          'Bintik hitam pada kulit pisang menandakan produksi Tumor Necrosis Factor (TNF) dan antioksidan yang optimal. Sangat manis alami, mudah dicerna, dan sempurna untuk bahan smoothie atau pancake sehat tanpa tambahan gula.',
+          'Bintik cokelat kecil (sugar spots) pada kulit pisang kuning menandakan pisang sudah sangat matang dan manis alami. Dagingnya tetap bagus, mudah dicerna, dan cocok dijadikan smoothie, pancake, atau banana bread tanpa banyak gula tambahan.',
       fruit: 'banana',
     ),
     FruitTipItem(
-      title: 'Cara Menyimpan Apel',
+      title: 'Bungkus Tangkai Pisang',
       shortText:
-          'Simpan apel di kulkas dan jauhkan dari buah sensitif agar tidak cepat layu.',
+          'Membungkus pangkal tangkai pisang membantu memperlambat pematangan agar tidak cepat hitam.',
       fullText:
-          'Apel melepaskan gas etilen dalam jumlah tinggi yang mempercepat pematangan buah lain di sekitarnya. Simpan di laci bawah kulkas dengan kantong berpori agar kesegarannya bertahan hingga sebulan.',
-      fruit: 'apple',
+          'Gas etilen paling banyak keluar dari pangkal tangkai pisang. Bungkus rapat bagian tangkai dengan plastik wrap atau kertas aluminium, lalu gantung di suhu ruang sejuk agar pisang matang 2-3 hari lebih awet.',
+      fruit: 'banana',
     ),
     FruitTipItem(
-      title: 'Alpukat Matang Sempurna',
+      title: 'Manfaat Pisang Mentah',
       shortText:
-          'Tekan lembut pangkal tangkai alpukat untuk memastikan kematangan tanpa merusak dagingnya.',
+          'Pisang hijau kaya pati resisten yang baik untuk pencernaan setelah dimasak matang.',
       fullText:
-          'Jika tangkai kecil di atas mudah lepas dan memperlihatkan warna hijau muda di bawahnya, alpukat siap dinikmati! Mengandung asam lemak tak jenuh tunggal yang sangat baik bagi kesehatan jantung.',
-      fruit: 'avocado',
+          'Pisang mentah (hijau) memiliki kadar gula lebih rendah dan tinggi pati resisten sebagai prebiotik alami. Sebaiknya jangan dimakan mentah langsung; rebus dengan sedikit garam atau olah menjadi keripik pisang renyah.',
+      fruit: 'banana',
     ),
     FruitTipItem(
-      title: 'Aroma Khas Mangga Matang',
+      title: 'Mematangkan Pisang Lebih Cepat',
       shortText:
-          'Aroma harum manis di bagian pangkal buah menandakan mangga sudah matang alami di pohon.',
+          'Simpan pisang hijau dalam kantong kertas tertutup di suhu ruang selama 1-2 hari.',
       fullText:
-          'Hindari memilih mangga yang pangkalnya masih keras dan tidak beraroma. Mangga matang pohon kaya akan vitamin A dan enzim alami yang baik untuk kesehatan mata serta membantu metabolisme pencernaan.',
-      fruit: 'mango',
+          'Jika kamu membeli pisang mentah dan ingin segera dinikmati, masukkan ke dalam kantong kertas cokelat yang dilipat longgar. Gas etilen alami akan terperangkap di dalamnya sehingga proses pematangan lebih cepat dan merata.',
+      fruit: 'banana',
     ),
     FruitTipItem(
-      title: 'Menjaga Kesegaran Jeruk',
+      title: 'Bekukan Pisang Sebelum Busuk',
       shortText:
-          'Simpan jeruk dalam kondisi utuh di wadah terbuka pada suhu ruang sejuk atau kulkas.',
+          'Kupas dan potong pisang yang terlalu matang lalu bekukan untuk stok smoothie harian.',
       fullText:
-          'Jeruk yang disimpan utuh dapat bertahan hingga 2-3 minggu di laci kulkas. Jangan mengupas kulitnya sebelum hendak disantap agar kandungan vitamin C dan antioksidan alami tidak teroksidasi oleh udara bebas.',
-      fruit: 'orange',
+          'Jangan buang pisang yang kulitnya mulai sangat berbintik jika dagingnya masih padat dan tidak berbau asam. Kupas, potong-potong, simpan dalam wadah kedap udara di freezer—tahan hingga 2 bulan dan siap diblender kapan saja.',
+      fruit: 'banana',
     ),
     FruitTipItem(
-      title: 'Semangka Manis & Berair',
+      title: 'Kenali Tanda Pisang Busuk',
       shortText:
-          'Cari bercak kuning krem di kulit bawah semangka sebagai tanda matang sempurna di kebun.',
+          'Kulit menghitam berair, daging sangat lembek, atau muncul bau fermentasi menandakan busuk.',
       fullText:
-          'Bercak field spot yang berwarna krem kekuningan menandakan semangka matang sempurna sebelum dipetik. Semangka mengandung 92% air dan likopen tinggi yang sangat efektif untuk rehidrasi tubuh dan mencegah radikal bebas.',
-      fruit: 'watermelon',
-    ),
-    FruitTipItem(
-      title: 'Menyimpan Buah Potong',
-      shortText:
-          'Beri sedikit perasan lemon atau simpan dalam wadah kedap udara agar tidak cepat mencokelat.',
-      fullText:
-          'Asam sitrat alami pada air lemon memperlambat enzim polifenol oksidase yang menyebabkan pencokelatan (browning). Selalu simpan buah potong di kulkas dan habiskan dalam 24-48 jam untuk nutrisi optimal.',
-      fruit: 'pineapple',
+          'Pisang yang sudah busuk ditandai bau asam menyengat, cairan merembes dari kulit, atau adanya bercak jamur. Hindari mengonsumsinya dan manfaatkan sebagai bahan kompos organik untuk tanaman.',
+      fruit: 'banana',
     ),
   ];
 
@@ -166,7 +158,7 @@ class HomeTodayTipCard extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Tips Kesehatan FruitLens',
+                                  'Tips Kesehatan BananaLens',
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: harvest.muted,
                                   ),

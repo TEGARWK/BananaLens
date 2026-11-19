@@ -39,14 +39,14 @@ class HomeSmartReminderCard extends ConsumerWidget {
       badgeColor = theme.colorScheme.primary;
     } else {
       reminderText =
-          'Tahukah kamu? Simpan buah matang terpisah agar gas etilen tidak membuat buah lain cepat busuk.';
+          'Tahukah kamu? Bungkus pangkal tangkai pisang matang agar gas etilen tidak membuatnya cepat menghitam.';
       reminderIcon = Icons.eco_rounded;
       badgeColor = harvest.primarySoft;
     }
 
     final goalText = userProfile?.goal != null && userProfile!.goal.isNotEmpty
-        ? 'Cocok untuk target ${userProfile.goal}: Perbanyak asupan apel & alpukat kaya serat.'
-        : 'Rekomendasi diet sehat: Konsumsi minimal 2 porsi buah segar setiap hari.';
+        ? 'Cocok untuk target ${userProfile.goal}: Pisang matang pas kaya kalium & serat untuk energi harian.'
+        : 'Rekomendasi harian: Nikmati pisang matang segar atau olahan rendah gula sesuai kebutuhanmu.';
     final ink = theme.colorScheme.onSurface;
 
     return IndustrialSpecimenCard(

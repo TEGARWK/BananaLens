@@ -9,18 +9,23 @@ class PigmentRatios {
     required this.yellowRatio,
     required this.brownDarkRatio,
     required this.activePixelCount,
+    this.nonBananaVividRatio = 0.0,
   });
 
   const PigmentRatios.empty()
     : greenRatio = 0.0,
       yellowRatio = 0.0,
       brownDarkRatio = 0.0,
-      activePixelCount = 0;
+      activePixelCount = 0,
+      nonBananaVividRatio = 0.0;
 
   final double greenRatio;
   final double yellowRatio;
   final double brownDarkRatio;
   final int activePixelCount;
+
+  /// Ratio of vivid red/orange/pink/purple pixels unlikely to be any banana stage.
+  final double nonBananaVividRatio;
 }
 
 /// Preprocessed image payload ready for MobileNetV3 TFLite + Masked HSV extraction.
@@ -133,6 +138,7 @@ abstract final class OnDeviceImagePreprocessor {
     int greenCount = 0;
     int yellowCount = 0;
     int brownDarkCount = 0;
+    int nonBananaVividCount = 0;
 
     for (int y = startY; y < endY; y++) {
       for (int x = startX; x < endX; x++) {
@@ -146,6 +152,13 @@ abstract final class OnDeviceImagePreprocessor {
         if (s < 28 || v < 20) continue;
 
         activeCount++;
+        final isVividRedOrange = (h <= 15 || h >= 165) && s >= 140 && v >= 145;
+        final isPurpleMagenta = h >= 125 && h <= 164 && s >= 45 && v >= 20;
+        final isVividBlue = h >= 100 && h < 125 && s >= 100 && v >= 60;
+        if (isVividRedOrange || isPurpleMagenta || isVividBlue) {
+          nonBananaVividCount++;
+        }
+
         if (h >= 31 && h <= 88 && g > r + 5) {
           greenCount++;
         } else if (h >= 16 && h <= 30 && v >= 90) {
@@ -165,6 +178,7 @@ abstract final class OnDeviceImagePreprocessor {
       yellowRatio: yellowCount / activeCount,
       brownDarkRatio: brownDarkCount / activeCount,
       activePixelCount: activeCount,
+      nonBananaVividRatio: nonBananaVividCount / activeCount,
     );
   }
 

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fruitlens/core/theme/app_radius.dart';
+import 'package:fruitlens/core/theme/app_dimens.dart';
 
-/// Renders a high-definition 3D fruit illustration from bundled local assets
-/// (`assets/images/fruits/*.png`) inside a soft pastel container.
+/// Renders a BananaLens industrial-style banana illustration matching the
+/// ripeness state (`unripe`, `ripe`, or `rotten`).
 class FruitVectorIcon extends StatelessWidget {
   const FruitVectorIcon({
     required this.fruitLabel,
+    this.ripeness,
     this.size = 48,
     this.iconSize,
     this.isCircular = true,
@@ -13,87 +14,46 @@ class FruitVectorIcon extends StatelessWidget {
   });
 
   final String fruitLabel;
+  final String? ripeness;
   final double size;
   final double? iconSize;
   final bool isCircular;
 
-  static _FruitAssetStyle _styleFor(String rawLabel) {
-    return switch (rawLabel.toLowerCase()) {
-      'banana' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/banana.png',
-        bgColor: Color(0xFFFFF8E1),
-        borderColor: Color(0xFFFBC02D),
+  static _BananaIconStyle _styleFor(String? rawRipeness) {
+    final norm = rawRipeness?.trim().toLowerCase() ?? 'ripe';
+    return switch (norm) {
+      'unripe' || 'mentah' => const _BananaIconStyle(
+        assetPath: 'assets/images/fruits/banana_unripe.png',
+        lightBg: Color(0xFFE6EED8),
+        darkBg: Color(0xFF242F1B),
+        accentColor: Color(0xFF4E7A27),
       ),
-      'apple' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/apple.png',
-        bgColor: Color(0xFFFFEBEE),
-        borderColor: Color(0xFFE53935),
+      'rotten' || 'busuk' => const _BananaIconStyle(
+        assetPath: 'assets/images/fruits/banana_rotten.png',
+        lightBg: Color(0xFFF1E2DC),
+        darkBg: Color(0xFF33221D),
+        accentColor: Color(0xFF7A4E2D),
       ),
-      'avocado' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/avocado.png',
-        bgColor: Color(0xFFE8F5E9),
-        borderColor: Color(0xFF43A047),
-      ),
-      'orange' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/orange.png',
-        bgColor: Color(0xFFFFF3E0),
-        borderColor: Color(0xFFFB8C00),
-      ),
-      'mango' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/mango.png',
-        bgColor: Color(0xFFFFF3E0),
-        borderColor: Color(0xFFFFB300),
-      ),
-      'watermelon' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/watermelon.png',
-        bgColor: Color(0xFFFFEBEE),
-        borderColor: Color(0xFFE53935),
-      ),
-      'strawberry' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/strawberry.png',
-        bgColor: Color(0xFFFCE4EC),
-        borderColor: Color(0xFFD81B60),
-      ),
-      'pineapple' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/pineapple.png',
-        bgColor: Color(0xFFFFFDE7),
-        borderColor: Color(0xFFFBC02D),
-      ),
-      'papaya' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/papaya.png',
-        bgColor: Color(0xFFFFF3E0),
-        borderColor: Color(0xFFFF7043),
-      ),
-      'grape' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/grape.png',
-        bgColor: Color(0xFFF3E5F5),
-        borderColor: Color(0xFF8E24AA),
-      ),
-      'tomato' => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/tomato.png',
-        bgColor: Color(0xFFFFEBEE),
-        borderColor: Color(0xFFE53935),
-      ),
-      _ => const _FruitAssetStyle(
-        assetPath: 'assets/images/fruits/default.png',
-        bgColor: Color(0xFFE8F5E9),
-        borderColor: Color(0xFF2E7D32),
+      _ => const _BananaIconStyle(
+        assetPath: 'assets/images/fruits/banana_ripe.png',
+        lightBg: Color(0xFFF6EBB0),
+        darkBg: Color(0xFF302B16),
+        accentColor: Color(0xFFDEC010),
       ),
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final style = _styleFor(fruitLabel);
-    final innerSize = iconSize ?? (size * 0.66);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final style = _styleFor(ripeness);
+    final innerSize = iconSize ?? (size * 0.74);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    final resolvedBg = isDark
-        ? style.borderColor.withValues(alpha: 0.16)
-        : style.bgColor;
+    final resolvedBg = isDark ? style.darkBg : style.lightBg;
     final resolvedBorder = isDark
-        ? style.borderColor.withValues(alpha: 0.35)
-        : style.borderColor.withValues(alpha: 0.22);
+        ? style.accentColor.withValues(alpha: 0.7)
+        : theme.colorScheme.onSurface;
 
     return Container(
       width: size,
@@ -101,15 +61,10 @@ class FruitVectorIcon extends StatelessWidget {
       decoration: BoxDecoration(
         color: resolvedBg,
         shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
-        borderRadius: isCircular ? null : AppRadius.roundedMd,
-        border: Border.all(color: resolvedBorder, width: 1),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: style.borderColor.withValues(alpha: isDark ? 0.04 : 0.08),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: isCircular
+            ? null
+            : BorderRadius.circular(AppDimens.rSharp),
+        border: Border.all(color: resolvedBorder, width: 1.3),
       ),
       child: Center(
         child: Image.asset(
@@ -120,8 +75,8 @@ class FruitVectorIcon extends StatelessWidget {
           filterQuality: FilterQuality.medium,
           errorBuilder: (_, _, _) => Icon(
             Icons.eco_rounded,
-            size: innerSize * 0.75,
-            color: style.borderColor,
+            size: innerSize * 0.72,
+            color: style.accentColor,
           ),
         ),
       ),
@@ -129,14 +84,16 @@ class FruitVectorIcon extends StatelessWidget {
   }
 }
 
-class _FruitAssetStyle {
-  const _FruitAssetStyle({
+class _BananaIconStyle {
+  const _BananaIconStyle({
     required this.assetPath,
-    required this.bgColor,
-    required this.borderColor,
+    required this.lightBg,
+    required this.darkBg,
+    required this.accentColor,
   });
 
   final String assetPath;
-  final Color bgColor;
-  final Color borderColor;
+  final Color lightBg;
+  final Color darkBg;
+  final Color accentColor;
 }

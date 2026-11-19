@@ -158,7 +158,7 @@ class ProfileScreen extends ConsumerWidget {
           age: 26,
           weight: 64.5,
           goal: 'Pola Hidup Sehat',
-          allergies: const <String>['Lateks (Alpukat/Pisang)'],
+          allergies: const <String>['Pisang / Lateks'],
         ),
       );
     }

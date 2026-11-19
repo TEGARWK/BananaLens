@@ -83,8 +83,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     children: <Widget>[
                       FruitVectorIcon(
                         fruitLabel: recipe.fruitLabel,
+                        ripeness: recipe.ripenessBucket.dbValue,
                         size: 28,
-                        iconSize: 18,
+                        iconSize: 20,
                       ),
                       const SizedBox(height: 3),
                       Text(

@@ -171,10 +171,11 @@ class AccountAllergySelector extends StatelessWidget {
   final void Function(String allergen, bool selected) onToggle;
 
   static const List<String> commonAllergens = <String>[
-    'Lateks (Alpukat/Pisang)',
-    'Sitrus (Jeruk)',
-    'Stroberi',
-    'Nanas (Bromelain)',
+    'Pisang / Lateks',
+    'Susu / Laktosa',
+    'Kacang-kacangan',
+    'Gluten / Tepung',
+    'Telur',
   ];
 
   @override

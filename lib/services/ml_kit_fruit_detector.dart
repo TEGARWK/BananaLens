@@ -35,22 +35,11 @@ class MlKitFruitValidator implements FruitObjectValidator {
 
   final ImageLabeler _labeler;
 
-  static const Set<String> _fruitKeywords = {
+  static const Set<String> _genericProduceKeywords = {
     'banana',
     'plantain',
     'fruit',
     'tropical fruit',
-    'citrus',
-    'apple',
-    'orange',
-    'mango',
-    'strawberry',
-    'grape',
-    'pineapple',
-    'watermelon',
-    'papaya',
-    'avocado',
-    'tomato',
     'food',
     'natural foods',
     'produce',
@@ -60,6 +49,40 @@ class MlKitFruitValidator implements FruitObjectValidator {
     'vegetable',
     'superfood',
     'vegan',
+  };
+
+  static const Set<String> _otherFruitKeywords = {
+    'citrus',
+    'orange',
+    'tangerine',
+    'mandarin',
+    'lemon',
+    'lime',
+    'grapefruit',
+    'apple',
+    'mango',
+    'strawberry',
+    'grape',
+    'pineapple',
+    'watermelon',
+    'papaya',
+    'avocado',
+    'tomato',
+    'melon',
+    'peach',
+    'pear',
+    'cherry',
+    'berry',
+    'blueberry',
+    'raspberry',
+    'kiwi',
+    'coconut',
+    'pomegranate',
+    'plum',
+    'fig',
+    'guava',
+    'durian',
+    'lychee',
   };
 
   static const Set<String> _nonFruitKeywords = {
@@ -130,6 +153,8 @@ class MlKitFruitValidator implements FruitObjectValidator {
     final normalizedNames = <String>[];
     double bestFruitConfidence = 0.0;
     double bestBananaConfidence = 0.0;
+    double bestOtherFruitConfidence = 0.0;
+    String? strongestOtherFruitLabel;
     double bestNonFruitConfidence = 0.0;
     String? strongestNonFruitLabel;
 
@@ -143,10 +168,18 @@ class MlKitFruitValidator implements FruitObjectValidator {
         }
       }
 
-      final isFruitMatch = _fruitKeywords.any(
+      final isOtherFruitMatch = _otherFruitKeywords.any(
         (kw) => lower == kw || lower.contains(kw),
       );
-      if (isFruitMatch && item.confidence > bestFruitConfidence) {
+      if (isOtherFruitMatch && item.confidence > bestOtherFruitConfidence) {
+        bestOtherFruitConfidence = item.confidence;
+        strongestOtherFruitLabel = item.label;
+      }
+
+      final isGenericProduceMatch = _genericProduceKeywords.any(
+        (kw) => lower == kw || lower.contains(kw),
+      );
+      if (isGenericProduceMatch && item.confidence > bestFruitConfidence) {
         bestFruitConfidence = item.confidence;
       }
 
@@ -159,14 +192,29 @@ class MlKitFruitValidator implements FruitObjectValidator {
       }
     }
 
-    // Reject only when ML Kit sees zero fruit/food clues AND is strongly confident it's an unrelated object.
-    if (bestFruitConfidence == 0.0 && bestNonFruitConfidence >= 0.60) {
+    // Reject explicitly identified non-banana fruits (e.g. orange, citrus, mango, apple)
+    // unless ML Kit has a stronger banana/plantain signal.
+    if (bestOtherFruitConfidence >= 0.45 &&
+        bestBananaConfidence < bestOtherFruitConfidence) {
       return FruitValidationResult(
         isLikelyFruitOrFood: false,
         detectedLabels: normalizedNames,
         fruitConfidence: 0.0,
         rejectionReason:
-            'Terdeteksi objek non-buah ($strongestNonFruitLabel) oleh Google ML Kit.',
+            'Terdeteksi buah selain pisang ($strongestOtherFruitLabel) oleh Google ML Kit.',
+      );
+    }
+
+    // Reject strong non-fruit subjects (e.g. person/face/selfie/electronics) when
+    // no explicit banana label is detected, or when zero produce clue exists.
+    if ((bestNonFruitConfidence >= 0.65 && bestBananaConfidence == 0.0) ||
+        (bestFruitConfidence == 0.0 && bestNonFruitConfidence >= 0.60)) {
+      return FruitValidationResult(
+        isLikelyFruitOrFood: false,
+        detectedLabels: normalizedNames,
+        fruitConfidence: 0.0,
+        rejectionReason:
+            'Terdeteksi objek bukan pisang ($strongestNonFruitLabel) oleh Google ML Kit.',
       );
     }
 

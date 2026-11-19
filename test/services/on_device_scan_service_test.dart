@@ -65,6 +65,36 @@ void main() {
       expect(result.isLikelyFruitOrFood, isTrue);
       expect(result.fruitConfidence, closeTo(0.48, 0.001));
     });
+
+    test('rejects non-banana fruits like orange, citrus, and mango', () {
+      final orangeResult = MlKitFruitValidator.evaluateLabels([
+        (label: 'Fruit', confidence: 0.92),
+        (label: 'Citrus', confidence: 0.84),
+        (label: 'Orange', confidence: 0.79),
+      ]);
+      expect(orangeResult.isLikelyFruitOrFood, isFalse);
+      expect(orangeResult.rejectionReason, contains('Citrus'));
+
+      final mangoResult = MlKitFruitValidator.evaluateLabels([
+        (label: 'Food', confidence: 0.88),
+        (label: 'Mango', confidence: 0.72),
+      ]);
+      expect(mangoResult.isLikelyFruitOrFood, isFalse);
+      expect(mangoResult.rejectionReason, contains('Mango'));
+    });
+
+    test(
+      'rejects person/selfie holding generic object without banana label',
+      () {
+        final selfieResult = MlKitFruitValidator.evaluateLabels([
+          (label: 'Person', confidence: 0.91),
+          (label: 'Smile', confidence: 0.82),
+          (label: 'Food', confidence: 0.54),
+        ]);
+        expect(selfieResult.isLikelyFruitOrFood, isFalse);
+        expect(selfieResult.rejectionReason, contains('Person'));
+      },
+    );
   });
 
   group('OnDeviceImagePreprocessor', () {
@@ -199,6 +229,8 @@ void main() {
           extractCnnFeatures: (_) async => Float32List(576),
           loadString: (_) async => metaJson,
           loadBinary: (_) async => ByteData.sublistView(weightsBytes),
+          // Synthetic all-zero CNN vector is out-of-distribution (~0.52 maxSim).
+          minBananaKernelSimilarity: 0.0,
         );
 
         final outcome = await service.scan(imgFile.path);
@@ -208,6 +240,39 @@ void main() {
         expect(success.fruitConfidence, closeTo(0.92, 0.001));
         expect(success.classProbabilities, isNotNull);
         expect(success.classProbabilities!.keys, {'ripe', 'rotten', 'unripe'});
+      },
+    );
+
+    test(
+      'OnDeviceScanService rejects out-of-distribution non-banana (low maxKernelSimilarity) as ScanUncertain',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp('on_device_ood_');
+        addTearDown(() async {
+          if (await tempDir.exists()) await tempDir.delete(recursive: true);
+        });
+
+        final greenYellowImg = img.Image(width: 240, height: 240);
+        img.fill(greenYellowImg, color: img.ColorRgb8(180, 200, 50));
+        final imgFile = File('${tempDir.path}/avocado.jpg');
+        await imgFile.writeAsBytes(img.encodeJpg(greenYellowImg));
+
+        final service = OnDeviceScanService(
+          fruitValidator: _FakeValidator(
+            const FruitValidationResult(
+              isLikelyFruitOrFood: true,
+              detectedLabels: ['Food', 'Fruit', 'Plant', 'Vegetable'],
+              detectedFruitType: 'banana',
+              fruitConfidence: 0.93,
+            ),
+          ),
+          // All-zero CNN vector is far from real banana support vectors (< 0.54).
+          extractCnnFeatures: (_) async => Float32List(576),
+          loadString: (_) async => metaJson,
+          loadBinary: (_) async => ByteData.sublistView(weightsBytes),
+        );
+
+        final outcome = await service.scan(imgFile.path);
+        expect(outcome, isA<ScanUncertain>());
       },
     );
 
@@ -261,6 +326,40 @@ void main() {
 
         final outcome = await service.scan('/non/existent/file.jpg');
         expect(outcome, isA<ScanFailure>());
+      },
+    );
+
+    test(
+      'OnDeviceScanService rejects vivid orange/red fruit (e.g. orange, red apple) as ScanUncertain',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'on_device_orange_',
+        );
+        addTearDown(() async {
+          if (await tempDir.exists()) await tempDir.delete(recursive: true);
+        });
+
+        final orangeImg = img.Image(width: 240, height: 240);
+        img.fill(orangeImg, color: img.ColorRgb8(250, 120, 10));
+        final imgFile = File('${tempDir.path}/orange.jpg');
+        await imgFile.writeAsBytes(img.encodeJpg(orangeImg));
+
+        final service = OnDeviceScanService(
+          fruitValidator: _FakeValidator(
+            const FruitValidationResult(
+              isLikelyFruitOrFood: true,
+              detectedLabels: ['Food', 'Fruit', 'Plant'],
+              detectedFruitType: 'banana',
+              fruitConfidence: 0.95,
+            ),
+          ),
+          extractCnnFeatures: (_) async => Float32List(576),
+          loadString: (_) async => metaJson,
+          loadBinary: (_) async => ByteData.sublistView(weightsBytes),
+        );
+
+        final outcome = await service.scan(imgFile.path);
+        expect(outcome, isA<ScanUncertain>());
       },
     );
 

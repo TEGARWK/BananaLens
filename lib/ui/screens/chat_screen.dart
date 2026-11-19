@@ -21,14 +21,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scrollController = ScrollController();
 
   static const List<String> _suggestedChips = [
-    'Buah apa yang paling tinggi serat?',
-    'Berapa lama apel tahan di kulkas?',
-    'Cara mematangkan alpukat?',
-    'Ide olahan pisang kematangan?',
+    'Cara simpan pisang biar tidak cepat hitam?',
+    'Pisang bintik cokelat masih aman dimakan?',
+    'Ide olahan pisang yang terlalu matang?',
+    'Apa manfaat pisang mentah yang direbus?',
   ];
 
   static const List<String> _contextSuggestedChips = [
-    'Apakah buah ini masih aman dikonsumsi?',
+    'Apakah pisang ini masih aman dikonsumsi?',
     'Ide olahan yang cocok untuk kondisi ini?',
     'Berapa lama & bagaimana cara menyimpannya?',
     'Apa saja kandungan gizinya?',

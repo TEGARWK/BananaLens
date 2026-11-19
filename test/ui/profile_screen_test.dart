@@ -203,7 +203,7 @@ void main() {
         age: 24,
         weight: 55.0,
         goal: 'Pola Hidup Sehat',
-        allergies: <String>['Sitrus (Jeruk)'],
+        allergies: <String>['Susu / Laktosa'],
       );
 
       await tester.pumpWidget(buildApp(user: user));
@@ -231,8 +231,8 @@ void main() {
       await tester.tap(find.text('Diet & Defisit Kalori'));
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text('Stroberi'));
-      await tester.tap(find.text('Stroberi'));
+      await tester.ensureVisible(find.text('Pisang / Lateks'));
+      await tester.tap(find.text('Pisang / Lateks'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Simpan Perubahan'));

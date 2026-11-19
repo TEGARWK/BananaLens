@@ -78,6 +78,7 @@ class HomeRecipesSection extends ConsumerWidget {
                               children: [
                                 FruitVectorIcon(
                                   fruitLabel: recipe.fruitLabel,
+                                  ripeness: recipe.ripenessBucket.dbValue,
                                   size: 36,
                                   isCircular: false,
                                 ),

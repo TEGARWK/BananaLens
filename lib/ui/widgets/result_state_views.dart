@@ -176,7 +176,7 @@ class _ResultLoadingViewState extends State<ResultLoadingView>
               ),
               const SizedBox(height: 4),
               Text(
-                'Menganalisis jenis buah, warna kulit, dan tingkat kematangan secara lokal.',
+                'Menganalisis warna kulit dan tingkat kematangan pisang secara lokal.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: harvest.muted,
                 ),

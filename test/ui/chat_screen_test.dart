@@ -38,7 +38,10 @@ void main() {
 
     expect(find.text(AppStrings.chatTitle), findsOneWidget);
     expect(find.textContaining('Halo! Saya asisten'), findsOneWidget);
-    expect(find.text('Buah apa yang paling tinggi serat?'), findsOneWidget);
+    expect(
+      find.text('Cara simpan pisang biar tidak cepat hitam?'),
+      findsOneWidget,
+    );
     expect(find.byType(TextField), findsOneWidget);
   });
 

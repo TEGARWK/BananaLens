@@ -72,7 +72,7 @@ class LocalAuthService implements AuthService {
       age: 26,
       weight: 68.0,
       goal: 'Energi & Imunitas',
-      allergies: <String>['Mangga'],
+      allergies: <String>['Susu / Laktosa'],
     );
   }
 

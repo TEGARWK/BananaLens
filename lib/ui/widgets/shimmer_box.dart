@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_dimens.dart';
-import '../../core/theme/harvest_colors.dart';
 
+/// Animated skeleton placeholder with a left-to-right shimmer sweep
+/// calibrated for both Technical Paper (light) and Night Instrument (dark).
 class ShimmerBox extends StatefulWidget {
   const ShimmerBox({
     super.key,
@@ -21,20 +22,14 @@ class ShimmerBox extends StatefulWidget {
 class _ShimmerBoxState extends State<ShimmerBox>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat(reverse: true);
-
-    _animation = Tween<double>(
-      begin: 0.35,
-      end: 0.85,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
   }
 
   @override
@@ -45,17 +40,29 @@ class _ShimmerBoxState extends State<ShimmerBox>
 
   @override
   Widget build(BuildContext context) {
-    final harvest = context.harvest;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark
+        ? const Color(0xFF282B23)
+        : const Color(0xFFD5D8CC);
+    final highlightColor = isDark
+        ? const Color(0xFF3E4236)
+        : const Color(0xFFF6F7F2);
 
     return AnimatedBuilder(
-      animation: _animation,
+      animation: _controller,
       builder: (context, child) {
+        final slide = (_controller.value * 3.0) - 1.5;
         return Container(
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: harvest.primarySoft.withValues(alpha: _animation.value),
             borderRadius: BorderRadius.circular(widget.radius),
+            gradient: LinearGradient(
+              begin: Alignment(slide - 0.8, -0.2),
+              end: Alignment(slide + 0.8, 0.2),
+              colors: <Color>[baseColor, highlightColor, baseColor],
+              stops: const <double>[0.15, 0.5, 0.85],
+            ),
           ),
         );
       },

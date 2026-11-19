@@ -15,7 +15,7 @@ class AppDatabase {
 
   static final AppDatabase instance = AppDatabase();
 
-  static const int currentVersion = 4;
+  static const int currentVersion = 5;
   static const String dbFileName = 'fruitlens.db';
   static const String scanResultsTable = 'scan_results';
   static const String fruitsTable = 'fruits';
@@ -67,6 +67,9 @@ class AppDatabase {
           await db.execute(
             'ALTER TABLE $scanResultsTable ADD COLUMN rotten_prob REAL',
           );
+        }
+        if (oldVersion < 5) {
+          await db.delete(recipesTable);
         }
       },
     );
@@ -156,8 +159,18 @@ class AppDatabase {
           await db.rawQuery('SELECT COUNT(*) FROM $recipesTable'),
         ) ??
         0;
+    final nonBananaCount =
+        Sqflite.firstIntValue(
+          await db.rawQuery(
+            "SELECT COUNT(*) FROM $recipesTable WHERE fruit_id != 'banana'",
+          ),
+        ) ??
+        0;
 
-    if (recipesCount == 0) {
+    if (recipesCount == 0 || nonBananaCount > 0) {
+      if (nonBananaCount > 0) {
+        await db.delete(recipesTable);
+      }
       final rawRecipes = await _loadString(recipesAssetPath);
       final decodedRecipes = jsonDecode(rawRecipes) as List<Object?>;
       final batch = db.batch();

@@ -9,11 +9,16 @@ class SvmPrediction {
     required this.predictedClass,
     required this.confidence,
     required this.probabilities,
+    this.maxKernelSimilarity = 1.0,
   });
 
   final String predictedClass;
   final double confidence;
   final Map<String, double> probabilities;
+
+  /// Highest RBF kernel similarity `max_i exp(-gamma * ||x - sv_i||^2)` across
+  /// all banana support vectors; useful for out-of-distribution (non-banana) checks.
+  final double maxKernelSimilarity;
 }
 
 /// Pure-Dart implementation of scikit-learn StandardScaler + PCA + LIBSVM RBF + Platt coupling.
@@ -140,6 +145,7 @@ class OnDeviceSvmClassifier {
     }
 
     final kernel = Float64List(totalSv);
+    double maxKernel = 0.0;
     for (int i = 0; i < totalSv; i++) {
       final svOffset = i * totalDim;
       double distSq = 0.0;
@@ -147,7 +153,11 @@ class OnDeviceSvmClassifier {
         final d = x130[j] - supportVectors[svOffset + j];
         distSq += d * d;
       }
-      kernel[i] = math.exp(-gamma * distSq);
+      final kVal = math.exp(-gamma * distSq);
+      kernel[i] = kVal;
+      if (kVal > maxKernel) {
+        maxKernel = kVal;
+      }
     }
 
     // 4. LIBSVM pairwise decision values
@@ -230,6 +240,7 @@ class OnDeviceSvmClassifier {
       predictedClass: bestClass,
       confidence: bestProb.clamp(0.0, 1.0),
       probabilities: probMap,
+      maxKernelSimilarity: maxKernel.clamp(0.0, 1.0),
     );
   }
 

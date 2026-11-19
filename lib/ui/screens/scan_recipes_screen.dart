@@ -369,6 +369,7 @@ class _ScanRecipeCard extends StatelessWidget {
             children: [
               FruitVectorIcon(
                 fruitLabel: recipe.fruitLabel,
+                ripeness: recipe.ripenessBucket.dbValue,
                 size: 52,
                 isCircular: false,
               ),
