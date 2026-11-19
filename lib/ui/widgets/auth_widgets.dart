@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/app_theme.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
-import 'package:fruitlens/ui/widgets/industrial_art.dart';
 
-/// Tactile instrument-panel specimen header adapting to Login/Register mode.
+/// Illustrated header adapting smoothly between Login and Register modes.
 class AuthHeader extends StatelessWidget {
   const AuthHeader({super.key, required this.isRegister});
 
@@ -15,73 +14,56 @@ class AuthHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final harvest = context.harvest;
 
-    return IndustrialSpecimenCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimens.s20,
-        vertical: AppDimens.s20,
-      ),
-      child: ClipRect(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 280),
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            final isIncoming = child.key == ValueKey<bool>(isRegister);
-            final direction = isRegister ? 1.0 : -1.0;
-            final beginOffset = isIncoming
-                ? Offset(direction, 0)
-                : Offset(-direction, 0);
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: beginOffset,
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            );
-          },
-          child: Column(
-            key: ValueKey<bool>(isRegister),
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  IndustrialTagChip(
-                    label: isRegister ? 'MOD-REG // BARU' : 'MOD-AUTH // MASUK',
-                    accent: true,
-                  ),
-                  Text(
-                    'BANANALENS',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: harvest.muted,
-                      letterSpacing: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppDimens.s16),
-              const IndustrialBananaMark(size: 64),
-              const SizedBox(height: AppDimens.s16),
-              Text(
-                isRegister ? 'Buat Profil Sehatmu' : 'Selamat Datang',
-                textAlign: TextAlign.center,
-                style: AppTheme.pixelDisplayStyle(
-                  context,
-                  fontSize: 19,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: AppDimens.s8),
-              Text(
+    return ClipRect(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 280),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          final isIncoming = child.key == ValueKey<bool>(isRegister);
+          final direction = isRegister ? 1.0 : -1.0;
+          final beginOffset = isIncoming
+              ? Offset(direction, 0)
+              : Offset(-direction, 0);
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: beginOffset,
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          );
+        },
+        child: Column(
+          key: ValueKey<bool>(isRegister),
+          children: <Widget>[
+            Center(
+              child: Image.asset(
                 isRegister
-                    ? 'Simpan target gizi, pantau alergi, dan racik olahan pisang segar.'
-                    : 'Lanjutkan pemantauan kematangan pisang dan nutrisi harianmu.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: harvest.muted,
-                ),
+                    ? 'assets/images/auth/auth_register.png'
+                    : 'assets/images/auth/auth_login.png',
+                height: isRegister ? 132 : 168,
+                fit: BoxFit.contain,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppDimens.s12),
+            Text(
+              isRegister ? 'Buat Profil Sehatmu' : 'Selamat Datang',
+              textAlign: TextAlign.center,
+              style: AppTheme.pixelDisplayStyle(
+                context,
+                fontSize: 19,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: AppDimens.s4),
+            Text(
+              isRegister
+                  ? 'Simpan target gizi, pantau alergi, dan racik olahan pisang segar.'
+                  : 'Lanjutkan pemantauan kematangan pisang dan nutrisi harianmu.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(color: harvest.muted),
+            ),
+          ],
         ),
       ),
     );

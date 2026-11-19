@@ -40,24 +40,15 @@ class OnboardingSlidePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          IndustrialSpecimenCard(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimens.s16,
-              vertical: AppDimens.s24,
-            ),
-            child: Column(
-              children: <Widget>[
-                _AnimatedIllustrationFrame(
-                  key: ValueKey<String>(slide.imagePath),
-                  imagePath: slide.imagePath,
-                  fallbackIcon: slide.fallbackIcon,
-                ),
-                const SizedBox(height: AppDimens.s16),
-                IndustrialTagChip(label: slide.eyebrow, accent: true),
-              ],
-            ),
+          const SizedBox(height: AppDimens.s8),
+          _AnimatedIllustrationFrame(
+            key: ValueKey<String>(slide.imagePath),
+            imagePath: slide.imagePath,
+            fallbackIcon: slide.fallbackIcon,
           ),
-          const SizedBox(height: AppDimens.s24),
+          const SizedBox(height: AppDimens.s16),
+          Center(child: IndustrialTagChip(label: slide.eyebrow, accent: true)),
+          const SizedBox(height: AppDimens.s20),
           Text(
             slide.title,
             textAlign: TextAlign.center,
@@ -204,7 +195,7 @@ class _AnimatedIllustrationFrameState extends State<_AnimatedIllustrationFrame>
 
     final imageWidget = Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 300, maxHeight: 270),
+        constraints: const BoxConstraints(maxWidth: 340, maxHeight: 330),
         child: Image.asset(
           widget.imagePath,
           fit: BoxFit.contain,

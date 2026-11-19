@@ -134,32 +134,18 @@ class _AppTextFieldState extends State<AppTextField> {
                   ),
                   prefixIcon: widget.prefixIcon != null
                       ? Padding(
-                          padding: const EdgeInsets.only(left: 10, right: 8),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: activeYellow.withValues(
-                                alpha: _isFocused ? 0.85 : 0.35,
-                              ),
-                              borderRadius: AppRadius.roundedSm,
-                              border: Border.all(
-                                color: inkColor.withValues(
-                                  alpha: _isFocused ? 1.0 : 0.7,
-                                ),
-                                width: _isFocused ? 1.4 : 1,
-                              ),
-                            ),
-                            child: Icon(
-                              widget.prefixIcon,
-                              size: 17,
-                              color: inkColor,
-                            ),
+                          padding: const EdgeInsets.only(left: 14, right: 10),
+                          child: Icon(
+                            widget.prefixIcon,
+                            size: 20,
+                            color: _isFocused
+                                ? inkColor
+                                : colorScheme.onSurfaceVariant,
                           ),
                         )
                       : null,
                   prefixIconConstraints: const BoxConstraints(
-                    minWidth: 48,
+                    minWidth: 44,
                     minHeight: 36,
                   ),
                   suffixIcon: widget.suffixIcon,

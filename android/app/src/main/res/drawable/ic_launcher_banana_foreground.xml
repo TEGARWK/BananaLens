@@ -4,28 +4,34 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Offset industrial shadow -->
-    <path
-        android:fillColor="#181A16"
-        android:pathData="M29,26 L83,26 Q89,26 89,32 L89,86 Q89,92 83,92 L29,92 Q23,92 23,86 L23,32 Q23,26 29,26 Z" />
-    <!-- Instrument frame -->
-    <path
-        android:fillColor="#F9FAF6"
-        android:strokeColor="#181A16"
-        android:strokeWidth="2.8"
-        android:pathData="M25,22 L79,22 Q85,22 85,28 L85,82 Q85,88 79,88 L25,88 Q19,88 19,82 L19,28 Q19,22 25,22 Z" />
-    <!-- Yellow banana silhouette -->
-    <path
-        android:fillColor="#F5D51E"
-        android:strokeColor="#181A16"
-        android:strokeWidth="2.8"
-        android:strokeLineJoin="round"
-        android:strokeLineCap="round"
-        android:pathData="M64,34 L68,30 L72,34 L69,39 C74,59 58,77 32,73 C29,72 28,68 31,66 C50,66 62,53 61,39 Z" />
-    <!-- Technical ridge line -->
-    <path
-        android:strokeColor="#181A16"
-        android:strokeWidth="1.8"
-        android:strokeLineCap="round"
-        android:pathData="M62,44 Q57,61 37,68" />
+    <group
+        android:translateX="22.68"
+        android:translateY="22.68"
+        android:scaleX="0.58"
+        android:scaleY="0.58">
+        <!-- Offset industrial shadow -->
+        <path
+            android:fillColor="#181A16"
+            android:pathData="M29,26 L83,26 Q89,26 89,32 L89,86 Q89,92 83,92 L29,92 Q23,92 23,86 L23,32 Q23,26 29,26 Z" />
+        <!-- Instrument frame -->
+        <path
+            android:fillColor="#F9FAF6"
+            android:strokeColor="#181A16"
+            android:strokeWidth="3.2"
+            android:pathData="M25,22 L79,22 Q85,22 85,28 L85,82 Q85,88 79,88 L25,88 Q19,88 19,82 L19,28 Q19,22 25,22 Z" />
+        <!-- Yellow banana silhouette -->
+        <path
+            android:fillColor="#F5D51E"
+            android:strokeColor="#181A16"
+            android:strokeWidth="3.2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"
+            android:pathData="M64,34 L68,30 L72,34 L69,39 C74,59 58,77 32,73 C29,72 28,68 31,66 C50,66 62,53 61,39 Z" />
+        <!-- Technical ridge line -->
+        <path
+            android:strokeColor="#181A16"
+            android:strokeWidth="2.0"
+            android:strokeLineCap="round"
+            android:pathData="M62,44 Q57,61 37,68" />
+    </group>
 </vector>

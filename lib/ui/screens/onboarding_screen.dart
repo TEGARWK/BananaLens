@@ -31,26 +31,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   static const List<OnboardingSlideData> _slides = <OnboardingSlideData>[
     OnboardingSlideData(
-      eyebrow: 'PEMINDAI HYBRID AI',
+      eyebrow: 'PEMINDAI PISANG AI',
       title: 'Deteksi Kematangan Seketika',
       description:
-          'Potret atau pilih foto buah dari galeri. AI kami mengenali jenis dan 4 tingkat kematangan buahmu dalam hitungan detik.',
+          'Foto pisang langsung atau pilih dari galeri. Aplikasi mengecek kondisi Mentah, Matang, atau Busuk secara cepat tanpa internet.',
       imagePath: 'assets/images/onboarding/slide_scan.png',
       fallbackIcon: Icons.center_focus_strong_rounded,
     ),
     OnboardingSlideData(
-      eyebrow: 'NUTRISI & KEAMANAN',
+      eyebrow: 'GIZI & KEAMANAN',
       title: 'Pantau Gizi & Peringatan Alergi',
       description:
-          'Lihat takaran kalori, serat, gula, serta peringatan alergi otomatis sesuai profil kesehatanmu.',
+          'Lihat informasi kalori, karbohidrat, gula, dan serat pisang, plus peringatan otomatis jika tidak aman atau memicu alergimu.',
       imagePath: 'assets/images/onboarding/slide_nutrition.png',
       fallbackIcon: Icons.health_and_safety_rounded,
     ),
     OnboardingSlideData(
-      eyebrow: 'ASISTEN KULINER PINTAR',
+      eyebrow: 'RESEP & ASISTEN AI',
       title: 'Ide Resep & Asisten AI',
       description:
-          'Tanyakan tips penyimpanan agar buah tetap awet dan temukan ide olahan lezat sesuai kematangannya.',
+          'Temukan rekomendasi olahan pisang sesuai selera dan kematangannya, serta tanya AI untuk tips penyimpanan.',
       imagePath: 'assets/images/onboarding/slide_assistant.png',
       fallbackIcon: Icons.auto_awesome_rounded,
     ),

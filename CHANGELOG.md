@@ -5,6 +5,18 @@
 
 ---
 
+## Kamis, 19 November 2026
+
+### Ilustrasi Onboarding Baru (Tema BananaLens)
+- **Pembaruan 3 aset ilustrasi onboarding:** Mengganti `assets/images/onboarding/slide_scan.png`, `slide_nutrition.png`, dan `slide_assistant.png` (1024×1024 PNG transparan) agar selaras dengan gaya **BananaLens — Layered Tactile Industrial Minimalism** (*Banana Volt Yellow* `#F5D51E`, outline arang `#181A16`, *hard offset depth*) dan fokus khusus ke komoditas pisang (tanpa buah lain).
+- **Layout & Teks Onboarding:** Menghapus kotak `IndustrialSpecimenCard` di belakang ilustrasi pada `onboarding_slide_content.dart` agar gambar tampil lepas lebih besar (`340×330`), serta memperbarui teks pada `onboarding_screen.dart` agar fokus ke buah pisang (Mentah, Matang, Busuk), gizi/alergi, dan resep sesuai selera.
+- **Ilustrasi & Header Auth (Masuk, Daftar, Lupa Sandi):** Membuat 3 ilustrasi baru bertema **BananaLens** (`assets/images/auth/auth_login.png`, `auth_register.png`, `auth_forgot.png`) serta mengganti kotak card header di `auth_widgets.dart` dan `forgot_password_screen.dart` dengan ilustrasi lepas berukuran proporsional.
+- **Ikon Input Form (`app_text_field.dart`):** Menghapus kotak kuning pada `prefixIcon` form input agar ikon tampil bersih selaras dengan ikon kanan.
+- **Ikon Launcher Aplikasi (`ic_launcher_banana_foreground.xml`, `mipmap-*/ic_launcher*.png`):** Menyesuaikan skala kotak ikon (`0.58×`) agar masuk ke dalam *safe zone* lingkaran Adaptive Icon Android sehingga tidak terpotong di launcher.
+- **Native Splash Screen Android 12+ (`splash_banana_mark.xml`, `values/colors.xml`, `values-night/colors.xml`):** Mengubah latar splash native menjadi **Banana Volt Yellow** (`#F5D51E`) dan menampilkan logo kotak instrumen berbayangan hitam + pisang kuning skala aman (`0.58×`) persis seperti ikon aplikasi.
+
+---
+
 ## Rabu, 18 November 2026
 
 ### Kalibrasi Kematangan Pisang (Post-Processing Warna)
