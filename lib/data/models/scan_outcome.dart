@@ -11,6 +11,8 @@ final class ScanSuccess extends ScanOutcome {
     required this.fruitConfidence,
     required this.ripenessConfidence,
     this.classProbabilities,
+    this.greenRatio,
+    this.brownDarkRatio,
   });
 
   final String fruitLabel;
@@ -24,6 +26,11 @@ final class ScanSuccess extends ScanOutcome {
   /// Key: class name ('unripe', 'ripe', 'overripe', 'rotten'), Value: 0.0 - 1.0.
   final Map<String, double>? classProbabilities;
 
+  /// Optional pigment ratios (0.0 - 1.0) extracted from the fruit body mask,
+  /// used as inputs to the PSO-RF decision support system (SPK).
+  final double? greenRatio;
+  final double? brownDarkRatio;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -31,7 +38,9 @@ final class ScanSuccess extends ScanOutcome {
     if (fruitLabel != other.fruitLabel ||
         ripenessLabel != other.ripenessLabel ||
         fruitConfidence != other.fruitConfidence ||
-        ripenessConfidence != other.ripenessConfidence) {
+        ripenessConfidence != other.ripenessConfidence ||
+        greenRatio != other.greenRatio ||
+        brownDarkRatio != other.brownDarkRatio) {
       return false;
     }
     final a = classProbabilities;
@@ -50,6 +59,8 @@ final class ScanSuccess extends ScanOutcome {
     ripenessLabel,
     fruitConfidence,
     ripenessConfidence,
+    greenRatio,
+    brownDarkRatio,
     classProbabilities == null
         ? null
         : Object.hashAll(

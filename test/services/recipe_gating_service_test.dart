@@ -275,6 +275,57 @@ void main() {
     },
   );
 
+  test(
+    '4-class ripe (with native overripe key) stays in ripe bucket even if confidence < 75%',
+    () async {
+      final service = RecipeGatingService(
+        fruitInfoRepository: _StubFruitRepo(),
+        recipeRepository: _StubRecipeRepo(),
+      );
+
+      const outcome = ScanSuccess(
+        fruitLabel: 'banana',
+        ripenessLabel: 'ripe',
+        fruitConfidence: 0.90,
+        ripenessConfidence: 0.642,
+        classProbabilities: <String, double>{
+          'unripe': 0.003,
+          'ripe': 0.642,
+          'overripe': 0.213,
+          'rotten': 0.141,
+        },
+      );
+
+      final result = await service.evaluateGateOnly(outcome);
+      expect(result, isA<RipeBucketReadyResult>());
+      expect((result as RipeBucketReadyResult).bucket, RipenessBucket.ripe);
+    },
+  );
+
+  test('4-class overripe resolves directly to very_ripe bucket', () async {
+    final service = RecipeGatingService(
+      fruitInfoRepository: _StubFruitRepo(),
+      recipeRepository: _StubRecipeRepo(),
+    );
+
+    const outcome = ScanSuccess(
+      fruitLabel: 'banana',
+      ripenessLabel: 'overripe',
+      fruitConfidence: 0.92,
+      ripenessConfidence: 0.78,
+      classProbabilities: <String, double>{
+        'unripe': 0.01,
+        'ripe': 0.15,
+        'overripe': 0.78,
+        'rotten': 0.06,
+      },
+    );
+
+    final result = await service.evaluateGateOnly(outcome);
+    expect(result, isA<RipeBucketReadyResult>());
+    expect((result as RipeBucketReadyResult).bucket, RipenessBucket.veryRipe);
+  });
+
   test('unknown fruit returns UnknownFruitResult', () async {
     final service = RecipeGatingService(
       fruitInfoRepository: _StubFruitRepo(),

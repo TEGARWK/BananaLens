@@ -77,7 +77,7 @@ class HomeHeroScanCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppDimens.s12),
                 Text(
-                  'Cek Kesegaran Buah',
+                  'Pindai Pisang',
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: textInk,
                     fontWeight: FontWeight.w800,
@@ -88,7 +88,7 @@ class HomeHeroScanCard extends StatelessWidget {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.65,
                   child: Text(
-                    'Arahkan kamera ke buah untuk deteksi instan.',
+                    'Cek kematangan & saran olahan secara instan.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: textInk.withValues(alpha: 0.82),
                       height: 1.35,

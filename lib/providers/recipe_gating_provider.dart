@@ -5,6 +5,7 @@ import 'package:fruitlens/data/models/scan_outcome.dart';
 import 'package:fruitlens/providers/service_providers.dart';
 import 'package:fruitlens/services/gemini_recipe_service.dart';
 import 'package:fruitlens/services/recipe_gating_service.dart';
+import 'package:fruitlens/services/spk_decision_service.dart';
 
 /// Arguments passed to [ScanRecipesScreen] and [scanRecipesProvider].
 class ScanRecipesArgs {
@@ -66,6 +67,16 @@ final recipeGatingServiceProvider = Provider<RecipeGatingService>((ref) {
     recipeRepository: ref.watch(recipeRepositoryProvider),
     liveRecipeGenerator: ref.watch(liveRecipeGeneratorProvider),
   );
+});
+
+/// Loads and caches the offline PSO-Random Forest SPK model (`spk_pso_rf_model.json`).
+/// Returns `null` if the asset is unavailable (e.g. minimal widget tests).
+final spkDecisionProvider = FutureProvider<SpkDecisionService?>((ref) async {
+  try {
+    return await SpkDecisionService.loadFromAssets();
+  } catch (_) {
+    return null;
+  }
 });
 
 /// Evaluates post-scan recipe gating locally without calling Gemini AI.

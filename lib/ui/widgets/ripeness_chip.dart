@@ -27,7 +27,7 @@ class RipenessChip extends StatelessWidget {
         const Color(0xFF181A16),
       ),
       Ripeness.overripe => (
-        'Terlalu matang',
+        'Matang Banget',
         Icons.warning_amber_rounded,
         const Color(0xFFD97706),
         Colors.white,

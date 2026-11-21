@@ -2,24 +2,11 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'on_device_image_preprocessor.dart';
+import 'svm_model_validation.dart';
+import 'svm_post_processing.dart';
+import 'svm_prediction.dart';
 
-/// Prediction output from the on-device hybrid PCA + RBF SVM pipeline.
-class SvmPrediction {
-  const SvmPrediction({
-    required this.predictedClass,
-    required this.confidence,
-    required this.probabilities,
-    this.maxKernelSimilarity = 1.0,
-  });
-
-  final String predictedClass;
-  final double confidence;
-  final Map<String, double> probabilities;
-
-  /// Highest RBF kernel similarity `max_i exp(-gamma * ||x - sv_i||^2)` across
-  /// all banana support vectors; useful for out-of-distribution (non-banana) checks.
-  final double maxKernelSimilarity;
-}
+export 'svm_prediction.dart';
 
 /// Pure-Dart implementation of scikit-learn StandardScaler + PCA + LIBSVM RBF + Platt coupling.
 /// All fields are isolate-safe primitive/typed-data buffers loaded once from assets.
@@ -53,13 +40,30 @@ class OnDeviceSvmClassifier {
   final Float32List cnnScalerMean;
   final Float32List cnnScalerScale;
   final Float32List pcaMean;
-  final Float32List pcaComponents; // [100 * 576] row-major
+  final Float32List pcaComponents; // [pcaDim * cnnDim] row-major
   final Float32List hsvScalerMean;
   final Float32List hsvScalerScale;
-  final Float32List supportVectors; // [nSV * 130] row-major
+  final Float32List supportVectors; // [nSV * (pcaDim + hsvDim)] row-major
   final Float32List dualCoef; // [(K-1) * nSV] row-major
 
+  /// CNN feature size, read from the trained `cnn_scaler_mean` tensor.
+  int get cnnDim => cnnScalerMean.length;
+
+  /// Masked HSV feature size, read from the trained `hsv_scaler_mean` tensor.
+  int get hsvDim => hsvScalerMean.length;
+
+  /// Number of PCA components, derived from `pca_components` = [pcaDim x cnnDim].
+  int get pcaDim => pcaComponents.length ~/ cnnDim;
+
+  /// Final SVM input size (PCA-projected CNN + scaled HSV).
+  int get featureDim => pcaDim + hsvDim;
+
+  /// Total support vectors across all classes.
+  int get totalSupportVectors => nSupport.fold(0, (a, b) => a + b);
+
   /// Parses packed `svm_pisang_meta.json` string and `svm_pisang_weights.bin` bytes.
+  /// Every dimension (CNN, PCA, HSV, support vectors) follows the trained model;
+  /// throws [FormatException] when tensors are inconsistent with each other.
   factory OnDeviceSvmClassifier.fromAssets({
     required String metaJson,
     required Uint8List weightsBytes,
@@ -67,14 +71,29 @@ class OnDeviceSvmClassifier {
     final meta = jsonDecode(metaJson) as Map<String, dynamic>;
     final tensors = meta['tensors'] as Map<String, dynamic>;
 
+    if (weightsBytes.length % 4 != 0) {
+      throw const FormatException(
+        'Bobot model SVM rusak: ukuran file bukan kelipatan float32.',
+      );
+    }
+
     // Copy to a zero-aligned Uint8List before viewing as Float32List (little-endian).
     final aligned = Uint8List.fromList(weightsBytes);
     final allFloats = aligned.buffer.asFloat32List();
 
     Float32List sliceTensor(String name) {
-      final info = tensors[name] as Map<String, dynamic>;
+      final info = tensors[name];
+      if (info is! Map<String, dynamic>) {
+        throw FormatException('Tensor "$name" tidak ada di metadata model.');
+      }
       final offset = (info['offset'] as num).toInt();
       final length = (info['length'] as num).toInt();
+      if (offset < 0 || length <= 0 || offset + length > allFloats.length) {
+        throw FormatException(
+          'Tensor "$name" di luar batas file bobot '
+          '(offset=$offset, length=$length, total=${allFloats.length}).',
+        );
+      }
       return Float32List.sublistView(allFloats, offset, offset + length);
     }
 
@@ -83,7 +102,7 @@ class OnDeviceSvmClassifier {
     List<double> doubleList(String key) =>
         (meta[key] as List<dynamic>).map((e) => (e as num).toDouble()).toList();
 
-    return OnDeviceSvmClassifier(
+    final classifier = OnDeviceSvmClassifier(
       classNames: (meta['class_names'] as List<dynamic>)
           .map((e) => e.toString())
           .toList(growable: false),
@@ -102,47 +121,54 @@ class OnDeviceSvmClassifier {
       supportVectors: sliceTensor('support_vectors'),
       dualCoef: sliceTensor('dual_coef'),
     );
+    classifier.validateShapes();
+    return classifier;
   }
 
   /// Runs StandardScaler + PCA + RBF kernel + LIBSVM pairwise coupling probabilities,
   /// optionally applying chlorophyll post-processing calibration for unripe green bananas.
   SvmPrediction predict(
-    Float32List cnn576,
-    Float32List hsv30, {
+    Float32List cnnFeatures,
+    Float32List hsvFeatures, {
     PigmentRatios? pigmentRatios,
   }) {
-    const cnnDim = 576;
-    const pcaDim = 100;
-    const hsvDim = 30;
-    const totalDim = pcaDim + hsvDim; // 130
+    // All dimensions follow the trained model tensors (no hardcoded sizes).
+    final cnnDim = this.cnnDim;
+    final pcaDim = this.pcaDim;
+    final hsvDim = this.hsvDim;
+    final totalDim = featureDim;
+    if (cnnFeatures.length != cnnDim || hsvFeatures.length != hsvDim) {
+      throw FormatException(
+        'Ukuran fitur tidak cocok dengan model: CNN ${cnnFeatures.length}/$cnnDim, '
+        'HSV ${hsvFeatures.length}/$hsvDim.',
+      );
+    }
 
-    // 1. Scale CNN 576 & subtract PCA mean
+    // 1. Scale CNN features & subtract PCA mean
     final cnnCentered = Float64List(cnnDim);
     for (int i = 0; i < cnnDim; i++) {
-      final scaled = (cnn576[i] - cnnScalerMean[i]) / cnnScalerScale[i];
+      final scaled = (cnnFeatures[i] - cnnScalerMean[i]) / cnnScalerScale[i];
       cnnCentered[i] = scaled - pcaMean[i];
     }
 
-    // 2. Project via PCA components [100 x 576] and concatenate scaled HSV [30]
-    final x130 = Float64List(totalDim);
+    // 2. Project via PCA components [pcaDim x cnnDim] and concatenate scaled HSV
+    final xCombined = Float64List(totalDim);
     for (int c = 0; c < pcaDim; c++) {
       final rowOffset = c * cnnDim;
       double dot = 0.0;
       for (int i = 0; i < cnnDim; i++) {
         dot += cnnCentered[i] * pcaComponents[rowOffset + i];
       }
-      x130[c] = dot;
+      xCombined[c] = dot;
     }
     for (int i = 0; i < hsvDim; i++) {
-      x130[pcaDim + i] = (hsv30[i] - hsvScalerMean[i]) / hsvScalerScale[i];
+      xCombined[pcaDim + i] =
+          (hsvFeatures[i] - hsvScalerMean[i]) / hsvScalerScale[i];
     }
 
     // 3. Evaluate RBF kernel K(x, sv_i) = exp(-gamma * ||x - sv_i||^2)
     final numClasses = classNames.length;
-    int totalSv = 0;
-    for (final count in nSupport) {
-      totalSv += count;
-    }
+    final totalSv = totalSupportVectors;
 
     final kernel = Float64List(totalSv);
     double maxKernel = 0.0;
@@ -150,7 +176,7 @@ class OnDeviceSvmClassifier {
       final svOffset = i * totalDim;
       double distSq = 0.0;
       for (int j = 0; j < totalDim; j++) {
-        final d = x130[j] - supportVectors[svOffset + j];
+        final d = xCombined[j] - supportVectors[svOffset + j];
         distSq += d * d;
       }
       final kVal = math.exp(-gamma * distSq);
@@ -215,7 +241,7 @@ class OnDeviceSvmClassifier {
     }
 
     // 6. Wu, Lin & Weng (2004) multiclass pairwise coupling solver
-    final probs = _multiclassProbability(numClasses, pairwise);
+    final probs = SvmPostProcessing.multiclassProbability(numClasses, pairwise);
 
     final probMap = <String, double>{};
     for (int i = 0; i < numClasses; i++) {
@@ -223,8 +249,8 @@ class OnDeviceSvmClassifier {
     }
 
     if (pigmentRatios != null) {
-      _applyChlorophyllCalibration(probMap, pigmentRatios);
-      _applyOverripeYellowCalibration(probMap, pigmentRatios);
+      SvmPostProcessing.applyChlorophyllCalibration(probMap, pigmentRatios);
+      SvmPostProcessing.applyOverripeYellowCalibration(probMap, pigmentRatios);
     }
 
     String bestClass = classNames.first;
@@ -242,142 +268,5 @@ class OnDeviceSvmClassifier {
       probabilities: probMap,
       maxKernelSimilarity: maxKernel.clamp(0.0, 1.0),
     );
-  }
-
-  /// Reinforces `unripe` over `ripe` when explicit chlorophyll green pigment
-  /// covers >= 30% of the fruit body and dominates yellow and brown/dark pixels.
-  static void _applyChlorophyllCalibration(
-    Map<String, double> probMap,
-    PigmentRatios pigment,
-  ) {
-    if (pigment.activePixelCount < 50) return;
-    if (pigment.greenRatio < 0.30) return;
-    if (pigment.greenRatio <= pigment.yellowRatio ||
-        pigment.greenRatio <= pigment.brownDarkRatio) {
-      return;
-    }
-
-    final svmUnripe = probMap['unripe'];
-    final svmRipe = probMap['ripe'];
-    if (svmUnripe == null || svmRipe == null) return;
-
-    final pairBudget = svmUnripe + svmRipe;
-    if (pairBudget <= 1e-6) return;
-
-    final svmUnripeShare = svmUnripe / pairBudget;
-    final colorGreenShare =
-        pigment.greenRatio / (pigment.greenRatio + pigment.yellowRatio + 1e-6);
-    final blendedUnripeShare =
-        (0.20 * svmUnripeShare) + (0.80 * colorGreenShare);
-    final calibratedUnripe = (pairBudget * blendedUnripeShare).clamp(
-      0.0,
-      pairBudget,
-    );
-
-    if (calibratedUnripe > svmUnripe) {
-      probMap['unripe'] = calibratedUnripe;
-      probMap['ripe'] = (pairBudget - calibratedUnripe).clamp(0.0, pairBudget);
-    }
-
-    // Dampens false-positive `rotten` caused by inter-fruit shadows or dark
-    // backgrounds on green banana bunches when chlorophyll clearly dominates brown/dark pixels.
-    final svmRotten = probMap['rotten'];
-    if (svmRotten != null &&
-        svmRotten > 0.0 &&
-        pigment.greenRatio >= 0.35 &&
-        pigment.greenRatio >= pigment.brownDarkRatio * 1.8) {
-      final greenVsBrown =
-          (pigment.greenRatio /
-                  (pigment.greenRatio + pigment.brownDarkRatio + 1e-6))
-              .clamp(0.0, 1.0);
-      final rottenShift = (svmRotten * (0.75 * greenVsBrown)).clamp(
-        0.0,
-        svmRotten,
-      );
-      probMap['rotten'] = (svmRotten - rottenShift).clamp(0.0, 1.0);
-      probMap['unripe'] = ((probMap['unripe'] ?? 0.0) + rottenShift).clamp(
-        0.0,
-        1.0,
-      );
-    }
-  }
-
-  /// Keeps yellow bananas with sugar spots (`overripe`) in `ripe` instead of
-  /// `rotten` when bright yellow peel still dominates brown/dark areas.
-  static void _applyOverripeYellowCalibration(
-    Map<String, double> probMap,
-    PigmentRatios pigment,
-  ) {
-    if (pigment.activePixelCount < 50) return;
-    if (pigment.greenRatio >= 0.30) return;
-    if (pigment.yellowRatio < 0.50) return;
-    if (pigment.yellowRatio < pigment.brownDarkRatio * 1.6) return;
-
-    final svmRipe = probMap['ripe'];
-    final svmRotten = probMap['rotten'];
-    if (svmRipe == null || svmRotten == null) return;
-    if (svmRotten <= svmRipe) return;
-
-    final yellowDominance =
-        (pigment.yellowRatio /
-                (pigment.yellowRatio + pigment.brownDarkRatio + 1e-6))
-            .clamp(0.0, 1.0);
-    final shift = (svmRotten * (0.60 * yellowDominance)).clamp(0.0, svmRotten);
-
-    probMap['rotten'] = (svmRotten - shift).clamp(0.0, 1.0);
-    probMap['ripe'] = (svmRipe + shift).clamp(0.0, 1.0);
-  }
-
-  static Float64List _multiclassProbability(int k, List<Float64List> r) {
-    final q = List<Float64List>.generate(k, (_) => Float64List(k));
-    final p = Float64List(k);
-    final qp = Float64List(k);
-    final eps = 0.005 / k;
-
-    for (int t = 0; t < k; t++) {
-      p[t] = 1.0 / k;
-      q[t][t] = 0.0;
-      for (int j = 0; j < t; j++) {
-        q[t][t] += r[j][t] * r[j][t];
-        q[t][j] = q[j][t];
-      }
-      for (int j = t + 1; j < k; j++) {
-        q[t][t] += r[j][t] * r[j][t];
-        q[t][j] = -r[j][t] * r[t][j];
-      }
-    }
-
-    for (int iter = 0; iter < 100; iter++) {
-      double pQp = 0.0;
-      for (int t = 0; t < k; t++) {
-        double rowDot = 0.0;
-        for (int j = 0; j < k; j++) {
-          rowDot += q[t][j] * p[j];
-        }
-        qp[t] = rowDot;
-        pQp += p[t] * rowDot;
-      }
-
-      double maxError = 0.0;
-      for (int t = 0; t < k; t++) {
-        final error = (qp[t] - pQp).abs();
-        if (error > maxError) maxError = error;
-      }
-      if (maxError < eps) break;
-
-      for (int t = 0; t < k; t++) {
-        final diff = (-qp[t] + pQp) / q[t][t];
-        p[t] += diff;
-        pQp =
-            (pQp + diff * (diff * q[t][t] + 2.0 * qp[t])) /
-            (1.0 + diff) /
-            (1.0 + diff);
-        for (int j = 0; j < k; j++) {
-          qp[j] = (qp[j] + diff * q[t][j]) / (1.0 + diff);
-          p[j] /= (1.0 + diff);
-        }
-      }
-    }
-    return p;
   }
 }

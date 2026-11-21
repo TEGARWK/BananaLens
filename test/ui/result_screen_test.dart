@@ -142,10 +142,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Detail Analisis Kematangan'), findsOneWidget);
+      expect(find.text('Lihat rincian skor AI'), findsOneWidget);
+      await tester.tap(find.text('Lihat rincian skor AI'));
+      await tester.pumpAndSettle();
+
       expect(find.text('Mentah'), findsOneWidget);
       expect(find.text('Matang'), findsWidgets);
-      expect(find.text('Terlalu Matang'), findsOneWidget);
+      expect(find.text('Matang Banget'), findsOneWidget);
       expect(find.text('Busuk'), findsOneWidget);
       expect(find.text('94.5%'), findsOneWidget);
     },
@@ -194,11 +197,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Detail Analisis Kematangan'), findsOneWidget);
+      expect(find.text('Lihat rincian skor AI'), findsOneWidget);
+      await tester.tap(find.text('Lihat rincian skor AI'));
+      await tester.pumpAndSettle();
+
       expect(find.text('Mentah'), findsOneWidget);
       expect(find.text('Matang'), findsWidgets);
       expect(find.text('Busuk'), findsOneWidget);
-      expect(find.text('Terlalu Matang'), findsNothing);
+      expect(find.text('Matang Banget'), findsNothing);
     },
   );
 

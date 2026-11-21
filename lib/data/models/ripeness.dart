@@ -9,7 +9,7 @@ enum Ripeness {
   String get labelId => switch (this) {
     Ripeness.unripe => 'Mentah',
     Ripeness.ripe => 'Matang',
-    Ripeness.overripe => 'Terlalu matang',
+    Ripeness.overripe => 'Matang Banget',
     Ripeness.rotten => 'Busuk',
   };
 

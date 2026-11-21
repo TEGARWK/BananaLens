@@ -8,8 +8,11 @@ import '../../data/models/recipe.dart';
 import '../../data/models/scan_outcome.dart';
 import '../../providers/recipe_gating_provider.dart';
 import '../../services/recipe_gating_service.dart';
+import '../../services/spk_decision_service.dart';
 import 'industrial_art.dart';
 import 'primary_button.dart';
+import 'rotten_guidance_sheet.dart';
+import 'spk_recommendation_card.dart';
 
 /// Post-scan Recipe gating section on ResultScreen.
 /// Evaluates safety/ripeness gating locally (0 LLM quota used) and navigates to
@@ -28,6 +31,61 @@ class _ResultRecipeGatingSectionState
     extends ConsumerState<ResultRecipeGatingSection> {
   // 0 = "Tunggu matang", 1 = "Masak sekarang" for unripe edible fruits.
   int _unripeTabIndex = 0;
+  late SpkTargetDays _targetDays;
+  late SpkUsageGoal _usageGoal;
+
+  @override
+  void initState() {
+    super.initState();
+    _applyDefaultContext();
+  }
+
+  @override
+  void didUpdateWidget(covariant ResultRecipeGatingSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.outcome.ripenessLabel != widget.outcome.ripenessLabel) {
+      _applyDefaultContext();
+    }
+  }
+
+  void _applyDefaultContext() {
+    switch (widget.outcome.ripenessLabel.trim().toLowerCase()) {
+      case 'unripe':
+        _targetDays = SpkTargetDays.moreThanFourDays;
+        _usageGoal = SpkUsageGoal.retailDistribution;
+      case 'overripe' || 'very_ripe':
+        _targetDays = SpkTargetDays.today;
+        _usageGoal = SpkUsageGoal.culinaryProcessing;
+      default:
+        _targetDays = SpkTargetDays.today;
+        _usageGoal = SpkUsageGoal.freshConsumption;
+    }
+  }
+
+  List<SpkTargetDays> _allowedTargetDays() {
+    final ripeness = widget.outcome.ripenessLabel.trim().toLowerCase();
+    if (ripeness == 'overripe' || ripeness == 'very_ripe') {
+      return const [SpkTargetDays.today, SpkTargetDays.twoToThreeDays];
+    }
+    return SpkTargetDays.values;
+  }
+
+  List<SpkUsageGoal> _allowedUsageGoals() {
+    final ripeness = widget.outcome.ripenessLabel.trim().toLowerCase();
+    if (ripeness == 'unripe') {
+      return const [
+        SpkUsageGoal.retailDistribution,
+        SpkUsageGoal.culinaryProcessing,
+      ];
+    }
+    if (ripeness == 'overripe' || ripeness == 'very_ripe') {
+      return const [
+        SpkUsageGoal.freshConsumption,
+        SpkUsageGoal.culinaryProcessing,
+      ];
+    }
+    return SpkUsageGoal.values;
+  }
 
   void _openScanRecipes({
     required String fruitName,
@@ -46,6 +104,7 @@ class _ResultRecipeGatingSectionState
   @override
   Widget build(BuildContext context) {
     final gateAsync = ref.watch(recipeGateProvider(widget.outcome));
+    final spkService = ref.watch(spkDecisionProvider).asData?.value;
 
     return gateAsync.when(
       loading: () => Padding(
@@ -59,24 +118,62 @@ class _ResultRecipeGatingSectionState
         ),
       ),
       error: (_, _) => const SizedBox.shrink(),
-      data: (result) => switch (result) {
-        UnknownFruitResult() => const SizedBox.shrink(),
-        RottenDiscardResult(:final fruitName) => _buildRottenCard(
-          context,
-          fruitName,
-        ),
-        UnripeWaitOnlyResult(:final fruitName, :final estimatedDays) =>
-          _buildWaitOnlyCard(context, fruitName, estimatedDays),
-        UnripeDualOptionResult(
-          :final fruitName,
-          :final estimatedDays,
-          :final bucket,
-        ) =>
-          _buildDualOptionCard(context, fruitName, estimatedDays, bucket),
-        RipeBucketReadyResult(:final fruitName, :final bucket) =>
-          _buildRipeCtaCard(context, fruitName, bucket),
+      data: (result) {
+        if (result is UnknownFruitResult) {
+          return const SizedBox.shrink();
+        }
+        if (spkService != null) {
+          final plan = RecipeGatingService.resolveSpkActionPlan(
+            outcome: widget.outcome,
+            spkService: spkService,
+            targetDays: _targetDays,
+            usageGoal: _usageGoal,
+          );
+          final fruitName = _fruitNameFromResult(result);
+          return SpkRecommendationCard(
+            plan: plan,
+            showContextSelectors: result is! RottenDiscardResult,
+            allowedTargetDays: _allowedTargetDays(),
+            allowedUsageGoals: _allowedUsageGoals(),
+            targetDays: _targetDays,
+            usageGoal: _usageGoal,
+            onTargetDaysChanged: (v) => setState(() => _targetDays = v),
+            onUsageGoalChanged: (v) => setState(() => _usageGoal = v),
+            onOpenRecipes: (bucket) =>
+                _openScanRecipes(fruitName: fruitName, bucket: bucket),
+            onOpenRecycleTips: () =>
+                showRottenGuidanceSheet(context, fruitName),
+          );
+        }
+        return switch (result) {
+          UnknownFruitResult() => const SizedBox.shrink(),
+          RottenDiscardResult(:final fruitName) => _buildRottenCard(
+            context,
+            fruitName,
+          ),
+          UnripeWaitOnlyResult(:final fruitName, :final estimatedDays) =>
+            _buildWaitOnlyCard(context, fruitName, estimatedDays),
+          UnripeDualOptionResult(
+            :final fruitName,
+            :final estimatedDays,
+            :final bucket,
+          ) =>
+            _buildDualOptionCard(context, fruitName, estimatedDays, bucket),
+          RipeBucketReadyResult(:final fruitName, :final bucket) =>
+            _buildRipeCtaCard(context, fruitName, bucket),
+        };
       },
     );
+  }
+
+  String _fruitNameFromResult(RecipeGateResult result) {
+    return switch (result) {
+      RottenDiscardResult(:final fruitName) => fruitName,
+      UnripeWaitOnlyResult(:final fruitName) => fruitName,
+      UnripeDualOptionResult(:final fruitName) => fruitName,
+      RipeBucketReadyResult(:final fruitName) => fruitName,
+      UnknownFruitResult() => 'Pisang',
+    };
   }
 
   Widget _buildRottenCard(BuildContext context, String fruitName) {

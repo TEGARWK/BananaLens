@@ -224,20 +224,25 @@ void main() {
         expect(processed.cnnInputTensor.length, 224 * 224 * 3);
         expect(processed.hsvFeatures.length, 30);
 
-        // Compare closely against Python OpenCV calcHist + meanStdDev output on same lossless PNG
-        // (Minor delta allowed due to bilinear interpolation implementation details).
+        // Compare closely against Python OpenCV calcHist + meanStdDev + 4 pigment ratios:
+        // 12 Hue [0..12) + 5 Sat [12..17) + 5 Val [17..22) + 2 Mean + 2 Std + 4 Pigment Ratios [26..30).
         final sumH = processed.hsvFeatures
             .sublist(0, 12)
             .reduce((a, b) => a + b);
         final sumS = processed.hsvFeatures
-            .sublist(12, 18)
+            .sublist(12, 17)
             .reduce((a, b) => a + b);
         final sumV = processed.hsvFeatures
-            .sublist(18, 24)
+            .sublist(17, 22)
+            .reduce((a, b) => a + b);
+        final sumPigments = processed.hsvFeatures
+            .sublist(26, 30)
             .reduce((a, b) => a + b);
         expect(sumH, closeTo(2.5, 0.05));
         expect(sumS, closeTo(2.5, 0.01));
         expect(sumV, closeTo(2.5, 0.01));
+        // Slight overlap at H in 31..85 and V in 40..59 matches Python Sel 3 (`sum ~ 2.50-2.55`).
+        expect(sumPigments, closeTo(2.5, 0.05));
         expect(
           processed.hsvFeatures[1],
           greaterThan(0.5),
@@ -260,21 +265,26 @@ void main() {
     });
 
     test(
-      'loads real binary weights and computes calibrated 3-class probabilities',
+      'loads real binary weights and computes calibrated 4-class probabilities',
       () {
         final classifier = OnDeviceSvmClassifier.fromAssets(
           metaJson: metaJson,
           weightsBytes: weightsBytes,
         );
 
-        expect(classifier.classNames, ['ripe', 'rotten', 'unripe']);
+        expect(classifier.classNames, ['overripe', 'ripe', 'rotten', 'unripe']);
         expect(classifier.hsvWeight, closeTo(2.5, 0.001));
 
         final zeroCnn = Float32List(576);
         final zeroHsv = Float32List(30);
         final pred = classifier.predict(zeroCnn, zeroHsv);
 
-        expect(pred.probabilities.keys, {'ripe', 'rotten', 'unripe'});
+        expect(pred.probabilities.keys, {
+          'overripe',
+          'ripe',
+          'rotten',
+          'unripe',
+        });
         final sumProbs = pred.probabilities.values.reduce((a, b) => a + b);
         expect(sumProbs, closeTo(1.0, 0.001));
         expect(pred.confidence, greaterThan(0.0));
@@ -317,7 +327,12 @@ void main() {
         expect(success.fruitLabel, 'banana');
         expect(success.fruitConfidence, closeTo(0.92, 0.001));
         expect(success.classProbabilities, isNotNull);
-        expect(success.classProbabilities!.keys, {'ripe', 'rotten', 'unripe'});
+        expect(success.classProbabilities!.keys, {
+          'overripe',
+          'ripe',
+          'rotten',
+          'unripe',
+        });
       },
     );
 

@@ -241,11 +241,9 @@ class HomeTodayTipCard extends StatelessWidget {
                     const SizedBox(height: AppDimens.s4),
                     Text(
                       tip.shortText,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: ink.withValues(alpha: 0.8),
-                        height: 1.35,
+                        height: 1.4,
                       ),
                     ),
                   ],

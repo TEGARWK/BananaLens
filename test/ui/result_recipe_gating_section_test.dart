@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,6 +8,7 @@ import 'package:fruitlens/data/models/recipe.dart';
 import 'package:fruitlens/data/models/scan_outcome.dart';
 import 'package:fruitlens/providers/recipe_gating_provider.dart';
 import 'package:fruitlens/services/recipe_gating_service.dart';
+import 'package:fruitlens/services/spk_decision_service.dart';
 import 'package:fruitlens/ui/screens/scan_recipes_screen.dart';
 import 'package:fruitlens/ui/widgets/result_recipe_gating_section.dart';
 
@@ -21,6 +24,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          spkDecisionProvider.overrideWith((ref) async => null),
           recipeGateProvider(sampleOutcome).overrideWith(
             (ref) async => const RottenDiscardResult(fruitName: 'Pisang'),
           ),
@@ -45,6 +49,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          spkDecisionProvider.overrideWith((ref) async => null),
           recipeGateProvider(sampleOutcome).overrideWith(
             (ref) async => const UnripeWaitOnlyResult(
               fruitName: 'Alpukat',
@@ -73,6 +78,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            spkDecisionProvider.overrideWith((ref) async => null),
             recipeGateProvider(sampleOutcome).overrideWith(
               (ref) async => const UnripeDualOptionResult(
                 fruitName: 'Pisang',
@@ -105,6 +111,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          spkDecisionProvider.overrideWith((ref) async => null),
           recipeGateProvider(sampleOutcome).overrideWith(
             (ref) async => const RipeBucketReadyResult(
               fruitName: 'Pisang',
@@ -125,6 +132,240 @@ void main() {
     expect(find.text('Rekomendasi Resep'), findsOneWidget);
     expect(find.text('Matang Pas'), findsOneWidget);
   });
+
+  testWidgets(
+    'renders SPK decision card and updates when selector chips tapped',
+    (tester) async {
+      final spk = SpkDecisionService.fromJsonString(
+        File('assets/models/spk_pso_rf_model.json').readAsStringSync(),
+      );
+      const overripeOutcome = ScanSuccess(
+        fruitLabel: 'banana',
+        ripenessLabel: 'overripe',
+        fruitConfidence: 0.94,
+        ripenessConfidence: 0.78,
+        classProbabilities: {
+          'unripe': 0.01,
+          'ripe': 0.15,
+          'overripe': 0.78,
+          'rotten': 0.06,
+        },
+        greenRatio: 0.01,
+        brownDarkRatio: 0.25,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            spkDecisionProvider.overrideWith((ref) async => spk),
+            recipeGateProvider(overripeOutcome).overrideWith(
+              (ref) async => const RipeBucketReadyResult(
+                fruitName: 'Pisang',
+                bucket: RipenessBucket.veryRipe,
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(
+              body: SingleChildScrollView(
+                child: ResultRecipeGatingSection(outcome: overripeOutcome),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rencana pakai'), findsOneWidget);
+      expect(find.text('Tujuan'), findsOneWidget);
+      // For overripe, `> 4 hari` and `Jual` are hidden because they are unrealistic.
+      expect(find.text('> 4 hari'), findsNothing);
+      expect(find.text('Jual'), findsNothing);
+
+      await tester.tap(find.text('Olahan'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Segera Olah'), findsOneWidget);
+      expect(find.text('Rekomendasi Resep'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'unripe SPK card hides Konsumsi option and defaults to > 4 hari + Jual',
+    (tester) async {
+      final spk = SpkDecisionService.fromJsonString(
+        File('assets/models/spk_pso_rf_model.json').readAsStringSync(),
+      );
+      const unripeOutcome = ScanSuccess(
+        fruitLabel: 'banana',
+        ripenessLabel: 'unripe',
+        fruitConfidence: 0.90,
+        ripenessConfidence: 0.76,
+        classProbabilities: {
+          'unripe': 0.76,
+          'ripe': 0.12,
+          'overripe': 0.02,
+          'rotten': 0.10,
+        },
+        greenRatio: 0.75,
+        brownDarkRatio: 0.05,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            spkDecisionProvider.overrideWith((ref) async => spk),
+            recipeGateProvider(unripeOutcome).overrideWith(
+              (ref) async => const UnripeDualOptionResult(
+                fruitName: 'Pisang',
+                estimatedDays: '2–3 hari',
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(
+              body: SingleChildScrollView(
+                child: ResultRecipeGatingSection(outcome: unripeOutcome),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Konsumsi'), findsNothing);
+      expect(find.text('Jual'), findsOneWidget);
+      expect(find.text('Olahan'), findsOneWidget);
+      expect(find.text('Simpan & Distribusi'), findsOneWidget);
+
+      await tester.tap(find.text('Hari ini'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Olahan'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Segera Olah'), findsOneWidget);
+      expect(find.text('Rekomendasi Resep'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'renders SPK decision card and updates when selector chips tapped',
+    (tester) async {
+      final spk = SpkDecisionService.fromJsonString(
+        File('assets/models/spk_pso_rf_model.json').readAsStringSync(),
+      );
+      const overripeOutcome = ScanSuccess(
+        fruitLabel: 'banana',
+        ripenessLabel: 'overripe',
+        fruitConfidence: 0.94,
+        ripenessConfidence: 0.78,
+        classProbabilities: {
+          'unripe': 0.01,
+          'ripe': 0.15,
+          'overripe': 0.78,
+          'rotten': 0.06,
+        },
+        greenRatio: 0.01,
+        brownDarkRatio: 0.25,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            spkDecisionProvider.overrideWith((ref) async => spk),
+            recipeGateProvider(overripeOutcome).overrideWith(
+              (ref) async => const RipeBucketReadyResult(
+                fruitName: 'Pisang',
+                bucket: RipenessBucket.veryRipe,
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(
+              body: SingleChildScrollView(
+                child: ResultRecipeGatingSection(outcome: overripeOutcome),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rencana pakai'), findsOneWidget);
+      expect(find.text('Tujuan'), findsOneWidget);
+      // For overripe, `> 4 hari` and `Jual` are hidden because they are unrealistic.
+      expect(find.text('> 4 hari'), findsNothing);
+      expect(find.text('Jual'), findsNothing);
+
+      await tester.tap(find.text('Olahan'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Segera Olah'), findsOneWidget);
+      expect(find.text('Rekomendasi Resep'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'unripe SPK card hides Konsumsi option and defaults to > 4 hari + Jual',
+    (tester) async {
+      final spk = SpkDecisionService.fromJsonString(
+        File('assets/models/spk_pso_rf_model.json').readAsStringSync(),
+      );
+      const unripeOutcome = ScanSuccess(
+        fruitLabel: 'banana',
+        ripenessLabel: 'unripe',
+        fruitConfidence: 0.90,
+        ripenessConfidence: 0.76,
+        classProbabilities: {
+          'unripe': 0.76,
+          'ripe': 0.12,
+          'overripe': 0.02,
+          'rotten': 0.10,
+        },
+        greenRatio: 0.75,
+        brownDarkRatio: 0.05,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            spkDecisionProvider.overrideWith((ref) async => spk),
+            recipeGateProvider(unripeOutcome).overrideWith(
+              (ref) async => const UnripeDualOptionResult(
+                fruitName: 'Pisang',
+                estimatedDays: '2–3 hari',
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(
+              body: SingleChildScrollView(
+                child: ResultRecipeGatingSection(outcome: unripeOutcome),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Konsumsi'), findsNothing);
+      expect(find.text('Jual'), findsOneWidget);
+      expect(find.text('Olahan'), findsOneWidget);
+      expect(find.text('Simpan & Distribusi'), findsOneWidget);
+
+      await tester.tap(find.text('Hari ini'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Olahan'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Segera Olah'), findsOneWidget);
+      expect(find.text('Rekomendasi Resep'), findsOneWidget);
+    },
+  );
 
   testWidgets('ScanRecipesScreen renders AI recipes and backup recipes below', (
     tester,

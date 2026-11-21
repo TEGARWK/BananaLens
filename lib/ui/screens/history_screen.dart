@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,16 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
+import '../../core/utils/fruit_name_helper.dart';
 import '../../data/models/ripeness.dart';
 import '../../data/models/scan_result.dart';
 import '../../providers/history_providers.dart';
 import '../widgets/empty_state.dart';
-import '../widgets/fruit_image.dart';
 import '../widgets/fruitlens_app_bar.dart';
-import '../widgets/industrial_art.dart';
-import '../widgets/ripeness_chip.dart';
+import '../widgets/history_item_card.dart';
 import '../widgets/shimmer_box.dart';
-import '../widgets/soft_button.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -29,38 +25,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   String _selectedFilter = 'all';
   String _searchQuery = '';
   final _searchController = TextEditingController();
-  Timer? _hintTimer;
-  int _hintIndex = 0;
-
-  static const List<String> _searchHints = <String>[
-    'Cari buah berdasarkan kematangan...',
-    'Cari: Pisang, Matang, Mentah...',
-    'Ketik nama buah atau status busuk...',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _startHintTimer();
-  }
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    _startHintTimer();
-  }
-
-  void _startHintTimer() {
-    _hintTimer?.cancel();
-    _hintTimer = Timer.periodic(const Duration(milliseconds: 2500), (_) {
-      if (!mounted || _searchQuery.isNotEmpty) return;
-      setState(() => _hintIndex = (_hintIndex + 1) % _searchHints.length);
-    });
-  }
 
   @override
   void dispose() {
-    _hintTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -69,12 +36,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return items.where((item) {
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
-        final fruitId = _formatFruitName(item.fruitLabel).toLowerCase();
+        final fruitId = FruitNameHelper.toIndonesian(
+          item.fruitLabel,
+        ).toLowerCase();
         final fruitEn = item.fruitLabel.toLowerCase();
         final ripenessId = switch (Ripeness.fromLabel(item.ripenessLabel)) {
           Ripeness.unripe => 'mentah',
           Ripeness.ripe => 'matang',
-          Ripeness.overripe => 'terlalu matang',
+          Ripeness.overripe => 'matang banget terlalu matang',
           Ripeness.rotten => 'busuk',
           null => '',
         };
@@ -84,14 +53,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             fruitEn.contains(query) ||
             ripenessId.contains(query) ||
             ripenessEn.contains(query);
-        if (!matchesQuery) {
-          return false;
-        }
+        if (!matchesQuery) return false;
       }
 
       return switch (_selectedFilter) {
-        'ripe' => item.ripenessLabel == 'ripe',
         'unripe' => item.ripenessLabel == 'unripe',
+        'ripe' => item.ripenessLabel == 'ripe',
+        'overripe' =>
+          item.ripenessLabel == 'overripe' || item.ripenessLabel == 'very_ripe',
         'rotten' => item.ripenessLabel == 'rotten',
         _ => true,
       };
@@ -99,97 +68,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   Future<void> _confirmDelete(BuildContext context, ScanResult item) async {
-    final theme = Theme.of(context);
-    final harvest = context.harvest;
-    final ink = theme.colorScheme.onSurface;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: AppDimens.s24),
-        child: IndustrialSpecimenCard(
-          padding: const EdgeInsets.all(AppDimens.s20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const IndustrialTagChip(label: 'HAPUS // RIWAYAT'),
-                  Icon(
-                    Icons.delete_outline_rounded,
-                    size: 20,
-                    color: theme.colorScheme.error,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppDimens.s16),
-              Text(
-                'Hapus Riwayat?',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: AppDimens.s8),
-              Text(
-                'Riwayat scan ${_formatFruitName(item.fruitLabel)} akan dihapus permanen.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: harvest.muted,
-                ),
-              ),
-              const SizedBox(height: AppDimens.s20),
-              Row(
-                children: [
-                  Expanded(
-                    child: SoftButton(
-                      text: 'Batal',
-                      height: 48,
-                      fullWidth: true,
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                    ),
-                  ),
-                  const SizedBox(width: AppDimens.s12),
-                  Expanded(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppDimens.rButton),
-                        boxShadow: [
-                          BoxShadow(
-                            color: ink,
-                            offset: const Offset(0, 4),
-                            blurRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.error,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppDimens.rButton,
-                            ),
-                            side: BorderSide(color: ink, width: 1.5),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text('Hapus'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (confirmed == true && item.id != null) {
+    final confirmed = await showDeleteHistoryDialog(context, item);
+    if (confirmed && item.id != null) {
       await ref.read(historyListProvider.notifier).delete(item.id!);
       if (!context.mounted) return;
       ScaffoldMessenger.of(
@@ -249,16 +129,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               vertical: AppDimens.s12,
             ),
             children: [
-              // 1. Kolom cari bergaya instrumen
+              // 1. Kolom cari statis fokus status kematangan pisang
               TextField(
                 controller: _searchController,
-                onChanged: (val) {
-                  setState(() {
-                    _searchQuery = val.trim();
-                  });
-                },
+                onChanged: (val) => setState(() => _searchQuery = val.trim()),
                 decoration: InputDecoration(
-                  hintText: _searchHints[_hintIndex],
+                  hintText: 'Cari: Mentah, Matang, Matang Banget, Busuk...',
                   prefixIcon: Icon(Icons.search_rounded, color: ink, size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
@@ -273,24 +149,37 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
               const SizedBox(height: AppDimens.s12),
 
-              // 2. Chip filter horizontal (tanpa "Terlalu matang")
+              // 2. Chip filter 4 kelas kematangan lengkap
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
                     _buildFilterChip('all', 'Semua'),
                     const SizedBox(width: AppDimens.s8),
+                    _buildFilterChip('unripe', 'Mentah'),
+                    const SizedBox(width: AppDimens.s8),
                     _buildFilterChip('ripe', 'Matang'),
                     const SizedBox(width: AppDimens.s8),
-                    _buildFilterChip('unripe', 'Mentah'),
+                    _buildFilterChip('overripe', 'Matang Banget'),
                     const SizedBox(width: AppDimens.s8),
                     _buildFilterChip('rotten', 'Busuk'),
                   ],
                 ),
               ),
-              const SizedBox(height: AppDimens.s16),
+              const SizedBox(height: AppDimens.s12),
 
-              // 3. Daftar Kartu Riwayat dengan Dismissible swipe-to-delete
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppDimens.s8),
+                child: Text(
+                  '${filteredItems.length} hasil pindai',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: harvest.muted,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+
+              // 3. Daftar Kartu Riwayat
               if (filteredItems.isEmpty)
                 const EmptyState(
                   title: 'Tidak Ditemukan',
@@ -298,97 +187,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       'Tidak ada riwayat yang cocok dengan kata kunci atau filter ini.',
                 )
               else
-                ...filteredItems.map((item) {
-                  final ripeness = Ripeness.fromLabel(item.ripenessLabel);
-                  final itemKey = ValueKey(
-                    item.id ?? item.createdAt.toIso8601String(),
-                  );
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: AppDimens.s12),
-                    child: Dismissible(
-                      key: itemKey,
-                      direction: DismissDirection.endToStart,
-                      confirmDismiss: (_) async {
-                        await _confirmDelete(context, item);
-                        return false;
-                      },
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: AppDimens.s20),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.error,
-                          borderRadius: BorderRadius.circular(AppDimens.rCard),
-                          border: Border.all(color: ink, width: 1.5),
-                        ),
-                        child: Icon(
-                          Icons.delete_outline_rounded,
-                          color: theme.colorScheme.onError,
-                          size: 26,
-                        ),
-                      ),
-                      child: InkWell(
-                        onTap: () =>
-                            context.push('/history-detail', extra: item),
-                        borderRadius: BorderRadius.circular(AppDimens.rCard),
-                        child: IndustrialSpecimenCard(
-                          padding: const EdgeInsets.all(AppDimens.s12),
-                          child: Row(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                    AppDimens.s12,
-                                  ),
-                                  border: Border.all(color: ink, width: 1.2),
-                                ),
-                                child: FruitImage(
-                                  imagePath: item.imagePath,
-                                  fruitLabel: item.fruitLabel,
-                                  width: 60,
-                                  height: 60,
-                                  radius: AppDimens.s12 - 1,
-                                ),
-                              ),
-                              const SizedBox(width: AppDimens.s12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _formatFruitName(item.fruitLabel),
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                    ),
-                                    const SizedBox(height: AppDimens.s4),
-                                    Text(
-                                      _formatDate(item.createdAt),
-                                      style: theme.textTheme.labelSmall
-                                          ?.copyWith(color: harvest.muted),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (ripeness != null)
-                                RipenessChip(ripeness: ripeness),
-                              const SizedBox(width: AppDimens.s4),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  size: 20,
-                                ),
-                                color: harvest.muted,
-                                onPressed: () => _confirmDelete(context, item),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
+                ...filteredItems.map(
+                  (item) => HistoryItemCard(
+                    item: item,
+                    onTap: () => context.push('/history-detail', extra: item),
+                    onRequestDelete: () => _confirmDelete(context, item),
+                  ),
+                ),
             ],
           );
         },
@@ -404,6 +209,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     final (selectedBg, selectedFg) = switch (key) {
       'unripe' => (const Color(0xFF3E7D28), Colors.white),
+      'overripe' => (harvest.overripe, Colors.white),
       'rotten' => (const Color(0xFFC43E2B), Colors.white),
       _ => (theme.colorScheme.primary, theme.colorScheme.onPrimary),
     };
@@ -425,13 +231,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             width: isSelected ? 1.5 : 1.0,
           ),
           boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: ink,
-                    offset: const Offset(2, 2),
-                    blurRadius: 0,
-                  ),
-                ]
+              ? [BoxShadow(color: ink, offset: const Offset(2, 2))]
               : null,
         ),
         child: Text(
@@ -443,40 +243,5 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         ),
       ),
     );
-  }
-
-  String _formatFruitName(String label) {
-    return switch (label.toLowerCase()) {
-      'banana' => 'Pisang',
-      'apple' => 'Apel',
-      'orange' => 'Jeruk',
-      'mango' => 'Mangga',
-      'papaya' => 'Pepaya',
-      'strawberry' => 'Stroberi',
-      'avocado' => 'Alpukat',
-      'dragonfruit' => 'Buah Naga',
-      'guava' => 'Jambu Biji',
-      'pineapple' => 'Nanas',
-      _ =>
-        label.isNotEmpty
-            ? '${label[0].toUpperCase()}${label.substring(1)}'
-            : label,
-    };
-  }
-
-  String _formatDate(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-    final minuteStr = dt.minute.toString().padLeft(2, '0');
-    final hourStr = dt.hour.toString().padLeft(2, '0');
-
-    if (diff.inDays == 0 && now.day == dt.day) {
-      return 'Hari ini, $hourStr:$minuteStr';
-    } else if (diff.inDays <= 1 && now.day - dt.day == 1) {
-      return 'Kemarin, $hourStr:$minuteStr';
-    } else if (diff.inDays < 7) {
-      return '${diff.inDays} hari lalu';
-    }
-    return '${dt.day}/${dt.month}/${dt.year}';
   }
 }

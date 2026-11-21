@@ -6,6 +6,7 @@ import 'package:fruitlens/data/models/scan_outcome.dart';
 import 'package:fruitlens/data/repositories/fruit_info_repository.dart';
 import 'package:fruitlens/data/repositories/recipe_repository.dart';
 import 'package:fruitlens/services/gemini_recipe_service.dart';
+import 'package:fruitlens/services/spk_decision_service.dart';
 
 /// Deterministic gating output for the post-scan Result screen.
 /// Does NOT trigger any LLM call on its own, preserving API quota until the user
@@ -52,6 +53,23 @@ final class RipeBucketReadyResult extends RecipeGateResult {
 /// Fruit is not in the known database: hide recipe section cleanly.
 final class UnknownFruitResult extends RecipeGateResult {
   const UnknownFruitResult();
+}
+
+/// UI-ready action plan produced by [RecipeGatingService.resolveSpkActionPlan].
+class SpkActionPlan {
+  const SpkActionPlan({
+    required this.decision,
+    required this.confidence,
+    required this.recipeBucket,
+    required this.isDiscard,
+    required this.isWaitOrStore,
+  });
+
+  final SpkDecisionClass decision;
+  final double confidence;
+  final RipenessBucket? recipeBucket;
+  final bool isDiscard;
+  final bool isWaitOrStore;
 }
 
 /// Output of loading recipes for a scan result (live Gemini AI + local JSON/SQLite backup).
@@ -118,6 +136,45 @@ class RecipeGatingService {
 
     final bucket = RipenessRecipeConfig.resolveRipeBucket(outcome);
     return RipeBucketReadyResult(fruitName: fruit.nameId, bucket: bucket);
+  }
+
+  /// Resolves an SPK-backed action plan for [outcome] using [spkService],
+  /// enforcing the food-safety invariant that `rotten` scans always map to
+  /// class 3 (discard / compost) with no food recipe CTA.
+  static SpkActionPlan resolveSpkActionPlan({
+    required ScanSuccess outcome,
+    required SpkDecisionService spkService,
+    required SpkTargetDays targetDays,
+    required SpkUsageGoal usageGoal,
+  }) {
+    final result = spkService.evaluateFromScan(
+      outcome,
+      targetDays: targetDays,
+      usageGoal: usageGoal,
+    );
+    final ripeness = outcome.ripenessLabel.trim().toLowerCase();
+    // Food-safety guard: rotten bananas must never be offered culinary recipes.
+    final effectiveDecision = ripeness == 'rotten'
+        ? spkService.decisionClasses.firstWhere(
+            (c) => c.id == 3,
+            orElse: () => result.decisionClass,
+          )
+        : result.decisionClass;
+
+    final RipenessBucket? recipeBucket = switch (effectiveDecision.id) {
+      1 => RipenessBucket.ripe,
+      2 =>
+        ripeness == 'unripe' ? RipenessBucket.unripe : RipenessBucket.veryRipe,
+      _ => null,
+    };
+
+    return SpkActionPlan(
+      decision: effectiveDecision,
+      confidence: ripeness == 'rotten' ? 1.0 : result.confidence,
+      recipeBucket: recipeBucket,
+      isDiscard: effectiveDecision.id == 3,
+      isWaitOrStore: effectiveDecision.id == 0,
+    );
   }
 
   /// Fetches recipes for an eligible scan bucket using live Gemini AI first,

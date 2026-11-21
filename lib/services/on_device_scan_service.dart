@@ -93,14 +93,18 @@ class OnDeviceScanService implements ScanService {
     await _initFuture;
   }
 
-  Future<Float32List> _extractCnn576(Float32List cnnInput) async {
+  Future<Float32List> _extractCnnFeatures(
+    Float32List cnnInput,
+    int cnnDim,
+  ) async {
     final custom = _customExtractCnnFeatures;
     if (custom != null) {
       return custom(cnnInput);
     }
     await _ensureTfliteLoaded();
     final iso = _isolateInterpreter!;
-    final output = Float32List(576);
+    // Output size follows the trained SVM scaler (cnn_scaler_mean length).
+    final output = Float32List(cnnDim);
     await iso.run(cnnInput.buffer.asUint8List(), output.buffer);
     return output;
   }
@@ -124,7 +128,7 @@ class OnDeviceScanService implements ScanService {
         return const ScanUncertain();
       }
 
-      // 2. Muat bobot SVM (3.3 MB binary) & gambar mentah
+      // 2. Muat bobot SVM (binary) & gambar mentah
       final svm = await _ensureSvmLoaded();
       final rawBytes = await file.readAsBytes();
 
@@ -163,13 +167,16 @@ class OnDeviceScanService implements ScanService {
         }
       }
 
-      // 4. Ekstraksi fitur CNN MobileNetV3Small (576 fitur) via TFLite Isolate
-      final cnn576 = await _extractCnn576(preprocessed.cnnInputTensor);
+      // 4. Ekstraksi fitur CNN MobileNetV3Small via TFLite Isolate (dimensi mengikuti model)
+      final cnnFeatures = await _extractCnnFeatures(
+        preprocessed.cnnInputTensor,
+        svm.cnnDim,
+      );
 
       // 5. Klasifikasi PCA + RBF SVM + Platt Scaling + Kalibrasi Klorofil di background Isolate
       final prediction = await Isolate.run(
         () => svm.predict(
-          cnn576,
+          cnnFeatures,
           preprocessed.hsvFeatures,
           pigmentRatios: preprocessed.pigmentRatios,
         ),
@@ -177,7 +184,9 @@ class OnDeviceScanService implements ScanService {
       debugPrint(
         'OnDeviceScanService SVM -> class=${prediction.predictedClass}, '
         'confidence=${prediction.confidence.toStringAsFixed(3)}, '
-        'maxSim=${prediction.maxKernelSimilarity.toStringAsFixed(4)}, '
+        'pigment(g=${pigment.greenRatio.toStringAsFixed(2)}, '
+        'y=${pigment.yellowRatio.toStringAsFixed(2)}, '
+        'b=${pigment.brownDarkRatio.toStringAsFixed(2)}), '
         'probs=${prediction.probabilities}',
       );
 
@@ -204,6 +213,8 @@ class OnDeviceScanService implements ScanService {
         fruitConfidence: validation.fruitConfidence,
         ripenessConfidence: prediction.confidence,
         classProbabilities: prediction.probabilities,
+        greenRatio: pigment.greenRatio,
+        brownDarkRatio: pigment.brownDarkRatio,
       );
     } on FormatException catch (e) {
       return ScanFailure(e.message);

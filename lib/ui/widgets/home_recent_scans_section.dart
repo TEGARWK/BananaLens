@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -84,11 +86,9 @@ class HomeRecentScansSection extends StatelessWidget {
                         padding: const EdgeInsets.all(AppDimens.s16),
                         child: Row(
                           children: [
-                            FruitVectorIcon(
-                              fruitLabel: recents[i].fruitLabel,
-                              ripeness: recents[i].ripenessLabel,
-                              size: 44,
-                              isCircular: false,
+                            _RecentScanThumb(
+                              item: recents[i],
+                              ink: theme.colorScheme.onSurface,
                             ),
                             const SizedBox(width: AppDimens.s12),
                             Expanded(
@@ -138,6 +138,45 @@ class HomeRecentScansSection extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _RecentScanThumb extends StatelessWidget {
+  const _RecentScanThumb({required this.item, required this.ink});
+
+  final ScanResult item;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = item.imagePath;
+    if (path.isNotEmpty && File(path).existsSync()) {
+      return Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          border: Border.all(color: ink, width: 1.2),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.file(
+          File(path),
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => FruitVectorIcon(
+            fruitLabel: item.fruitLabel,
+            ripeness: item.ripenessLabel,
+            size: 44,
+            isCircular: false,
+          ),
+        ),
+      );
+    }
+    return FruitVectorIcon(
+      fruitLabel: item.fruitLabel,
+      ripeness: item.ripenessLabel,
+      size: 44,
+      isCircular: false,
     );
   }
 }

@@ -88,6 +88,7 @@ flutter:
     - assets/models/mobilenet_v3_extractor.tflite
     - assets/models/svm_pisang_meta.json
     - assets/models/svm_pisang_weights.bin
+    - assets/models/spk_pso_rf_model.json
     - assets/images/fruits/
     - assets/images/onboarding/
     - assets/images/auth/

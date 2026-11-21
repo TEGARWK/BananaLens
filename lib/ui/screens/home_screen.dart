@@ -10,23 +10,19 @@ import '../../providers/camera_providers.dart';
 import '../../providers/history_providers.dart';
 import '../../providers/scan_notifier.dart';
 import '../widgets/home_hero_scan_card.dart';
-import '../widgets/home_quick_action_chips.dart';
 import '../widgets/home_quick_stats_row.dart';
 import '../widgets/home_recent_scans_section.dart';
 import '../widgets/home_recipes_section.dart';
-import '../widgets/home_smart_reminder_card.dart';
 import '../widgets/home_today_tip_card.dart';
 import '../widgets/industrial_art.dart';
 
-/// Screen utama FruitLens dengan susunan informasi lengkap:
-/// 1. Sapaan + Avatar
-/// 2. Hero "Cek Kesegaran Buah" (Kamera + Dari Galeri)
-/// 3. Aksi Cepat (3 chip: Tips Buah, Asisten AI, Resep Sehat)
-/// 4. Statistik Ringkas (Total scan, Buah matang, Buah favorit)
-/// 5. Pengingat Buah & Rekomendasi Personal
-/// 6. Riwayat Terakhir
-/// 7. Resep Rekomendasi (horizontal)
-/// 8. Tips Hari Ini (dialog pembaca modal)
+/// Main BananaLens home screen with a focused 6-block hierarchy:
+/// 1. Header greeting + profile avatar
+/// 2. Hero "Pindai Pisang" card (Camera + Gallery)
+/// 3. 3-column scan metric strip (Total Pindai, Siap Santap, Mentah)
+/// 4. Recent scans with real thumbnails
+/// 5. Recommended banana recipes
+/// 6. Single daily insight card
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -75,45 +71,26 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppDimens.s16),
 
-            // 2. Hero "Cek Kesegaran Buah"
+            // 2. Hero "Pindai Pisang"
             HomeHeroScanCard(
               onScanTap: () => context.go('/scan'),
               onGalleryTap: () => _pickFromGallery(context, ref),
             ),
-            const SizedBox(height: AppDimens.s12),
-
-            // 3. Aksi Cepat
-            HomeQuickActionChips(
-              onTipsTap: () {
-                final dayIndex =
-                    DateTime.now().weekday % HomeTodayTipCard.tipsList.length;
-                HomeTodayTipCard.showTipDialog(
-                  context,
-                  HomeTodayTipCard.tipsList[dayIndex],
-                );
-              },
-              onAiTap: () => context.go('/chat'),
-              onRecipeTap: () => context.go('/recipes'),
-            ),
             const SizedBox(height: AppDimens.s16),
 
-            // 4. Statistik Ringkas
+            // 3. Strip Statistik Pindai
             HomeQuickStatsRow(historyAsync: historyAsync),
-            const SizedBox(height: AppDimens.s16),
+            const SizedBox(height: AppDimens.s20),
 
-            // 5. Pengingat Buah Cerdas
-            HomeSmartReminderCard(historyAsync: historyAsync),
-            const SizedBox(height: AppDimens.s16),
-
-            // 6. Riwayat Terakhir
+            // 4. Riwayat Terakhir
             HomeRecentScansSection(historyAsync: historyAsync),
             const SizedBox(height: AppDimens.s20),
 
-            // 7. Rekomendasi Resep
+            // 5. Resep Pilihan
             const HomeRecipesSection(),
             const SizedBox(height: AppDimens.s20),
 
-            // 8. Tips Hari Ini
+            // 6. Tips Hari Ini (tunggal, tanpa duplikasi)
             const HomeTodayTipCard(),
             const SizedBox(height: AppDimens.s24),
           ],
@@ -173,7 +150,7 @@ class _HomeHeader extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'Mau cek kesegaran buah apa hari ini?',
+                'Pantau kematangan pisang hari ini.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: harvest.muted,
                 ),

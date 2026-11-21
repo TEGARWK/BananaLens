@@ -28,6 +28,12 @@ abstract final class RipenessRecipeConfig {
     }
 
     final probs = outcome.classProbabilities;
+    // When the 4-class model explicitly includes `overripe`, trust its primary
+    // `ripe` decision instead of shifting borderline `ripe` scans to `veryRipe`.
+    if (probs != null && probs.containsKey('overripe')) {
+      return RipenessBucket.ripe;
+    }
+
     final rottenProb = probs?['rotten'] ?? 0.0;
     final unripeProb = probs?['unripe'] ?? 0.0;
 

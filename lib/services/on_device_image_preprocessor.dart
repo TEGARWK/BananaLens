@@ -153,8 +153,9 @@ abstract final class OnDeviceImagePreprocessor {
         final b = rgbBytes[p + 2];
         final (h, s, v) = rgbToOpenCvHsv(r, g, b);
 
-        // Ignore white paper, grey floors, or dark shadows outside fruit pigment.
+        // Ignore white paper, grey floors, or dark asphalt/shadows outside fruit pigment.
         if (s < 28 || v < 20) continue;
+        if (v < 85 && s < 75) continue;
 
         activeCount++;
         final isVividRedOrange = (h <= 15 || h >= 165) && s >= 140 && v >= 145;
@@ -231,12 +232,13 @@ abstract final class OnDeviceImagePreprocessor {
 
     final useMask = maskCount >= 50;
     final hHist = Float64List(12);
-    final sHist = Float64List(6);
-    final vHist = Float64List(6);
+    final sHist = Float64List(5);
+    final vHist = Float64List(5);
 
-    double sumH = 0, sumS = 0, sumV = 0;
-    double sqH = 0, sqS = 0, sqV = 0;
+    double sumH = 0, sumS = 0;
+    double sqH = 0, sqS = 0;
     int activeCount = 0;
+    int greenPx = 0, yellowPx = 0, brownSpotPx = 0, darkRottenPx = 0;
 
     for (int i = 0; i < croppedCount; i++) {
       if (useMask && maskFlags[i] == 0) continue;
@@ -251,15 +253,25 @@ abstract final class OnDeviceImagePreprocessor {
           hHist[hBin] += 1.0;
         }
       }
-      sHist[(s * 6) ~/ 256] += 1.0;
-      vHist[(v * 6) ~/ 256] += 1.0;
+      sHist[(s * 5) ~/ 256] += 1.0;
+      vHist[(v * 5) ~/ 256] += 1.0;
 
       sumH += h;
       sumS += s;
-      sumV += v;
       sqH += h * h;
       sqS += s * s;
-      sqV += v * v;
+
+      if (h >= 31 && h <= 85 && v >= 40) {
+        greenPx++;
+      } else if (h >= 18 && h < 31 && v >= 110) {
+        yellowPx++;
+      } else if ((h < 18 && v >= 60) ||
+          (h >= 18 && h < 31 && v >= 60 && v < 110)) {
+        brownSpotPx++;
+      }
+      if (v < 60) {
+        darkRottenPx++;
+      }
       activeCount++;
     }
 
@@ -270,29 +282,30 @@ abstract final class OnDeviceImagePreprocessor {
     final denom = activeCount > 0 ? activeCount.toDouble() : 1.0;
     final meanH = sumH / denom;
     final meanS = sumS / denom;
-    final meanV = sumV / denom;
-
     final stdH = math.sqrt(math.max(0.0, (sqH / denom) - meanH * meanH));
     final stdS = math.sqrt(math.max(0.0, (sqS / denom) - meanS * meanS));
-    final stdV = math.sqrt(math.max(0.0, (sqV / denom) - meanV * meanV));
+    final ratioDenom = activeCount + 1e-7;
 
+    // 12 Hue + 5 Sat + 5 Val + 2 Mean(H,S) + 2 Std(H,S) + 4 Pigment Ratios = 30
     final result = Float32List(30);
     int out = 0;
     for (int i = 0; i < 12; i++) {
-      result[out++] = (hHist[i] * hsvWeight).toDouble();
+      result[out++] = hHist[i] * hsvWeight;
     }
-    for (int i = 0; i < 6; i++) {
-      result[out++] = (sHist[i] * hsvWeight).toDouble();
+    for (int i = 0; i < 5; i++) {
+      result[out++] = sHist[i] * hsvWeight;
     }
-    for (int i = 0; i < 6; i++) {
-      result[out++] = (vHist[i] * hsvWeight).toDouble();
+    for (int i = 0; i < 5; i++) {
+      result[out++] = vHist[i] * hsvWeight;
     }
     result[out++] = (meanH / 255.0) * hsvWeight;
     result[out++] = (meanS / 255.0) * hsvWeight;
-    result[out++] = (meanV / 255.0) * hsvWeight;
     result[out++] = (stdH / 255.0) * hsvWeight;
     result[out++] = (stdS / 255.0) * hsvWeight;
-    result[out++] = (stdV / 255.0) * hsvWeight;
+    result[out++] = (greenPx / ratioDenom) * hsvWeight;
+    result[out++] = (yellowPx / ratioDenom) * hsvWeight;
+    result[out++] = (brownSpotPx / ratioDenom) * hsvWeight;
+    result[out++] = (darkRottenPx / ratioDenom) * hsvWeight;
 
     return result;
   }

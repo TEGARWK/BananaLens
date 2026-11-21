@@ -32,7 +32,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.appName), findsOneWidget);
+    expect(find.text('Pindai Pisang'), findsOneWidget);
     expect(find.text('Mulai Scan'), findsOneWidget);
+    expect(find.text('Total Pindai'), findsOneWidget);
+    expect(find.text('Siap Santap'), findsOneWidget);
+    expect(find.text('Mentah'), findsOneWidget);
+    expect(find.text('Buah Favorit'), findsNothing);
     expect(find.textContaining('Tips Hari Ini'), findsOneWidget);
     expect(find.text('Riwayat Terakhir'), findsOneWidget);
   });

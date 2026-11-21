@@ -5,6 +5,29 @@
 
 ---
 
+## Sabtu, 21 November 2026
+
+### Integrasi Model SVM 4-Kelas (PCA 100) & Refactor Classifier Dinamis
+- **Refaktor `OnDeviceSvmClassifier` bebas hardcode (`on_device_svm_classifier.dart`, `on_device_scan_service.dart`):** Menghapus seluruh konstanta dimensi tetap (`576`, `30`, `100`) sehingga `cnnDim`, `hsvDim`, `pcaDim`, dan `featureDim` dibaca dinamis langsung dari tensor model (`cnn_scaler_mean`, `hsv_scaler_mean`, `pca_components`).
+- **Modularisasi & Validasi Tensor (`svm_prediction.dart`, `svm_model_validation.dart`, `svm_post_processing.dart`):** Memecah kode classifier ke modul terpisah (`<= 275` baris/file) serta menambahkan `validateShapes()` untuk memastikan kesesuaian ukuran tensor saat model dimuat.
+- **Pembaruan Aset Model Jalur B Terbaru (`assets/models/`):** Mengganti `svm_pisang_meta.json`, `svm_pisang_weights.bin` (`3.1 MB`, 4 kelas `overripe`/`ripe`/`rotten`/`unripe`, `PCA = 100`, `5.434` *support vectors*), serta `mobilenet_v3_extractor.tflite`.
+- **Sinkronisasi Gating Resep 4-Kelas (`ripeness_recipe_config.dart`):** Memperbaiki bug di mana hasil `Matang` (`<75%`) dari model 4-kelas sempat tergeser ke `Matang Banget` oleh aturan fallback 3-kelas lama.
+- **Dokumentasi & Test (`hasil_testing/LAPORAN_AUDIT_TESTING_V2_4KELAS.md`, `test/services/on_device_svm_classifier_test.dart`, `test/services/recipe_gating_service_test.dart`):** Menambahkan laporan audit 12 sampel uji V2, test validasi dimensi dinamis (PCA 60 & 100), serta verifikasi penuh **`125 / 125` test lulus** dan `flutter analyze` bersih (`0` isu).
+
+### Integrasi SPK PSO-Random Forest untuk Rekomendasi Tindakan (`Tahap 2`)
+- **Aset & Mesin Inferensi SPK Offline (`assets/models/spk_pso_rf_model.json`, `lib/services/spk_decision_service.dart`):** Menambahkan model 26 pohon *PSO-Optimized Random Forest* ke aset Flutter dan membangun mesin inferensi pure-Dart offline dengan 8 fitur input (`prob_unripe/ripe/overripe/rotten * 100`, `green_ratio`, `brown_dark_ratio`, `target_days`, `usage_goal`) serta 4 kelas keputusan tindakan.
+- **Penerusan Rasio Pigmen (`scan_outcome.dart`, `on_device_scan_service.dart`):** Menyimpan `greenRatio` dan `brownDarkRatio` dari `PigmentRatios` ke `ScanSuccess` agar dapat dikonsumsi langsung oleh SPK tanpa komputasi ulang.
+- **Gating Tindakan & Pengaman Pangan (`recipe_gating_service.dart`, `recipe_gating_provider.dart`):** Menghubungkan `SpkDecisionService` ke `RecipeGatingService.resolveSpkActionPlan()` dengan pengaman pangan agar hasil pindai `rotten` selalu terkunci ke keputusan buang/kompos (kelas `3`).
+- **UI Interaktif Layar Hasil (`spk_recommendation_card.dart`, `result_recipe_gating_section.dart`):** Menambahkan kartu rekomendasi SPK beserta pilihan interaktif `Rencana pakai` (`Hari ini`, `2–3 hari`, `> 4 hari`) dan `Tujuan` (`Konsumsi`, `Jual`, `Olahan`) yang menghitung ulang keputusan secara instan.
+- **Verifikasi Paritas & Widget Test (`test/services/spk_decision_service_test.dart`, `test/ui/result_recipe_gating_section_test.dart`):** Uji paritas Dart vs Python (selisih `< 1e-5` pada 5 skenario), uji pengaman pangan, serta uji interaksi widget — seluruh **`136 / 136` test lulus** dan `flutter analyze` bersih (`0` isu).
+- **Kalibrasi Latar Gelap Pisang Kuning (`lib/services/svm_post_processing.dart`, `on_device_image_preprocessor.dart`):** Menyempurnakan `applyOverripeYellowCalibration()` serta filter aspal/bayangan gelap (`v < 85 && s < 75`) agar pisang kuning bersih di latar gelap/aspal dikembalikan aman ke `ripe` (`Matang`), sementara pisang busuk gelap tetap tidak tersentuh.
+- **Upgrade UX Halaman Hasil Pindai & Penyesuaian Tombol SPK (`result_success_view.dart`, `result_probability_accordion.dart`, `spk_recommendation_card.dart`, `result_recipe_gating_section.dart`):** Menyederhanakan layar hasil menjadi 4 blok logis tanpa duplikasi (menghapus tombol `Ide Resep` ganda serta kartu statis `Analisis Kematangan` & `Cara Menyimpan`), melipat rincian 4 skor AI ke accordion (`Lihat rincian skor AI`), memindahkan kartu SPK ke posisi utama dengan pilihan di bagian atas, serta menyesuaikan opsi & default SPK agar masuk akal per kondisi (`Mentah` tanpa opsi `Konsumsi`, `Matang Banget` tanpa `> 4 hari`/`Jual`, `Busuk` langsung ke `Buang / Kompos` + `Tips Daur Ulang`) — **`138 / 138` test lulus**.
+- **Upgrade UI/UX Beranda Anti-Slop (`home_screen.dart`, `home_hero_scan_card.dart`, `home_quick_stats_row.dart`, `home_recent_scans_section.dart`, `home_recipes_section.dart`, `home_today_tip_card.dart`):** Menghapus 3 chip cepat terpotong (`Tips Bu...`, `Asisten...`, `Resep S...`) dan kartu duplikat `Pengingat Kesegaran`, mengganti 3 kotak statistik sempit (`Buah Favorit: Pisang`) dengan 1 strip metrik 3 kolom (`Total Pindai`, `Siap Santap`, `Mentah`) tanpa elipsis, menyelaraskan copywriting ke BananaLens (`Pindai Pisang`), menampilkan thumbnail foto asli di Riwayat Terakhir, serta menambahkan target kematangan pada kartu resep.
+- **Penyelarasan Ekstraksi 30 Fitur HSV Sel 3 (`on_device_image_preprocessor.dart`):** Memperbarui susunan vektor HSV dari format lama (`12+6+6+3+3`) ke format model terbaru (`12 Hue + 5 Sat + 5 Val + 2 Mean(H,S) + 2 Std(H,S) + 4 Rasio Pigmen`, masing-masing dikali `hsvWeight = 2.5`) agar 100% identik dengan pipeline training Colab — **`138 / 138` test lulus**, `flutter analyze` bersih (`0` isu).
+- **Upgrade UI/UX Halaman Riwayat Scan (`history_screen.dart`, `history_item_card.dart`):** Menambahkan chip filter `Matang Banget`, menampilkan persentase keyakinan (`% yakin`) serta penghitung jumlah hasil (`N hasil pindai`), memperbaiki pencarian kata kunci `'matang banget'`, menghapus timer kedip hint search dengan hint fokus pisang, memperbaiki bug selisih hari pergantian bulan pada `_formatDate`, serta memecah kartu item ke komponen terpisah (`<= 230` baris/file).
+
+---
+
 ## Kamis, 19 November 2026
 
 ### Ilustrasi Onboarding Baru (Tema BananaLens)
