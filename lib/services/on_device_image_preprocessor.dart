@@ -69,20 +69,19 @@ abstract final class OnDeviceImagePreprocessor {
     }
 
     final oriented = img.bakeOrientation(decoded);
-    final interpolation =
-        (oriented.width > inputSize * 1.5 || oriented.height > inputSize * 1.5)
-        ? img.Interpolation.average
-        : img.Interpolation.linear;
     final resized = img.copyResize(
       oriented,
       width: inputSize,
       height: inputSize,
-      interpolation: interpolation,
+      interpolation: img.Interpolation.linear,
     );
-    final rgbImage =
-        (resized.numChannels == 3 && resized.format == img.Format.uint8)
+    final hasAlpha = resized.numChannels == 4;
+    final uint8Image = resized.format == img.Format.uint8
         ? resized
-        : resized.convert(format: img.Format.uint8, numChannels: 3);
+        : resized.convert(
+            format: img.Format.uint8,
+            numChannels: resized.numChannels,
+          );
 
     final rgbBytes = Uint8List(inputSize * inputSize * 3);
     final cnnInput = Float32List(inputSize * inputSize * 3);
@@ -90,10 +89,16 @@ abstract final class OnDeviceImagePreprocessor {
     int idx = 0;
     for (int y = 0; y < inputSize; y++) {
       for (int x = 0; x < inputSize; x++) {
-        final pixel = rgbImage.getPixel(x, y);
-        final r = pixel.r.toInt();
-        final g = pixel.g.toInt();
-        final b = pixel.b.toInt();
+        final pixel = uint8Image.getPixel(x, y);
+        int r = pixel.r.toInt();
+        int g = pixel.g.toInt();
+        int b = pixel.b.toInt();
+        if (hasAlpha) {
+          final a = pixel.a.toDouble() / 255.0;
+          r = (r * a + 255.0 * (1.0 - a)).round().clamp(0, 255);
+          g = (g * a + 255.0 * (1.0 - a)).round().clamp(0, 255);
+          b = (b * a + 255.0 * (1.0 - a)).round().clamp(0, 255);
+        }
         rgbBytes[idx] = r;
         rgbBytes[idx + 1] = g;
         rgbBytes[idx + 2] = b;
@@ -140,6 +145,7 @@ abstract final class OnDeviceImagePreprocessor {
     final endX = width - mw;
 
     int activeCount = 0;
+    int vividSampleCount = 0;
     int greenCount = 0;
     int yellowCount = 0;
     int brownDarkCount = 0;
@@ -153,11 +159,11 @@ abstract final class OnDeviceImagePreprocessor {
         final b = rgbBytes[p + 2];
         final (h, s, v) = rgbToOpenCvHsv(r, g, b);
 
-        // Ignore white paper, grey floors, or dark asphalt/shadows outside fruit pigment.
+        // Ignore white/grey neutral backgrounds and dark shadows/asphalt.
         if (s < 28 || v < 20) continue;
         if (v < 85 && s < 75) continue;
 
-        activeCount++;
+        vividSampleCount++;
         final isVividRedOrange = (h <= 15 || h >= 165) && s >= 140 && v >= 145;
         final isPurpleMagenta = h >= 125 && h <= 164 && s >= 45 && v >= 20;
         final isVividBlue = h >= 100 && h < 125 && s >= 100 && v >= 60;
@@ -165,26 +171,34 @@ abstract final class OnDeviceImagePreprocessor {
           nonBananaVividCount++;
         }
 
-        if (h >= 31 && h <= 88 && g > r + 5) {
+        // Banana pigment mask matching Python `calibrate_4class_probs` (`H <= 90`).
+        if (h > 90) continue;
+        activeCount++;
+
+        if ((h >= 31 && h <= 88 && v >= 40) || (g > r + 5 && g > b + 15)) {
           greenCount++;
-        } else if (h >= 16 && h <= 30 && v >= 90) {
+        }
+        if (h >= 18 && h < 31 && v >= 110 && r >= g) {
           yellowCount++;
-        } else if (h < 16 || v < 90) {
+        }
+        if (h < 18 || v < 110) {
           brownDarkCount++;
         }
       }
     }
 
-    if (activeCount == 0) {
+    if (activeCount == 0 && vividSampleCount == 0) {
       return const PigmentRatios.empty();
     }
 
     return PigmentRatios(
-      greenRatio: greenCount / activeCount,
-      yellowRatio: yellowCount / activeCount,
-      brownDarkRatio: brownDarkCount / activeCount,
+      greenRatio: activeCount == 0 ? 0.0 : greenCount / activeCount,
+      yellowRatio: activeCount == 0 ? 0.0 : yellowCount / activeCount,
+      brownDarkRatio: activeCount == 0 ? 0.0 : brownDarkCount / activeCount,
       activePixelCount: activeCount,
-      nonBananaVividRatio: nonBananaVividCount / activeCount,
+      nonBananaVividRatio: vividSampleCount == 0
+          ? 0.0
+          : nonBananaVividCount / vividSampleCount,
     );
   }
 

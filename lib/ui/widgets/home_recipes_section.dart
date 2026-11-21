@@ -53,7 +53,7 @@ class HomeRecipesSection extends ConsumerWidget {
             if (recipes.isEmpty) return const SizedBox.shrink();
 
             return SizedBox(
-              height: 168,
+              height: 212,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.only(bottom: 4, right: 4),
@@ -132,6 +132,8 @@ class HomeRecipesSection extends ConsumerWidget {
                             const SizedBox(height: AppDimens.s4),
                             Text(
                               '${recipe.ripenessBucket.labelId} · ${recipe.ingredients.length} bahan',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: harvest.muted,
                                 fontSize: 11,

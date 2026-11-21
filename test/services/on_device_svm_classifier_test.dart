@@ -75,10 +75,10 @@ void main() {
 
       expect(c.classNames, ['overripe', 'ripe', 'rotten', 'unripe']);
       expect(c.cnnDim, 576);
-      expect(c.pcaDim, 100);
+      expect(c.pcaDim, 60);
       expect(c.hsvDim, 30);
-      expect(c.featureDim, 130);
-      expect(c.totalSupportVectors, 5434);
+      expect(c.featureDim, 90);
+      expect(c.totalSupportVectors, 3899);
     });
 
     test('real bundled model: every tensor min/max matches metadata', () {
@@ -185,87 +185,139 @@ void main() {
     });
 
     test(
-      'clean yellow banana on dark background dampens false rotten into ripe',
+      'calibrate4ClassProbs boosts unripe when greenRatio >= 0.25 and > yellowRatio',
       () {
         final probs = <String, double>{
-          'unripe': 0.004,
-          'ripe': 0.385,
-          'overripe': 0.026,
-          'rotten': 0.584,
+          'unripe': 0.22,
+          'ripe': 0.65,
+          'overripe': 0.03,
+          'rotten': 0.10,
         };
-        SvmPostProcessing.applyOverripeYellowCalibration(
+        SvmPostProcessing.calibrate4ClassProbs(
           probs,
           const PigmentRatios(
-            greenRatio: 0.02,
-            yellowRatio: 0.58,
-            brownDarkRatio: 0.14,
+            greenRatio: 0.70,
+            yellowRatio: 0.10,
+            brownDarkRatio: 0.20,
             activePixelCount: 4000,
           ),
         );
-        expect(probs['ripe']!, greaterThan(probs['rotten']!));
-        expect(probs['overripe'], closeTo(0.026, 1e-6));
+        expect(probs['unripe']!, greaterThan(0.80));
+        expect(probs['ripe']!, lessThan(0.15));
       },
     );
-
-    test('truly dark rotten banana is untouched by yellow calibration', () {
-      final probs = <String, double>{
-        'unripe': 0.002,
-        'ripe': 0.034,
-        'overripe': 0.011,
-        'rotten': 0.954,
-      };
-      SvmPostProcessing.applyOverripeYellowCalibration(
-        probs,
-        const PigmentRatios(
-          greenRatio: 0.01,
-          yellowRatio: 0.15,
-          brownDarkRatio: 0.78,
-          activePixelCount: 4000,
-        ),
-      );
-      expect(probs['rotten'], closeTo(0.954, 1e-6));
-    });
 
     test(
-      'clean yellow banana on dark background dampens false rotten into ripe',
+      'calibrate4ClassProbs boosts spotted yellow banana into overripe proportionally',
       () {
         final probs = <String, double>{
-          'unripe': 0.004,
-          'ripe': 0.385,
-          'overripe': 0.026,
-          'rotten': 0.584,
+          'unripe': 0.002,
+          'ripe': 0.35,
+          'overripe': 0.10,
+          'rotten': 0.548,
         };
-        SvmPostProcessing.applyOverripeYellowCalibration(
+        SvmPostProcessing.calibrate4ClassProbs(
           probs,
           const PigmentRatios(
             greenRatio: 0.02,
-            yellowRatio: 0.58,
-            brownDarkRatio: 0.14,
+            yellowRatio: 0.35,
+            brownDarkRatio: 0.40,
             activePixelCount: 4000,
           ),
         );
-        expect(probs['ripe']!, greaterThan(probs['rotten']!));
-        expect(probs['overripe'], closeTo(0.026, 1e-6));
+        expect(probs['overripe']!, closeTo(0.70, 1e-4));
+        expect(probs['overripe']!, greaterThan(probs['rotten']!));
       },
     );
 
-    test('truly dark rotten banana is untouched by yellow calibration', () {
-      final probs = <String, double>{
-        'unripe': 0.002,
-        'ripe': 0.034,
-        'overripe': 0.011,
-        'rotten': 0.954,
-      };
-      SvmPostProcessing.applyOverripeYellowCalibration(
-        probs,
-        const PigmentRatios(
-          greenRatio: 0.01,
-          yellowRatio: 0.15,
-          brownDarkRatio: 0.78,
-          activePixelCount: 4000,
-        ),
-      );
-      expect(probs['rotten'], closeTo(0.954, 1e-6));
-    });
+    test(
+      'calibrate4ClassProbs keeps confident ripe banana on wooden/cream background as ripe',
+      () {
+        final probs = <String, double>{
+          'unripe': 0.01,
+          'ripe': 0.88,
+          'overripe': 0.08,
+          'rotten': 0.03,
+        };
+        SvmPostProcessing.calibrate4ClassProbs(
+          probs,
+          const PigmentRatios(
+            greenRatio: 0.01,
+            yellowRatio: 0.45,
+            brownDarkRatio: 0.38,
+            activePixelCount: 4000,
+          ),
+        );
+        expect(probs['ripe'], closeTo(0.88, 1e-6));
+        expect(probs['overripe'], closeTo(0.08, 1e-6));
+      },
+    );
+
+    test(
+      'calibrate4ClassProbs reinforces rotten when dark decay dominates and SVM is uncertain',
+      () {
+        final probs = <String, double>{
+          'unripe': 0.01,
+          'ripe': 0.57,
+          'overripe': 0.08,
+          'rotten': 0.34,
+        };
+        SvmPostProcessing.calibrate4ClassProbs(
+          probs,
+          const PigmentRatios(
+            greenRatio: 0.01,
+            yellowRatio: 0.18,
+            brownDarkRatio: 0.72,
+            activePixelCount: 4000,
+          ),
+        );
+        expect(probs['rotten']!, greaterThan(0.70));
+        expect(probs['rotten']!, greaterThan(probs['ripe']!));
+      },
+    );
+
+    test(
+      'calibrate4ClassProbs leaves truly dark rotten banana (> 68% brown) untouched',
+      () {
+        final probs = <String, double>{
+          'unripe': 0.009,
+          'ripe': 0.175,
+          'overripe': 0.079,
+          'rotten': 0.737,
+        };
+        SvmPostProcessing.calibrate4ClassProbs(
+          probs,
+          const PigmentRatios(
+            greenRatio: 0.01,
+            yellowRatio: 0.15,
+            brownDarkRatio: 0.78,
+            activePixelCount: 4000,
+          ),
+        );
+        expect(probs['rotten'], closeTo(0.737, 1e-6));
+      },
+    );
+
+    test(
+      'calibrate4ClassProbs leaves clean yellow ripe banana (< 15% brown) untouched',
+      () {
+        final probs = <String, double>{
+          'unripe': 0.01,
+          'ripe': 0.85,
+          'overripe': 0.10,
+          'rotten': 0.04,
+        };
+        SvmPostProcessing.calibrate4ClassProbs(
+          probs,
+          const PigmentRatios(
+            greenRatio: 0.02,
+            yellowRatio: 0.88,
+            brownDarkRatio: 0.10,
+            activePixelCount: 4000,
+          ),
+        );
+        expect(probs['ripe'], closeTo(0.85, 1e-6));
+      },
+    );
   });
 }

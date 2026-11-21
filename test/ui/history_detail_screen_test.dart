@@ -65,7 +65,7 @@ void main() {
       expect(find.text('Akurasi Kematangan'), findsOneWidget);
       expect(find.text('SARAN KONSUMSI'), findsOneWidget);
       expect(find.text('DAYA SIMPAN'), findsOneWidget);
-      expect(find.text('Resep Olahan'), findsOneWidget);
+      expect(find.text('Resep'), findsOneWidget);
       expect(find.text(AppStrings.rottenAdviceTitle), findsNothing);
     },
   );
@@ -104,9 +104,9 @@ void main() {
       expect(find.text(AppStrings.rottenAdviceWarning), findsOneWidget);
       expect(find.text(AppStrings.rottenEcoTitle), findsOneWidget);
       expect(find.textContaining('smoothie'), findsNothing);
-      expect(find.text('Resep Olahan'), findsNothing);
+      expect(find.text('Resep'), findsNothing);
 
-      final recycleButton = find.text(AppStrings.rottenRecycleButton);
+      final recycleButton = find.text('Daur Ulang');
       expect(recycleButton, findsOneWidget);
       await tester.tap(recycleButton);
       await tester.pumpAndSettle();

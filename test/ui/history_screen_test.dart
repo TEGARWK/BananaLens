@@ -111,6 +111,10 @@ void main() {
   testWidgets('renders history detail screen with scan info and nutrition', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
     final repo = InMemoryHistoryRepository();
     final item = ScanResult(
       id: 1,
@@ -133,8 +137,72 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Detail Riwayat Pindai'), findsOneWidget);
+    expect(find.text('CATATAN // PINDAI'), findsOneWidget);
     expect(find.text('93%'), findsOneWidget);
+    expect(find.text('Ketuk untuk rincian'), findsOneWidget);
+    expect(find.text('Per 100 g'), findsOneWidget);
+    expect(find.text('Serat Pangan'), findsOneWidget);
     expect(find.text('SARAN KONSUMSI'), findsOneWidget);
     expect(find.text('DAYA SIMPAN'), findsOneWidget);
+    expect(find.text('Resep'), findsOneWidget);
+    expect(find.text('Tanya AI'), findsOneWidget);
   });
+
+  testWidgets(
+    'renders ripeness-aware guidance for unripe and rotten history detail',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final repo = InMemoryHistoryRepository();
+      final unripeItem = ScanResult(
+        id: 2,
+        imagePath: 'unripe.jpg',
+        fruitLabel: 'banana',
+        ripenessLabel: 'unripe',
+        confidence: 0.78,
+        createdAt: DateTime(2026, 11, 21, 23, 49),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [historyRepositoryProvider.overrideWithValue(repo)],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: HistoryDetailScreen(initialItem: unripeItem),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('2–5 hari'), findsOneWidget);
+      expect(find.textContaining('Kulit menghitam'), findsNothing);
+      expect(find.text('Resep'), findsOneWidget);
+
+      final rottenItem = ScanResult(
+        id: 3,
+        imagePath: 'rotten.jpg',
+        fruitLabel: 'banana',
+        ripenessLabel: 'rotten',
+        confidence: 0.55,
+        createdAt: DateTime(2026, 11, 21, 23, 57),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [historyRepositoryProvider.overrideWithValue(repo)],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: HistoryDetailScreen(initialItem: rottenItem),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('PERINGATAN KEAMANAN PANGAN'), findsOneWidget);
+      expect(find.text('Daur Ulang'), findsOneWidget);
+      expect(find.text('Tanya AI'), findsOneWidget);
+    },
+  );
 }

@@ -598,10 +598,10 @@ void main() {
         );
         expect(bunchTotal, closeTo(1.0, 1e-5));
 
-        // Yellow peel with sugar spots (`yellowRatio >= 0.50` & >= 1.6x brown)
-        // shifts false `rotten` back to `ripe` (very_ripe), while truly dark
-        // rotten peels (`brownDarkRatio >= yellowRatio`) stay `rotten`.
-        final sugarSpotPred = classifier.predict(
+        // When SVM is already confident `ripe` (`>= 0.70`, no rotten/overripe
+        // ambiguity), moderate `brownDarkRatio` (e.g. wooden/cream background)
+        // must keep `ripe` untouched instead of forcing `overripe`.
+        final cleanBackgroundPred = classifier.predict(
           dummyCnn,
           dummyHsv,
           pigmentRatios: const PigmentRatios(
@@ -611,15 +611,13 @@ void main() {
             activePixelCount: 5000,
           ),
         );
-        expect(sugarSpotPred.predictedClass, 'ripe');
+        expect(cleanBackgroundPred.predictedClass, 'ripe');
         expect(
-          sugarSpotPred.probabilities['ripe']!,
-          greaterThan(sugarSpotPred.probabilities['rotten']!),
+          cleanBackgroundPred.probabilities['ripe']!,
+          greaterThan(cleanBackgroundPred.probabilities['rotten']!),
         );
-        final sugarTotal = sugarSpotPred.probabilities.values.fold<double>(
-          0.0,
-          (a, b) => a + b,
-        );
+        final sugarTotal = cleanBackgroundPred.probabilities.values
+            .fold<double>(0.0, (a, b) => a + b);
         expect(sugarTotal, closeTo(1.0, 1e-5));
 
         final trulyRottenPred = classifier.predict(

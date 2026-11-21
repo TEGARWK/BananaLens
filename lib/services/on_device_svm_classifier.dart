@@ -249,8 +249,7 @@ class OnDeviceSvmClassifier {
     }
 
     if (pigmentRatios != null) {
-      SvmPostProcessing.applyChlorophyllCalibration(probMap, pigmentRatios);
-      SvmPostProcessing.applyOverripeYellowCalibration(probMap, pigmentRatios);
+      SvmPostProcessing.calibrate4ClassProbs(probMap, pigmentRatios);
     }
 
     String bestClass = classNames.first;

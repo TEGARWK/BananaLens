@@ -5,6 +5,23 @@
 
 ---
 
+## Minggu, 22 November 2026
+
+### Penyelarasan Model PCA 60 & Kalibrasi 4-Kelas Python (`baca/update`)
+- **Pembaruan Aset Model (`assets/models/`):** Memasang `svm_pisang_meta.json`, `svm_pisang_weights.bin` (`1.595.820` bytes, PCA 60, `3.899` *support vectors*), dan `mobilenet_v3_extractor.tflite` dari `baca/update/`.
+- **Penyelarasan Preprocessing & Rasio Pigmen (`on_device_image_preprocessor.dart`):** Menyamakan metode resize ke `Interpolation.linear` (BILINEAR) serta menyelaraskan mask aktif (`S >= 28`, `V >= 20`, `H <= 90`) dan definisi `greenRatio`, `yellowRatio`, `brownDarkRatio` agar identik dengan `calibrate_4class_probs` Python, sambil mempertahankan *non-banana vivid gate*.
+- **Porting & Penyempurnaan `calibrate4ClassProbs` (`svm_post_processing.dart`, `on_device_svm_classifier.dart`):** Mengganti kalibrasi lama dengan logika 4-kelas (`unripe` untuk `greenRatio >= 0.25 && greenRatio > yellowRatio`, `rotten` untuk pembusukan dominan `brownRatio >= 0.58 && yellowRatio < 0.28` saat SVM ragu `ripe < 0.70 || rotten >= 0.20`, dan `overripe` hanya saat ada ambiguitas `rotten + overripe >= 0.20 || ripe < 0.70` dengan skor proporsional agar tidak terpaku di 88% serta tidak menimpa pisang `Matang` mulus di meja kayu/aspal).
+- **Unit Test (`test/services/on_device_svm_classifier_test.dart`):** Memperbarui dan menambah verifikasi paritas `calibrate4ClassProbs` untuk kondisi `Mentah`, `Matang Banget`, `Matang`, dan `Busuk`.
+
+### Upgrade UI/UX Halaman Detail Riwayat Pindai (`HistoryDetailScreen`)
+- **Hero Card & Overlay Foto (`history_detail_hero_card.dart`):** Mengganti tag `SCAN // RECORD` menjadi `CATATAN // PINDAI`, memindahkan tombol `Perbesar` sebagai *overlay pill* di pojok kanan bawah foto, menambahkan isyarat ketuk `Ketuk untuk rincian` pada kotak akurasi, serta mendukung 4 kelas warna kematangan termasuk `Matang Banget`.
+- **Blok Nutrisi Konsisten (`history_detail_screen.dart`):** Mengganti grid 2x2 nutrisi dengan banner kuning `89 kkal · Kalori | Per 100 g` dan 3 kartu makro (`Karbohidrat`, `Gula Alami`, `Serat Pangan`) selaras dengan halaman Hasil Pindai.
+- **Panduan Sadar Kematangan (`history_detail_guidance_card.dart`):** Memperbaiki bug di mana tips penyimpanan `Matang` muncul pada pemindaian `Mentah`; kini `SARAN KONSUMSI` dan `DAYA SIMPAN` menyesuaikan kondisi `Mentah`, `Matang`, `Matang Banget`, dan `Busuk`.
+- **Tombol Aksi 1 Baris & Sheet 4-Kelas (`history_detail_screen.dart`, `history_detail_sheets.dart`):** Merapikan tombol bawah menjadi 1 baris (`Resep` / `Daur Ulang` + `Tanya AI`), mendukung rincian skor 4 kelas pada bottom sheet, serta memodularisasi file dari 915 baris menjadi 4 file ringkas (`<= 235` baris/file).
+- **Widget Test (`test/ui/history_screen_test.dart`):** Menambahkan verifikasi UI baru serta skenario panduan `Mentah` dan `Busuk` pada `HistoryDetailScreen`.
+
+---
+
 ## Sabtu, 21 November 2026
 
 ### Integrasi Model SVM 4-Kelas (PCA 100) & Refactor Classifier Dinamis
