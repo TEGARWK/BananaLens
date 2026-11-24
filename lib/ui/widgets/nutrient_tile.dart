@@ -27,15 +27,8 @@ class NutrientTile extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppDimens.rButton),
-        border: Border.all(color: ink.withValues(alpha: 0.65), width: 1.3),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary,
-            offset: const Offset(0, 2.5),
-            blurRadius: 0,
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppDimens.rCard),
+        border: Border.all(color: harvest.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

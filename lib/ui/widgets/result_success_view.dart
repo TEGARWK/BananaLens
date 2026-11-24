@@ -7,6 +7,7 @@ import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
+import '../../core/utils/ripeness_nutrition_helper.dart';
 import '../../data/models/fruit_info.dart';
 import '../../data/models/ripeness.dart';
 import '../../data/models/scan_outcome.dart';
@@ -47,6 +48,9 @@ class ResultSuccessView extends ConsumerWidget {
     final harvest = context.harvest;
     final info = report.fruitInfo;
     final ripeness = Ripeness.fromLabel(outcome.ripenessLabel);
+    final adjustedInfo = info != null
+        ? RipenessNutritionHelper.adjust(info, ripeness)
+        : null;
     final fruitTitle = info?.nameId ?? outcome.fruitLabel;
     final userProfile = ref.watch(authNotifierProvider).value;
 
@@ -86,9 +90,9 @@ class ResultSuccessView extends ConsumerWidget {
         // 2. Rekomendasi Tindakan SPK (Hero Action)
         ResultRecipeGatingSection(outcome: outcome),
 
-        // 3. Info Gizi & Manfaat Ringkas
-        if (info != null) ...[
-          _buildNutritionSection(theme, harvest, ink, info),
+        // 3. Info Gizi & Manfaat Ringkas (disesuaikan tingkat kematangan)
+        if (adjustedInfo != null) ...[
+          _buildNutritionSection(theme, harvest, ink, adjustedInfo),
           const SizedBox(height: AppDimens.s16),
         ],
 

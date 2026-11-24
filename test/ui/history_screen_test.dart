@@ -142,8 +142,7 @@ void main() {
     expect(find.text('Ketuk untuk rincian'), findsOneWidget);
     expect(find.text('Per 100 g'), findsOneWidget);
     expect(find.text('Serat Pangan'), findsOneWidget);
-    expect(find.text('SARAN KONSUMSI'), findsOneWidget);
-    expect(find.text('DAYA SIMPAN'), findsOneWidget);
+    expect(find.text(AppStrings.resultBenefits), findsOneWidget);
     expect(find.text('Resep'), findsOneWidget);
     expect(find.text('Tanya AI'), findsOneWidget);
   });
@@ -176,7 +175,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('2–5 hari'), findsOneWidget);
+      expect(find.text(AppStrings.resultBenefits), findsOneWidget);
       expect(find.textContaining('Kulit menghitam'), findsNothing);
       expect(find.text('Resep'), findsOneWidget);
 

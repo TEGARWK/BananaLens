@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_dimens.dart';
+import '../../core/utils/ripeness_nutrition_helper.dart';
 import '../../data/models/fruit_info.dart';
 import '../../data/models/ripeness.dart';
 import '../../data/models/scan_outcome.dart';
@@ -99,6 +100,9 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
     final theme = Theme.of(context);
     final ripeness = Ripeness.fromLabel(item.ripenessLabel);
     final fruitInfo = _fruitInfo;
+    final adjustedInfo = fruitInfo != null
+        ? RipenessNutritionHelper.adjust(fruitInfo, ripeness)
+        : null;
     final fruitTitle = fruitInfo?.nameId ?? item.fruitLabel;
     final confPct = (item.confidence * 100).round();
     final scanOutcome = _toScanSuccess(item);
@@ -137,8 +141,12 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
           ),
           const SizedBox(height: AppDimens.s16),
           ResultRecipeGatingSection(outcome: scanOutcome),
-          if (fruitInfo != null) HistoryDetailNutritionSection(info: fruitInfo),
-          HistoryDetailGuidanceCard(fruitInfo: fruitInfo, ripeness: ripeness),
+          if (adjustedInfo != null)
+            HistoryDetailNutritionSection(info: adjustedInfo),
+          HistoryDetailGuidanceCard(
+            fruitInfo: adjustedInfo ?? fruitInfo,
+            ripeness: ripeness,
+          ),
           const SizedBox(height: AppDimens.s16),
         ],
       ),

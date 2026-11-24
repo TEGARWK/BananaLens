@@ -63,8 +63,8 @@ void main() {
 
       expect(find.text('74%'), findsOneWidget);
       expect(find.text('Akurasi Kematangan'), findsOneWidget);
-      expect(find.text('SARAN KONSUMSI'), findsOneWidget);
-      expect(find.text('DAYA SIMPAN'), findsOneWidget);
+      expect(find.text(AppStrings.resultBenefits), findsOneWidget);
+      expect(find.text('Vitamin B6'), findsOneWidget);
       expect(find.text('Resep'), findsOneWidget);
       expect(find.text(AppStrings.rottenAdviceTitle), findsNothing);
     },

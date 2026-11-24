@@ -159,54 +159,78 @@ class HistoryDetailGuidanceCard extends StatelessWidget {
       );
     }
 
-    final (consumptionText, storageText) = _guidanceFor(ripeness, fruitInfo);
+    final benefits =
+        fruitInfo?.benefits ??
+        'Sumber energi cepat, kalium, dan serat alami untuk aktivitas harian.';
+    final vitamins = fruitInfo?.vitamins;
+
     return IndustrialSpecimenCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _GuidanceSection(
-            icon: Icons.schedule_rounded,
-            iconBg: harvest.primarySoft,
-            iconColor: ink,
-            title: 'SARAN KONSUMSI',
-            body: consumptionText,
+          Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: leafBg,
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
+                ),
+                child: Icon(
+                  Icons.health_and_safety_outlined,
+                  size: 16,
+                  color: leafFg,
+                ),
+              ),
+              const SizedBox(width: AppDimens.s8),
+              Text(
+                AppStrings.resultBenefits,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              if (vitamins != null && vitamins.isNotEmpty) ...[
+                const SizedBox(width: AppDimens.s8),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimens.s8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: harvest.primarySoft,
+                        borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                      ),
+                      child: Text(
+                        vitamins,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: ink,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
-          Divider(height: AppDimens.s24, color: harvest.border),
-          _GuidanceSection(
-            icon: Icons.hourglass_bottom_rounded,
-            iconBg: leafBg,
-            iconColor: leafFg,
-            title: 'DAYA SIMPAN',
-            body: storageText,
+          const SizedBox(height: AppDimens.s8),
+          Text(
+            benefits,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: ink.withValues(alpha: 0.85),
+              height: 1.45,
+            ),
           ),
         ],
       ),
     );
-  }
-
-  (String, String) _guidanceFor(Ripeness? value, FruitInfo? info) {
-    return switch (value) {
-      Ripeness.unripe => (
-        'Masih mentah dengan kandungan pati tinggi dan belum manis. '
-            'Belum cocok dimakan langsung, namun pas diolah menjadi keripik '
-            'atau pisang goreng.',
-        'Simpan di suhu ruang selama 2–5 hari hingga kulit menguning merata. '
-            'Jangan masukkan kulkas karena dapat menghambat proses pematangan.',
-      ),
-      Ripeness.overripe => (
-        'Sangat matang dengan rasa manis maksimal dan tekstur lembut. '
-            'Segera konsumsi atau olah menjadi smoothie, bolu pisang, atau '
-            'pancake.',
-        'Tahan sekitar 1 hari di suhu ruang. Kupas dan bekukan di freezer '
-            'dalam wadah tertutup jika ingin disimpan lebih lama.',
-      ),
-      Ripeness.ripe || Ripeness.rotten || null => (
-        info?.benefits ??
-            'Sumber energi cepat, kalium, dan serat alami untuk aktivitas harian.',
-        'Kondisi matang ideal untuk dinikmati langsung dalam 1–2 hari. '
-            'Simpan di tempat sejuk dan jauhkan dari sinar matahari langsung.',
-      ),
-    };
   }
 }
 
