@@ -5,6 +5,13 @@
 
 ---
 
+## Selasa, 24 November 2026
+
+### Perbaikan Responsivitas Tujuan `Olahan` pada SPK (`RecipeGatingService`)
+- **Penyelarasan Pilihan `Olahan` (`recipe_gating_service.dart`):** Menambahkan guard pada `resolveSpkActionPlan()` agar saat pengguna memilih **`Tujuan: Olahan`** pada pisang layak konsumsi (`Mentah`, `Matang`, `Matang Banget`) dengan rencana **`Hari ini`** atau **`2–3 hari`**, kartu SPK langsung beralih ke **`Prioritas Olahan Kuliner (Segera Olah)`** dan tidak tertahan di `Siap Jual Retail / Konsumsi Segar`.
+
+---
+
 ## Minggu, 22 November 2026
 
 ### Penyelarasan Model PCA 60 & Kalibrasi 4-Kelas Python (`baca/update`)

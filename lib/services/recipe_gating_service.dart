@@ -154,17 +154,33 @@ class RecipeGatingService {
     );
     final ripeness = outcome.ripenessLabel.trim().toLowerCase();
     // Food-safety guard: rotten bananas must never be offered culinary recipes.
-    final effectiveDecision = ripeness == 'rotten'
-        ? spkService.decisionClasses.firstWhere(
-            (c) => c.id == 3,
-            orElse: () => result.decisionClass,
-          )
-        : result.decisionClass;
+    // Culinary intent guard: explicit "Olahan" goal always routes non-rotten
+    // fruit to Class 2 (Prioritas Olahan Kuliner) even when RF favors Class 1.
+    final SpkDecisionClass effectiveDecision;
+    if (ripeness == 'rotten') {
+      effectiveDecision = spkService.decisionClasses.firstWhere(
+        (c) => c.id == 3,
+        orElse: () => result.decisionClass,
+      );
+    } else if (usageGoal == SpkUsageGoal.culinaryProcessing &&
+        result.decisionClass.id != 2) {
+      effectiveDecision = spkService.decisionClasses.firstWhere(
+        (c) => c.id == 2,
+        orElse: () => result.decisionClass,
+      );
+    } else {
+      effectiveDecision = result.decisionClass;
+    }
 
     final RipenessBucket? recipeBucket = switch (effectiveDecision.id) {
       1 => RipenessBucket.ripe,
       2 =>
-        ripeness == 'unripe' ? RipenessBucket.unripe : RipenessBucket.veryRipe,
+        ripeness == 'unripe'
+            ? RipenessBucket.unripe
+            : (ripeness == 'ripe' &&
+                      targetDays != SpkTargetDays.moreThanFourDays
+                  ? RipenessBucket.ripe
+                  : RipenessBucket.veryRipe),
       _ => null,
     };
 
