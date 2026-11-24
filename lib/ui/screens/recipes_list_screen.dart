@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../core/utils/fruit_name_helper.dart';
@@ -152,19 +153,19 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
+                                color: theme.brightness == Brightness.dark
+                                    ? AppColors.dLeafSoft
+                                    : AppColors.lLeafSoft,
                                 borderRadius: BorderRadius.circular(
                                   AppDimens.rSharp,
-                                ),
-                                border: Border.all(
-                                  color: theme.colorScheme.onSurface,
-                                  width: 1.2,
                                 ),
                               ),
                               child: Text(
                                 'KREASI SEHAT ALAMI',
                                 style: TextStyle(
-                                  color: theme.colorScheme.onPrimary,
+                                  color: theme.brightness == Brightness.dark
+                                      ? AppColors.dLeafGreen
+                                      : AppColors.lLeafStrong,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.5,
                                   fontSize: 10,
@@ -200,17 +201,9 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                         height: 52,
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                          border: Border.all(
-                            color: theme.colorScheme.onSurface,
-                            width: 1.5,
+                          borderRadius: BorderRadius.circular(
+                            AppDimens.rButton,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.colorScheme.onSurface,
-                              offset: const Offset(2, 2),
-                            ),
-                          ],
                         ),
                         child: Center(
                           child: Icon(
@@ -253,22 +246,16 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? theme.colorScheme.primary
-                                : theme.colorScheme.surface,
+                                : harvest.primarySoft,
                             borderRadius: BorderRadius.circular(
-                              AppDimens.rSharp,
+                              AppDimens.rButton,
                             ),
                             border: Border.all(
-                              color: theme.colorScheme.onSurface,
-                              width: isSelected ? 1.5 : 1.0,
+                              color: isSelected
+                                  ? theme.colorScheme.primary
+                                  : harvest.border,
+                              width: 1.0,
                             ),
-                            boxShadow: isSelected
-                                ? [
-                                    BoxShadow(
-                                      color: theme.colorScheme.onSurface,
-                                      offset: const Offset(2, 2),
-                                    ),
-                                  ]
-                                : null,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -507,16 +494,18 @@ class _RecipesListScreenState extends ConsumerState<RecipesListScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppDimens.s12),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                          border: Border.all(
-                            color: theme.colorScheme.onSurface,
-                            width: 1.3,
+                          color: theme.brightness == Brightness.dark
+                              ? theme.colorScheme.primary
+                              : AppColors.lSurfaceDark,
+                          borderRadius: BorderRadius.circular(
+                            AppDimens.rButton,
                           ),
                         ),
                         child: Icon(
                           Icons.auto_awesome_rounded,
-                          color: theme.colorScheme.onPrimary,
+                          color: theme.brightness == Brightness.dark
+                              ? theme.colorScheme.onPrimary
+                              : AppColors.lPrimary,
                           size: 22,
                         ),
                       ),

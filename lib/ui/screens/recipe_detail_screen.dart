@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../core/utils/fruit_name_helper.dart';
@@ -126,18 +127,14 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
-                      color: harvest.overripe.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                      border: Border.all(
-                        color: theme.colorScheme.onSurface,
-                        width: 1.2,
-                      ),
+                      color: harvest.overripe.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(AppDimens.rButton),
                     ),
                     child: Icon(
                       Icons.health_and_safety_rounded,
-                      color: theme.colorScheme.onSurface,
+                      color: harvest.overripe,
                       size: 18,
                     ),
                   ),
@@ -211,26 +208,35 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Container(
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 140),
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
                             color: isChecked
-                                ? theme.colorScheme.primary
+                                ? (theme.brightness == Brightness.dark
+                                      ? AppColors.dLeafGreen
+                                      : AppColors.lLeafStrong)
                                 : theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(
                               AppDimens.rSharp,
                             ),
                             border: Border.all(
-                              color: theme.colorScheme.onSurface,
-                              width: 1.5,
+                              color: isChecked
+                                  ? (theme.brightness == Brightness.dark
+                                        ? AppColors.dLeafGreen
+                                        : AppColors.lLeafStrong)
+                                  : harvest.border,
+                              width: 1.4,
                             ),
                           ),
                           child: isChecked
                               ? Icon(
                                   Icons.check_rounded,
                                   size: 15,
-                                  color: theme.colorScheme.onPrimary,
+                                  color: theme.brightness == Brightness.dark
+                                      ? AppColors.dOnPrimary
+                                      : Colors.white,
                                 )
                               : null,
                         ),
@@ -294,11 +300,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                       height: 28,
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                        border: Border.all(
-                          color: theme.colorScheme.onSurface,
-                          width: 1.3,
-                        ),
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
                       ),
                       child: Center(
                         child: Text(
@@ -329,24 +331,26 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
           // 4. Tips Ahli Nutrisi FruitLens
           IndustrialSpecimenCard(
-            backgroundColor: harvest.primarySoft,
+            backgroundColor: theme.brightness == Brightness.dark
+                ? AppColors.dLeafSoft
+                : AppColors.lLeafSoft,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                    border: Border.all(
-                      color: theme.colorScheme.onSurface,
-                      width: 1.2,
-                    ),
+                    color: theme.brightness == Brightness.dark
+                        ? AppColors.dLeafGreen
+                        : AppColors.lLeafStrong,
+                    borderRadius: BorderRadius.circular(AppDimens.rButton),
                   ),
                   child: Icon(
                     Icons.tips_and_updates_rounded,
                     size: 16,
-                    color: theme.colorScheme.onPrimary,
+                    color: theme.brightness == Brightness.dark
+                        ? AppColors.dOnPrimary
+                        : Colors.white,
                   ),
                 ),
                 const SizedBox(width: AppDimens.s12),

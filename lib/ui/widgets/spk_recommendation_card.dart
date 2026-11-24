@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/recipe.dart';
 import '../../services/recipe_gating_service.dart';
+import '../../services/spk_context_interpreter.dart';
 import '../../services/spk_decision_service.dart';
 import 'industrial_art.dart';
 import 'primary_button.dart';
 import 'soft_button.dart';
 
-/// Displays the PSO-Random Forest SPK decision card. Context selector chips
-/// (`Rencana pakai` & `Tujuan`) sit at the top so the flow reads naturally:
-/// choose context -> see decision & tips -> take action.
+/// Displays the Hybrid PSO-Random Forest SPK decision card with contextual
+/// interpretation tailored to the banana's ripeness, timeframe, and usage goal.
 class SpkRecommendationCard extends StatelessWidget {
   const SpkRecommendationCard({
     super.key,
     required this.plan,
+    required this.ripenessLabel,
     required this.showContextSelectors,
     required this.allowedTargetDays,
     required this.allowedUsageGoals,
@@ -29,6 +31,7 @@ class SpkRecommendationCard extends StatelessWidget {
   });
 
   final SpkActionPlan plan;
+  final String ripenessLabel;
   final bool showContextSelectors;
   final List<SpkTargetDays> allowedTargetDays;
   final List<SpkUsageGoal> allowedUsageGoals;
@@ -44,23 +47,69 @@ class SpkRecommendationCard extends StatelessWidget {
     final theme = Theme.of(context);
     final harvest = context.harvest;
     final ink = theme.colorScheme.onSurface;
+    final isDark = theme.brightness == Brightness.dark;
     final decision = plan.decision;
-    final accent = _accentForClass(decision.id, theme, harvest);
-    final bgColor = plan.isDiscard || plan.isWaitOrStore
-        ? Color.alphaBlend(
-            accent.withValues(alpha: 0.12),
-            theme.colorScheme.surface,
-          )
-        : null;
+
+    final advice = SpkContextInterpreter.interpret(
+      ripenessLabel: ripenessLabel,
+      targetDays: targetDays,
+      usageGoal: usageGoal,
+      baseDecision: decision,
+    );
+    final (suitBg, suitFg, suitIcon) = _suitabilityStyle(
+      advice.suitability,
+      theme,
+      harvest,
+      isDark,
+    );
+    final confPct = (plan.confidence * 100).round();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.s16),
       child: IndustrialSpecimenCard(
-        backgroundColor: bgColor,
+        backgroundColor: plan.isDiscard
+            ? Color.alphaBlend(
+                theme.colorScheme.error.withValues(alpha: 0.08),
+                theme.colorScheme.surface,
+              )
+            : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'REKOMENDASI SPK',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: harvest.muted,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.9,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimens.s8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: harvest.primarySoft,
+                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                  ),
+                  child: Text(
+                    'PSO-RF · $confPct%',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: ink,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             if (showContextSelectors) ...[
+              const SizedBox(height: AppDimens.s12),
               _SelectorGroup<SpkTargetDays>(
                 label: 'Rencana pakai',
                 values: allowedTargetDays,
@@ -68,7 +117,7 @@ class SpkRecommendationCard extends StatelessWidget {
                 labelOf: (v) => v.labelId,
                 onSelected: onTargetDaysChanged,
               ),
-              const SizedBox(height: AppDimens.s8),
+              const SizedBox(height: AppDimens.s8 + 2),
               _SelectorGroup<SpkUsageGoal>(
                 label: 'Tujuan',
                 values: allowedUsageGoals,
@@ -78,26 +127,45 @@ class SpkRecommendationCard extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: AppDimens.s12),
-                child: Divider(height: 1, color: ink.withValues(alpha: 0.16)),
+                child: Divider(height: 1, color: harvest.border),
               ),
-            ],
-            _HeaderRow(
-              decision: decision,
-              accent: accent,
-              ink: ink,
-              isDiscard: plan.isDiscard,
-              isWaitOrStore: plan.isWaitOrStore,
-            ),
-            const SizedBox(height: AppDimens.s8),
-            Text(
-              decision.description,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: ink.withValues(alpha: 0.88),
-                height: 1.4,
+            ] else
+              const SizedBox(height: AppDimens.s12),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              child: Column(
+                key: ValueKey(
+                  '${targetDays.code}-${usageGoal.code}-${decision.id}',
+                ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _AdviceHeader(
+                    headline: advice.headline,
+                    suitabilityLabel: advice.suitability.labelId,
+                    modelBadge: decision.badge,
+                    suitBg: suitBg,
+                    suitFg: suitFg,
+                    suitIcon: suitIcon,
+                    ink: ink,
+                    isDiscard: plan.isDiscard,
+                  ),
+                  const SizedBox(height: AppDimens.s8 + 2),
+                  Text(
+                    advice.reason,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: ink.withValues(alpha: 0.88),
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimens.s8 + 2),
+                  _ActionTipBox(
+                    tips: advice.actionTip,
+                    accent: suitFg,
+                    ink: ink,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: AppDimens.s8),
-            _ActionTipBox(tips: decision.actionTips, accent: accent, ink: ink),
             if (plan.recipeBucket != null) ...[
               const SizedBox(height: AppDimens.s12),
               PrimaryButton(
@@ -119,83 +187,125 @@ class SpkRecommendationCard extends StatelessWidget {
     );
   }
 
-  Color _accentForClass(int id, ThemeData theme, HarvestColors harvest) {
-    return switch (id) {
-      0 => harvest.unripe,
-      1 => theme.colorScheme.primary,
-      2 => harvest.overripe,
-      3 => theme.colorScheme.error,
-      _ => theme.colorScheme.primary,
+  (Color, Color, IconData) _suitabilityStyle(
+    SpkSuitability suitability,
+    ThemeData theme,
+    HarvestColors harvest,
+    bool isDark,
+  ) {
+    return switch (suitability) {
+      SpkSuitability.ideal => (
+        isDark ? AppColors.dLeafSoft : AppColors.lLeafSoft,
+        isDark ? AppColors.dLeafGreen : AppColors.lLeafStrong,
+        Icons.check_circle_rounded,
+      ),
+      SpkSuitability.adjust => (
+        harvest.primarySoft,
+        harvest.overripe,
+        Icons.tune_rounded,
+      ),
+      SpkSuitability.notRecommended => (
+        theme.colorScheme.error.withValues(alpha: 0.12),
+        theme.colorScheme.error,
+        Icons.warning_amber_rounded,
+      ),
     };
   }
 }
 
-class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({
-    required this.decision,
-    required this.accent,
+class _AdviceHeader extends StatelessWidget {
+  const _AdviceHeader({
+    required this.headline,
+    required this.suitabilityLabel,
+    required this.modelBadge,
+    required this.suitBg,
+    required this.suitFg,
+    required this.suitIcon,
     required this.ink,
     required this.isDiscard,
-    required this.isWaitOrStore,
   });
 
-  final SpkDecisionClass decision;
-  final Color accent;
+  final String headline;
+  final String suitabilityLabel;
+  final String modelBadge;
+  final Color suitBg;
+  final Color suitFg;
+  final IconData suitIcon;
   final Color ink;
   final bool isDiscard;
-  final bool isWaitOrStore;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final icon = isDiscard
-        ? Icons.dangerous_rounded
-        : (isWaitOrStore ? Icons.schedule_rounded : Icons.auto_awesome_rounded);
-    final badgeTextColor = isDiscard
-        ? theme.colorScheme.onError
-        : (decision.id == 1 ? theme.colorScheme.onPrimary : Colors.white);
+    final harvest = context.harvest;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 34,
+          height: 34,
           decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.18),
+            color: suitBg,
             borderRadius: BorderRadius.circular(AppDimens.rButton),
           ),
-          child: Icon(icon, size: 17, color: decision.id == 1 ? ink : accent),
+          child: Icon(suitIcon, size: 18, color: suitFg),
         ),
         const SizedBox(width: AppDimens.s12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimens.s8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: suitBg,
+                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                    ),
+                    child: Text(
+                      suitabilityLabel,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: suitFg,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimens.s8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: harvest.primarySoft,
+                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                    ),
+                    child: Text(
+                      modelBadge,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: ink,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
               Text(
-                decision.title,
+                headline,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: isDiscard ? theme.colorScheme.error : ink,
                   fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimens.s8,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: accent,
-                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                ),
-                child: Text(
-                  decision.badge,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: badgeTextColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 10.5,
-                  ),
+                  height: 1.25,
                 ),
               ),
             ],
@@ -224,7 +334,7 @@ class _ActionTipBox extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.09),
+        color: accent.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppDimens.rButton),
         border: Border.all(color: harvest.border, width: 1),
       ),
@@ -289,7 +399,7 @@ class _SelectorGroup<T> extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: ink.withValues(alpha: 0.72),
+            color: harvest.muted,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -302,7 +412,8 @@ class _SelectorGroup<T> extends StatelessWidget {
             return InkWell(
               onTap: () => onSelected(item),
               borderRadius: BorderRadius.circular(AppDimens.rButton),
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 140),
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimens.s12,
                   vertical: 7,

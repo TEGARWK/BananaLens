@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/recipe.dart';
@@ -61,30 +62,24 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
             padding: const EdgeInsets.only(right: AppDimens.s12),
             child: Tooltip(
               message: 'Buat Variasi AI Baru',
-              child: InkWell(
-                onTap: () => ref.invalidate(scanRecipesProvider(activeArgs)),
-                borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                child: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                    border: Border.all(
-                      color: theme.colorScheme.onSurface,
-                      width: 1.4,
+              child: Material(
+                color: harvest.primarySoft,
+                borderRadius: BorderRadius.circular(AppDimens.rButton),
+                child: InkWell(
+                  onTap: () => ref.invalidate(scanRecipesProvider(activeArgs)),
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppDimens.rButton),
+                      border: Border.all(color: harvest.border, width: 1),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.onSurface,
-                        offset: const Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.refresh_rounded,
-                    size: 18,
-                    color: theme.colorScheme.onSurface,
+                    child: Icon(
+                      Icons.refresh_rounded,
+                      size: 18,
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ),
@@ -123,20 +118,14 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                          : harvest.primarySoft,
+                      borderRadius: BorderRadius.circular(AppDimens.rButton),
                       border: Border.all(
-                        color: theme.colorScheme.onSurface,
-                        width: isSelected ? 1.5 : 1.0,
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : harvest.border,
+                        width: 1.0,
                       ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: theme.colorScheme.onSurface,
-                                offset: const Offset(2, 2),
-                              ),
-                            ]
-                          : null,
                     ),
                     alignment: Alignment.center,
                     child: Text(
@@ -146,7 +135,7 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
                             ? theme.colorScheme.onPrimary
                             : theme.colorScheme.onSurface,
                         fontWeight: isSelected
-                            ? FontWeight.w800
+                            ? FontWeight.w700
                             : FontWeight.w600,
                       ),
                     ),
@@ -179,21 +168,21 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
                     IndustrialSpecimenCard(
                       backgroundColor: result.isFromLiveAi
                           ? harvest.primarySoft
-                          : theme.colorScheme.surface,
+                          : (theme.brightness == Brightness.dark
+                                ? AppColors.dLeafSoft
+                                : AppColors.lLeafSoft),
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(7),
                             decoration: BoxDecoration(
                               color: result.isFromLiveAi
                                   ? theme.colorScheme.primary
-                                  : harvest.primarySoft,
+                                  : (theme.brightness == Brightness.dark
+                                        ? AppColors.dLeafGreen
+                                        : AppColors.lLeafStrong),
                               borderRadius: BorderRadius.circular(
-                                AppDimens.rSharp,
-                              ),
-                              border: Border.all(
-                                color: theme.colorScheme.onSurface,
-                                width: 1.2,
+                                AppDimens.rButton,
                               ),
                             ),
                             child: Icon(
@@ -201,7 +190,11 @@ class _ScanRecipesScreenState extends ConsumerState<ScanRecipesScreen> {
                                   ? Icons.auto_awesome_rounded
                                   : Icons.offline_pin_rounded,
                               size: 16,
-                              color: theme.colorScheme.onSurface,
+                              color: result.isFromLiveAi
+                                  ? theme.colorScheme.onPrimary
+                                  : (theme.brightness == Brightness.dark
+                                        ? AppColors.dOnPrimary
+                                        : Colors.white),
                             ),
                           ),
                           const SizedBox(width: AppDimens.s12),
@@ -399,10 +392,6 @@ class _ScanRecipeCard extends StatelessWidget {
                               color: theme.colorScheme.primary,
                               borderRadius: BorderRadius.circular(
                                 AppDimens.rSharp,
-                              ),
-                              border: Border.all(
-                                color: theme.colorScheme.onSurface,
-                                width: 1.2,
                               ),
                             ),
                             child: Row(

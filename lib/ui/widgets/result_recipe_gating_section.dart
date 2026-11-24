@@ -132,6 +132,7 @@ class _ResultRecipeGatingSectionState
           final fruitName = _fruitNameFromResult(result);
           return SpkRecommendationCard(
             plan: plan,
+            ripenessLabel: widget.outcome.ripenessLabel,
             showContextSelectors: result is! RottenDiscardResult,
             allowedTargetDays: _allowedTargetDays(),
             allowedUsageGoals: _allowedUsageGoals(),
