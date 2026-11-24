@@ -25,24 +25,30 @@ class ViewfinderBracketsPainter extends CustomPainter {
     final rect = Rect.fromLTWH(left, top, boxSide, boxSide);
 
     const cornerLen = 18.0;
+    const r = 6.0;
     final strokePaint = Paint()
       ..color = bracketColor.withValues(alpha: 0.92 * bracketProgress)
-      ..strokeWidth = 2.0
+      ..strokeWidth = 2.2
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.square;
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
     final path = Path()
       ..moveTo(rect.left, rect.top + cornerLen)
-      ..lineTo(rect.left, rect.top)
+      ..lineTo(rect.left, rect.top + r)
+      ..quadraticBezierTo(rect.left, rect.top, rect.left + r, rect.top)
       ..lineTo(rect.left + cornerLen, rect.top)
       ..moveTo(rect.right - cornerLen, rect.top)
-      ..lineTo(rect.right, rect.top)
+      ..lineTo(rect.right - r, rect.top)
+      ..quadraticBezierTo(rect.right, rect.top, rect.right, rect.top + r)
       ..lineTo(rect.right, rect.top + cornerLen)
       ..moveTo(rect.right, rect.bottom - cornerLen)
-      ..lineTo(rect.right, rect.bottom)
+      ..lineTo(rect.right, rect.bottom - r)
+      ..quadraticBezierTo(rect.right, rect.bottom, rect.right - r, rect.bottom)
       ..lineTo(rect.right - cornerLen, rect.bottom)
       ..moveTo(rect.left + cornerLen, rect.bottom)
-      ..lineTo(rect.left, rect.bottom)
+      ..lineTo(rect.left + r, rect.bottom)
+      ..quadraticBezierTo(rect.left, rect.bottom, rect.left, rect.bottom - r)
       ..lineTo(rect.left, rect.bottom - cornerLen);
 
     canvas.drawPath(path, strokePaint);

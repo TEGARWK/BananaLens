@@ -171,7 +171,6 @@ class ProfileScreen extends ConsumerWidget {
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final ink = theme.colorScheme.onSurface;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -187,7 +186,7 @@ class ProfileScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const IndustrialTagChip(label: 'KONFIRMASI // KELUAR'),
+                  const IndustrialTagChip(label: 'KONFIRMASI · KELUAR'),
                   Icon(
                     Icons.logout_rounded,
                     size: 20,
@@ -222,33 +221,20 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: AppDimens.s12),
                   Expanded(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppDimens.rButton),
-                        boxShadow: [
-                          BoxShadow(
-                            color: ink,
-                            offset: const Offset(0, 4),
-                            blurRadius: 0,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.error,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppDimens.rButton,
                           ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.error,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppDimens.rButton,
-                            ),
-                            side: BorderSide(color: ink, width: 1.5),
-                          ),
-                          elevation: 0,
                         ),
-                        child: const Text('Keluar'),
+                        elevation: 0,
                       ),
+                      child: const Text('Keluar'),
                     ),
                   ),
                 ],
@@ -267,7 +253,6 @@ class ProfileScreen extends ConsumerWidget {
   void _showInfoModal(BuildContext context, {required bool isEngine}) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final ink = theme.colorScheme.onSurface;
 
     showDialog<void>(
       context: context,
@@ -284,7 +269,7 @@ class ProfileScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IndustrialTagChip(
-                    label: isEngine ? 'MOD-AI // ENGINE' : 'BANANALENS // V1.0',
+                    label: isEngine ? 'MOD-AI · ENGINE' : 'BANANALENS · V1.0',
                     accent: true,
                   ),
                   if (isEngine)
@@ -293,10 +278,7 @@ class ProfileScreen extends ConsumerWidget {
                       height: 38,
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(
-                          AppDimens.rButton - 2,
-                        ),
-                        border: Border.all(color: ink, width: 1.4),
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
                       ),
                       child: Icon(
                         Icons.memory_rounded,

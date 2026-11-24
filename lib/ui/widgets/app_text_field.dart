@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fruitlens/core/theme/app_radius.dart';
 import 'package:fruitlens/core/theme/app_spacing.dart';
 
-/// Standardized, tactile form input field with a clear top label,
-/// high-visibility yellow active border, and smooth tilt animation on focus.
+/// Clean, flat editorial form input field with tonal Soft Oat idle fill
+/// and crisp Roasted Cocoa focus state — zero double strokes or hard shadows.
 class AppTextField extends StatefulWidget {
   const AppTextField({
     required this.controller,
@@ -47,8 +47,7 @@ class _AppTextFieldState extends State<AppTextField> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final inkColor = widget.prefixIconColor ?? colorScheme.onSurface;
-    final activeYellow = colorScheme.primary;
+    final focusColor = widget.prefixIconColor ?? colorScheme.secondary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,129 +58,86 @@ class _AppTextFieldState extends State<AppTextField> {
           style: theme.textTheme.labelSmall?.copyWith(
             fontWeight: FontWeight.w700,
             color: colorScheme.onSurface,
-            letterSpacing: 1.0,
+            letterSpacing: 0.9,
           ),
         ),
         const SizedBox(height: 6),
-        TweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0.0, end: _isFocused ? 1.0 : 0.0),
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          builder: (BuildContext context, double t, Widget? child) {
-            return Transform.rotate(
-              angle: -0.014 * t,
-              child: Transform.scale(scale: 1.0 + (0.012 * t), child: child),
-            );
+        Focus(
+          onFocusChange: (bool focused) {
+            if (_isFocused != focused) {
+              setState(() => _isFocused = focused);
+            }
           },
-          child: Focus(
-            onFocusChange: (bool focused) {
-              if (_isFocused != focused) {
-                setState(() => _isFocused = focused);
-              }
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppRadius.md + 2),
-                border: Border.all(
-                  color: _isFocused ? activeYellow : Colors.transparent,
-                  width: 2.5,
-                ),
-                boxShadow: _isFocused
-                    ? <BoxShadow>[
-                        BoxShadow(
-                          color: activeYellow,
-                          offset: const Offset(0, 3),
-                          blurRadius: 0,
-                        ),
-                      ]
-                    : null,
+          child: TextFormField(
+            controller: widget.controller,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            onFieldSubmitted: widget.onFieldSubmitted,
+            obscureText: widget.obscureText,
+            textCapitalization: widget.textCapitalization,
+            validator: widget.validator,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+            decoration: InputDecoration(
+              hintText: widget.hintText,
+              hintStyle: TextStyle(
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.65),
+                fontWeight: FontWeight.w400,
+                fontSize: 13.5,
               ),
-              child: TextFormField(
-                controller: widget.controller,
-                keyboardType: widget.keyboardType,
-                textInputAction: widget.textInputAction,
-                onFieldSubmitted: widget.onFieldSubmitted,
-                obscureText: widget.obscureText,
-                textCapitalization: widget.textCapitalization,
-                validator: widget.validator,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.65),
-                    fontWeight: FontWeight.w400,
-                    fontSize: 13.5,
-                  ),
-                  suffixText: widget.suffixText,
-                  suffixStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                  filled: true,
-                  fillColor: _isFocused
-                      ? colorScheme.surface
-                      : colorScheme.primaryContainer,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: 13,
-                  ),
-                  prefixIcon: widget.prefixIcon != null
-                      ? Padding(
-                          padding: const EdgeInsets.only(left: 14, right: 10),
-                          child: Icon(
-                            widget.prefixIcon,
-                            size: 20,
-                            color: _isFocused
-                                ? inkColor
-                                : colorScheme.onSurfaceVariant,
-                          ),
-                        )
-                      : null,
-                  prefixIconConstraints: const BoxConstraints(
-                    minWidth: 44,
-                    minHeight: 36,
-                  ),
-                  suffixIcon: widget.suffixIcon,
-                  border: OutlineInputBorder(
-                    borderRadius: AppRadius.roundedMd,
-                    borderSide: BorderSide(
-                      color: colorScheme.outlineVariant,
-                      width: 1,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: AppRadius.roundedMd,
-                    borderSide: BorderSide(
-                      color: colorScheme.outlineVariant,
-                      width: 1,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: AppRadius.roundedMd,
-                    borderSide: BorderSide(color: inkColor, width: 1.5),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: AppRadius.roundedMd,
-                    borderSide: BorderSide(
-                      color: colorScheme.error,
-                      width: 1.5,
-                    ),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: AppRadius.roundedMd,
-                    borderSide: BorderSide(
-                      color: colorScheme.error,
-                      width: 2.0,
-                    ),
-                  ),
-                ),
+              suffixText: widget.suffixText,
+              suffixStyle: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+              filled: true,
+              fillColor: _isFocused
+                  ? colorScheme.surface
+                  : colorScheme.primaryContainer,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 14,
+              ),
+              prefixIcon: widget.prefixIcon != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 14, right: 10),
+                      child: Icon(
+                        widget.prefixIcon,
+                        size: 20,
+                        color: _isFocused
+                            ? focusColor
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    )
+                  : null,
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 44,
+                minHeight: 36,
+              ),
+              suffixIcon: widget.suffixIcon,
+              border: const OutlineInputBorder(
+                borderRadius: AppRadius.roundedMd,
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: const OutlineInputBorder(
+                borderRadius: AppRadius.roundedMd,
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: AppRadius.roundedMd,
+                borderSide: BorderSide(color: focusColor, width: 1.4),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: AppRadius.roundedMd,
+                borderSide: BorderSide(color: colorScheme.error, width: 1.2),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: AppRadius.roundedMd,
+                borderSide: BorderSide(color: colorScheme.error, width: 1.5),
               ),
             ),
           ),

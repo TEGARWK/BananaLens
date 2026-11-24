@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitlens/core/theme/app_colors.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 
 /// Renders a BananaLens industrial-style banana illustration matching the
@@ -24,21 +25,21 @@ class FruitVectorIcon extends StatelessWidget {
     return switch (norm) {
       'unripe' || 'mentah' => const _BananaIconStyle(
         assetPath: 'assets/images/fruits/banana_unripe.png',
-        lightBg: Color(0xFFE6EED8),
-        darkBg: Color(0xFF242F1B),
-        accentColor: Color(0xFF4E7A27),
+        lightBg: AppColors.lLeafSoft,
+        darkBg: AppColors.dLeafSoft,
+        accentColor: AppColors.lLeafStrong,
       ),
       'rotten' || 'busuk' => const _BananaIconStyle(
         assetPath: 'assets/images/fruits/banana_rotten.png',
-        lightBg: Color(0xFFF1E2DC),
-        darkBg: Color(0xFF33221D),
-        accentColor: Color(0xFF7A4E2D),
+        lightBg: Color(0xFFF6E6DF),
+        darkBg: Color(0xFF3A241C),
+        accentColor: AppColors.lAccent,
       ),
       _ => const _BananaIconStyle(
         assetPath: 'assets/images/fruits/banana_ripe.png',
-        lightBg: Color(0xFFF6EBB0),
-        darkBg: Color(0xFF302B16),
-        accentColor: Color(0xFFDEC010),
+        lightBg: AppColors.lPrimarySoft,
+        darkBg: AppColors.dPrimarySoft,
+        accentColor: AppColors.lPrimary,
       ),
     };
   }

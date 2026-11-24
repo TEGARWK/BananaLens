@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fruitlens/core/theme/app_colors.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
 import 'package:fruitlens/core/theme/theme_controller.dart';
@@ -32,7 +33,6 @@ class ThemePickerSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final ink = theme.colorScheme.onSurface;
     final current = ref.watch(themeControllerProvider);
 
     return Container(
@@ -41,7 +41,7 @@ class ThemePickerSheet extends ConsumerWidget {
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppDimens.rHero),
         ),
-        border: Border(top: BorderSide(color: ink, width: 1.6)),
+        border: Border(top: BorderSide(color: harvest.border, width: 1)),
       ),
       padding: const EdgeInsets.fromLTRB(
         AppDimens.s20,
@@ -57,10 +57,10 @@ class ThemePickerSheet extends ConsumerWidget {
           children: [
             Center(
               child: Container(
-                width: 44,
-                height: 5,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: ink.withValues(alpha: 0.35),
+                  color: harvest.border,
                   borderRadius: BorderRadius.circular(AppDimens.rSharp),
                 ),
               ),
@@ -69,10 +69,7 @@ class ThemePickerSheet extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const IndustrialTagChip(
-                  label: 'TEMA // TAMPILAN',
-                  accent: true,
-                ),
+                const IndustrialTagChip(label: 'TEMA · TAMPILAN', accent: true),
                 Text(
                   'BANANALENS',
                   style: theme.textTheme.labelSmall?.copyWith(
@@ -155,35 +152,27 @@ class _ThemeOptionTile extends StatelessWidget {
     final harvest = context.harvest;
     final primary = theme.colorScheme.primary;
     final ink = theme.colorScheme.onSurface;
+    final leafStrong = theme.brightness == Brightness.dark
+        ? AppColors.dLeafGreen
+        : AppColors.lLeafStrong;
 
     return Material(
-      color: selected
-          ? primary.withValues(alpha: 0.22)
-          : theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(AppDimens.rButton),
+      color: selected ? harvest.primarySoft : theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(AppDimens.rCard),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDimens.rButton),
+        borderRadius: BorderRadius.circular(AppDimens.rCard),
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppDimens.s16,
             vertical: AppDimens.s12,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppDimens.rButton),
+            borderRadius: BorderRadius.circular(AppDimens.rCard),
             border: Border.all(
-              color: selected ? ink : harvest.border,
-              width: selected ? 1.6 : 1.2,
+              color: selected ? primary : harvest.border,
+              width: selected ? 1.4 : 1,
             ),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: primary,
-                      offset: const Offset(0, 3),
-                      blurRadius: 0,
-                    ),
-                  ]
-                : null,
           ),
           child: Row(
             children: [
@@ -192,11 +181,7 @@ class _ThemeOptionTile extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: selected ? primary : harvest.primarySoft,
-                  borderRadius: BorderRadius.circular(AppDimens.rButton - 2),
-                  border: Border.all(
-                    color: selected ? ink : harvest.border,
-                    width: 1.3,
-                  ),
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
                 ),
                 child: Icon(
                   icon,
@@ -225,24 +210,12 @@ class _ThemeOptionTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: selected ? primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                  border: Border.all(
-                    color: selected ? ink : harvest.muted,
-                    width: 1.4,
-                  ),
-                ),
-                child: selected
-                    ? Icon(
-                        Icons.check_rounded,
-                        size: 16,
-                        color: theme.colorScheme.onPrimary,
-                      )
-                    : null,
+              Icon(
+                selected
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                size: 22,
+                color: selected ? leafStrong : harvest.muted,
               ),
             ],
           ),

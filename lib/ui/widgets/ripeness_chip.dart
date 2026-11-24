@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_dimens.dart';
+import '../../core/theme/harvest_colors.dart';
 import '../../data/models/ripeness.dart';
 
 class RipenessChip extends StatelessWidget {
@@ -11,31 +12,32 @@ class RipenessChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ink = theme.colorScheme.onSurface;
+    final harvest = context.harvest;
+    final isDark = theme.brightness == Brightness.dark;
 
     final (label, icon, bg, fg) = switch (ripeness) {
       Ripeness.unripe => (
         'Mentah',
         Icons.eco_outlined,
-        const Color(0xFF3E7D28),
-        Colors.white,
+        harvest.unripe,
+        isDark ? theme.colorScheme.onPrimary : Colors.white,
       ),
       Ripeness.ripe => (
         'Matang',
         Icons.check_circle_outline,
         theme.colorScheme.primary,
-        const Color(0xFF181A16),
+        theme.colorScheme.onPrimary,
       ),
       Ripeness.overripe => (
         'Matang Banget',
         Icons.warning_amber_rounded,
-        const Color(0xFFD97706),
+        harvest.overripe,
         Colors.white,
       ),
       Ripeness.rotten => (
         'Busuk',
         Icons.dangerous_outlined,
-        const Color(0xFFC43E2B),
+        harvest.rotten,
         Colors.white,
       ),
     };
@@ -47,8 +49,7 @@ class RipenessChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(AppDimens.rSharp),
-        border: Border.all(color: ink, width: 1.2),
+        borderRadius: BorderRadius.circular(AppDimens.rButton),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

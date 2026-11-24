@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 
-/// Corner radius scale for cards, buttons, dialogs, and sheets.
+/// Corner radius scale for crisp editorial flat cards, buttons, dialogs, and sheets.
 abstract final class AppRadius {
-  /// 4pt - Subtle rounding
-  static const double xs = 4.0;
+  /// 2pt - Crisp editorial tags & micro-bars
+  static const double xs = 2.0;
 
-  /// 8pt - Small components (badges, tags)
-  static const double sm = 8.0;
+  /// 4pt - Small chips & icon boxes
+  static const double sm = 4.0;
 
-  /// 12pt - Medium components (input fields, small cards)
-  static const double md = 12.0;
+  /// 6pt - Buttons & input fields
+  static const double md = 6.0;
 
-  /// 16pt - Standard cards & dialogs
-  static const double lg = 16.0;
+  /// 8pt - Standard editorial cards & dialogs
+  static const double lg = 8.0;
 
-  /// 24pt - Bottom sheets & large cards
-  static const double xl = 24.0;
+  /// 16pt - Bottom sheets & hero panels
+  static const double xl = 16.0;
 
-  /// 999pt - Full pill rounding (FAB, chips, pills)
+  /// 999pt - Full pill rounding (FAB / circular badges)
   static const double full = 999.0;
 
   // BorderRadius helpers

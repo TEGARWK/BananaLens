@@ -7,10 +7,12 @@ import 'package:fruitlens/providers/auth_providers.dart';
 import 'package:fruitlens/services/auth_service.dart';
 import 'package:fruitlens/ui/widgets/app_text_field.dart';
 import 'package:fruitlens/ui/widgets/auth_widgets.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 import 'package:fruitlens/ui/widgets/primary_button.dart';
 import 'package:go_router/go_router.dart';
 
-/// Dedicated screen allowing registered local users to reset their password.
+/// Dedicated screen allowing registered local users to reset their password
+/// in Editorial Scanner Flat style.
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key, this.initialEmail = ''});
 
@@ -93,20 +95,42 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Center(
-                  child: Image.asset(
-                    'assets/images/auth/auth_forgot.png',
-                    height: 164,
-                    fit: BoxFit.contain,
+                const Center(
+                  child: IndustrialTagChip(
+                    label: 'PEMULIHAN // AKSES',
+                    accent: true,
                   ),
                 ),
-                const SizedBox(height: AppDimens.s12),
+                const SizedBox(height: AppDimens.s16),
+                Center(
+                  child: ScannerFrame(
+                    bracketLength: 16,
+                    strokeWidth: 2.0,
+                    bracketColor: harvest.accent,
+                    padding: const EdgeInsets.all(AppDimens.s12),
+                    child: Container(
+                      width: 196,
+                      height: 148,
+                      decoration: BoxDecoration(
+                        color: harvest.primarySoft,
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
+                      ),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(AppDimens.s8),
+                      child: Image.asset(
+                        'assets/images/auth/auth_forgot.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppDimens.s16),
                 Text(
                   'Lupa Kata Sandi?',
                   textAlign: TextAlign.center,
                   style: AppTheme.pixelDisplayStyle(
                     context,
-                    fontSize: 19,
+                    fontSize: 24,
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
@@ -122,76 +146,86 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   const SizedBox(height: AppDimens.s16),
                   AuthErrorBanner(message: _errorMessage!),
                 ],
-                const SizedBox(height: AppDimens.s24),
-                AppTextField(
-                  controller: _emailController,
-                  label: 'Email Terdaftar',
-                  hintText: LocalAuthService.demoEmail,
-                  prefixIcon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  validator: (String? v) {
-                    final text = v?.trim() ?? '';
-                    if (text.isEmpty || !text.contains('@')) {
-                      return 'Masukkan format email yang valid';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppDimens.s16),
-                AppTextField(
-                  controller: _newPasswordController,
-                  label: 'Kata Sandi Baru',
-                  hintText: 'Minimal 6 karakter',
-                  prefixIcon: Icons.lock_outline_rounded,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.next,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
+                const SizedBox(height: AppDimens.s20),
+                IndustrialSpecimenCard(
+                  padding: const EdgeInsets.all(AppDimens.s20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      AppTextField(
+                        controller: _emailController,
+                        label: 'Email Terdaftar',
+                        hintText: LocalAuthService.demoEmail,
+                        prefixIcon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        validator: (String? v) {
+                          final text = v?.trim() ?? '';
+                          if (text.isEmpty || !text.contains('@')) {
+                            return 'Masukkan format email yang valid';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: AppDimens.s16),
+                      AppTextField(
+                        controller: _newPasswordController,
+                        label: 'Kata Sandi Baru',
+                        hintText: 'Minimal 6 karakter',
+                        prefixIcon: Icons.lock_outline_rounded,
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.next,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
+                        ),
+                        validator: (String? v) => (v == null || v.length < 6)
+                            ? 'Kata sandi minimal 6 karakter'
+                            : null,
+                      ),
+                      const SizedBox(height: AppDimens.s16),
+                      AppTextField(
+                        controller: _confirmPasswordController,
+                        label: 'Konfirmasi Kata Sandi Baru',
+                        hintText: 'Ulangi kata sandi baru',
+                        prefixIcon: Icons.verified_user_outlined,
+                        obscureText: _obscureConfirm,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _submit(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirm
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
+                        ),
+                        validator: (String? v) {
+                          if (v == null || v.isEmpty) {
+                            return 'Konfirmasi kata sandi wajib diisi';
+                          }
+                          if (v != _newPasswordController.text) {
+                            return 'Kata sandi baru tidak cocok';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: AppDimens.s20),
+                      PrimaryButton(
+                        text: 'Simpan Kata Sandi Baru',
+                        isLoading: _isSubmitting,
+                        onPressed: _submit,
+                      ),
+                    ],
                   ),
-                  validator: (String? v) => (v == null || v.length < 6)
-                      ? 'Kata sandi minimal 6 karakter'
-                      : null,
-                ),
-                const SizedBox(height: AppDimens.s16),
-                AppTextField(
-                  controller: _confirmPasswordController,
-                  label: 'Konfirmasi Kata Sandi Baru',
-                  hintText: 'Ulangi kata sandi baru',
-                  prefixIcon: Icons.verified_user_outlined,
-                  obscureText: _obscureConfirm,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirm
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscureConfirm = !_obscureConfirm),
-                  ),
-                  validator: (String? v) {
-                    if (v == null || v.isEmpty) {
-                      return 'Konfirmasi kata sandi wajib diisi';
-                    }
-                    if (v != _newPasswordController.text) {
-                      return 'Kata sandi baru tidak cocok';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppDimens.s24),
-                PrimaryButton(
-                  text: 'Simpan Kata Sandi Baru',
-                  isLoading: _isSubmitting,
-                  onPressed: _submit,
                 ),
               ],
             ),

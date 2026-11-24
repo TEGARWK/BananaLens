@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/fruit_info.dart';
@@ -32,14 +33,6 @@ class HistoryDetailNutritionSection extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(AppDimens.rCard),
-              border: Border.all(color: ink, width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: ink,
-                  offset: const Offset(2, 2.5),
-                  blurRadius: 0,
-                ),
-              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -72,7 +65,6 @@ class HistoryDetailNutritionSection extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                    border: Border.all(color: ink, width: 1.2),
                   ),
                   child: Text(
                     'Per 100 g',
@@ -136,6 +128,10 @@ class HistoryDetailGuidanceCard extends StatelessWidget {
     final harvest = context.harvest;
     final ink = theme.colorScheme.onSurface;
 
+    final isDark = theme.brightness == Brightness.dark;
+    final leafBg = isDark ? AppColors.dLeafSoft : AppColors.lLeafSoft;
+    final leafFg = isDark ? AppColors.dLeafGreen : AppColors.lLeafStrong;
+
     if (ripeness == Ripeness.rotten) {
       return IndustrialSpecimenCard(
         backgroundColor: harvest.rotten.withValues(alpha: 0.08),
@@ -153,8 +149,8 @@ class HistoryDetailGuidanceCard extends StatelessWidget {
             Divider(height: AppDimens.s24, color: harvest.border),
             _GuidanceSection(
               icon: Icons.recycling_rounded,
-              iconBg: theme.colorScheme.primary.withValues(alpha: 0.5),
-              iconColor: ink,
+              iconBg: leafBg,
+              iconColor: leafFg,
               title: AppStrings.rottenEcoTitle,
               body: AppStrings.rottenEcoBody,
             ),
@@ -170,7 +166,7 @@ class HistoryDetailGuidanceCard extends StatelessWidget {
         children: [
           _GuidanceSection(
             icon: Icons.schedule_rounded,
-            iconBg: theme.colorScheme.primary.withValues(alpha: 0.45),
+            iconBg: harvest.primarySoft,
             iconColor: ink,
             title: 'SARAN KONSUMSI',
             body: consumptionText,
@@ -178,8 +174,8 @@ class HistoryDetailGuidanceCard extends StatelessWidget {
           Divider(height: AppDimens.s24, color: harvest.border),
           _GuidanceSection(
             icon: Icons.hourglass_bottom_rounded,
-            iconBg: harvest.primarySoft,
-            iconColor: ink,
+            iconBg: leafBg,
+            iconColor: leafFg,
             title: 'DAYA SIMPAN',
             body: storageText,
           ),
@@ -241,14 +237,13 @@ class _GuidanceSection extends StatelessWidget {
         Row(
           children: [
             Container(
-              width: 30,
-              height: 30,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 color: iconBg,
-                borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                border: Border.all(color: ink, width: 1.2),
+                borderRadius: BorderRadius.circular(AppDimens.rButton),
               ),
-              child: Icon(icon, size: 16, color: iconColor),
+              child: Icon(icon, size: 17, color: iconColor),
             ),
             const SizedBox(width: AppDimens.s8),
             Expanded(

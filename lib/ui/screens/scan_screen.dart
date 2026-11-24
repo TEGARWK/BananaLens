@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../providers/camera_providers.dart';
@@ -178,12 +179,20 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
     context.push('/result');
   }
 
+  void _closeScanner() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final permAsync = ref.watch(cameraPermissionProvider);
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.dSurfaceDark,
       body: permAsync.when(
         loading: () => _buildCameraSkeleton(),
         error: (_, _) => Center(
@@ -229,7 +238,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
 
   Widget _buildCameraSkeleton() {
     return Container(
-      color: Colors.black,
+      color: AppColors.dSurfaceDark,
       padding: const EdgeInsets.all(AppDimens.screenPadding),
       child: Center(
         child: Column(
@@ -268,7 +277,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
 
   Widget _buildCameraView() {
     final theme = Theme.of(context);
-    final harvest = context.harvest;
+    final scanYellow = theme.colorScheme.primary;
+    final scrimDark = AppColors.dSurfaceDark.withValues(alpha: 0.58);
 
     if (_isCameraInitializing) {
       return _buildCameraSkeleton();
@@ -340,15 +350,14 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  onPressed: () => context.pop(),
+                  onPressed: _closeScanner,
+                  tooltip: 'Tutup',
                   icon: const Icon(
                     Icons.close_rounded,
                     color: Colors.white,
-                    size: 26,
+                    size: 24,
                   ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withValues(alpha: 0.4),
-                  ),
+                  style: IconButton.styleFrom(backgroundColor: scrimDark),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -356,40 +365,53 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                     vertical: AppDimens.s8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: scrimDark,
                     borderRadius: BorderRadius.circular(AppDimens.rPill),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: scanYellow.withValues(alpha: 0.55),
                       width: 1,
                     ),
                   ),
-                  child: Text(
-                    'Arahkan ke buah',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          color: scanYellow,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                      Text(
+                        'Arahkan ke buah',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 IconButton(
                   onPressed: _toggleFlash,
+                  tooltip: _isFlashOn ? 'Matikan flash' : 'Nyalakan flash',
                   icon: Icon(
                     _isFlashOn
                         ? Icons.flash_on_rounded
                         : Icons.flash_off_rounded,
-                    color: _isFlashOn ? harvest.accent : Colors.white,
+                    color: _isFlashOn ? scanYellow : Colors.white,
                     size: 22,
                   ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withValues(alpha: 0.4),
-                  ),
+                  style: IconButton.styleFrom(backgroundColor: scrimDark),
                 ),
               ],
             ),
           ),
         ),
 
-        // 3. Bingkai Fokus 220dp dengan 4 sudut siku tebal 4px accent & garis pindai
+        // 3. Bingkai Fokus 220dp dengan 4 sudut membulat kuning & garis pindai kuning
         Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -399,13 +421,14 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                 height: 220,
                 child: Stack(
                   children: [
-                    // 4 Sudut Siku
+                    // 4 Sudut Membulat Kuning
                     CustomPaint(
                       size: const Size(220, 220),
                       painter: _ScannerCornerPainter(
-                        cornerColor: harvest.accent,
+                        cornerColor: scanYellow,
                         strokeWidth: 4,
-                        cornerLength: 26,
+                        cornerLength: 28,
+                        cornerRadius: 10,
                       ),
                     ),
                     // Garis horizontal beranimasi naik-turun (2.2s easeInOut)
@@ -419,13 +442,13 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                           child: Container(
                             height: 2.5,
                             decoration: BoxDecoration(
-                              color: harvest.accent,
+                              color: scanYellow,
                               borderRadius: BorderRadius.circular(
                                 AppDimens.rPill,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: harvest.accent.withValues(alpha: 0.8),
+                                  color: scanYellow.withValues(alpha: 0.75),
                                   blurRadius: 8,
                                   spreadRadius: 1,
                                 ),
@@ -446,13 +469,13 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                   vertical: AppDimens.s4 + 2,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.55),
+                  color: scrimDark,
                   borderRadius: BorderRadius.circular(AppDimens.rPill),
                 ),
                 child: Text(
                   'Pastikan pencahayaan cukup',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.85),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ),
@@ -521,16 +544,16 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                           ),
                           alignment: Alignment.center,
                           child: Container(
-                            width: 50,
-                            height: 50,
+                            width: 52,
+                            height: 52,
                             decoration: BoxDecoration(
-                              color: harvest.accent,
+                              color: scanYellow,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.camera_alt_rounded,
-                              color: harvest.onAccent,
-                              size: 26,
+                              color: theme.colorScheme.onPrimary,
+                              size: 25,
                             ),
                           ),
                         ),
@@ -651,11 +674,13 @@ class _ScannerCornerPainter extends CustomPainter {
     required this.cornerColor,
     required this.strokeWidth,
     required this.cornerLength,
+    this.cornerRadius = 10,
   });
 
   final Color cornerColor;
   final double strokeWidth;
   final double cornerLength;
+  final double cornerRadius;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -663,32 +688,59 @@ class _ScannerCornerPainter extends CustomPainter {
       ..color = cornerColor
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
     final w = size.width;
     final h = size.height;
     final l = cornerLength;
+    final r = cornerRadius.clamp(0.0, l * 0.6);
 
     // Top Left
-    canvas.drawLine(const Offset(0, 0), Offset(l, 0), paint);
-    canvas.drawLine(const Offset(0, 0), Offset(0, l), paint);
+    canvas.drawPath(
+      Path()
+        ..moveTo(0, l)
+        ..lineTo(0, r)
+        ..quadraticBezierTo(0, 0, r, 0)
+        ..lineTo(l, 0),
+      paint,
+    );
 
     // Top Right
-    canvas.drawLine(Offset(w, 0), Offset(w - l, 0), paint);
-    canvas.drawLine(Offset(w, 0), Offset(w, l), paint);
+    canvas.drawPath(
+      Path()
+        ..moveTo(w - l, 0)
+        ..lineTo(w - r, 0)
+        ..quadraticBezierTo(w, 0, w, r)
+        ..lineTo(w, l),
+      paint,
+    );
 
     // Bottom Left
-    canvas.drawLine(Offset(0, h), Offset(l, h), paint);
-    canvas.drawLine(Offset(0, h), Offset(0, h - l), paint);
+    canvas.drawPath(
+      Path()
+        ..moveTo(0, h - l)
+        ..lineTo(0, h - r)
+        ..quadraticBezierTo(0, h, r, h)
+        ..lineTo(l, h),
+      paint,
+    );
 
     // Bottom Right
-    canvas.drawLine(Offset(w, h), Offset(w - l, h), paint);
-    canvas.drawLine(Offset(w, h), Offset(w, h - l), paint);
+    canvas.drawPath(
+      Path()
+        ..moveTo(w - l, h)
+        ..lineTo(w - r, h)
+        ..quadraticBezierTo(w, h, w, h - r)
+        ..lineTo(w, h - l),
+      paint,
+    );
   }
 
   @override
   bool shouldRepaint(covariant _ScannerCornerPainter oldDelegate) =>
       oldDelegate.cornerColor != cornerColor ||
       oldDelegate.strokeWidth != strokeWidth ||
-      oldDelegate.cornerLength != cornerLength;
+      oldDelegate.cornerLength != cornerLength ||
+      oldDelegate.cornerRadius != cornerRadius;
 }

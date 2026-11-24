@@ -137,7 +137,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Detail Riwayat Pindai'), findsOneWidget);
-    expect(find.text('CATATAN // PINDAI'), findsOneWidget);
+    expect(find.text('CATATAN · PINDAI'), findsOneWidget);
     expect(find.text('93%'), findsOneWidget);
     expect(find.text('Ketuk untuk rincian'), findsOneWidget);
     expect(find.text('Per 100 g'), findsOneWidget);

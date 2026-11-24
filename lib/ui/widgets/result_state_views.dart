@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/scan_report.dart';
@@ -83,7 +84,7 @@ class _ResultLoadingViewState extends State<ResultLoadingView>
                         )
                       else
                         Container(
-                          color: const Color(0xFF181A16),
+                          color: AppColors.dSurfaceDark,
                           child: Center(
                             child: Icon(
                               Icons.center_focus_strong_rounded,
@@ -94,9 +95,9 @@ class _ResultLoadingViewState extends State<ResultLoadingView>
                             ),
                           ),
                         ),
-                      // Subtle dark scrim so the yellow scan laser pops
+                      // Subtle dark chocolate scrim so the yellow scan laser pops
                       Container(
-                        color: const Color(0xFF181A16).withValues(alpha: 0.28),
+                        color: AppColors.dSurfaceDark.withValues(alpha: 0.28),
                       ),
                       // Sweeping BananaLens scan laser
                       AnimatedBuilder(
@@ -110,7 +111,7 @@ class _ResultLoadingViewState extends State<ResultLoadingView>
                           );
                         },
                       ),
-                      // Top-left industrial status tag
+                      // Top-left status tag
                       Positioned(
                         top: AppDimens.s12,
                         left: AppDimens.s12,
@@ -124,7 +125,6 @@ class _ResultLoadingViewState extends State<ResultLoadingView>
                             borderRadius: BorderRadius.circular(
                               AppDimens.rSharp,
                             ),
-                            border: Border.all(color: ink, width: 1.2),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -136,7 +136,7 @@ class _ResultLoadingViewState extends State<ResultLoadingView>
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'SCANNING // ANALISIS AI',
+                                'MEMINDAI · ANALISIS AI',
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: theme.colorScheme.onPrimary,
                                   fontWeight: FontWeight.w800,
@@ -209,13 +209,15 @@ class _ScanLaserPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     const bracketLen = 22.0;
     const pad = 12.0;
+    const r = 8.0;
     final bracketPaint = Paint()
       ..color = accentColor
       ..strokeWidth = 2.6
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.square;
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    // 4 corner viewfinder brackets
+    // 4 rounded corner viewfinder brackets
     const left = pad;
     const top = pad;
     final right = size.width - pad;
@@ -225,7 +227,8 @@ class _ScanLaserPainter extends CustomPainter {
     canvas.drawPath(
       Path()
         ..moveTo(left, top + bracketLen)
-        ..lineTo(left, top)
+        ..lineTo(left, top + r)
+        ..quadraticBezierTo(left, top, left + r, top)
         ..lineTo(left + bracketLen, top),
       bracketPaint,
     );
@@ -233,7 +236,8 @@ class _ScanLaserPainter extends CustomPainter {
     canvas.drawPath(
       Path()
         ..moveTo(right - bracketLen, top)
-        ..lineTo(right, top)
+        ..lineTo(right - r, top)
+        ..quadraticBezierTo(right, top, right, top + r)
         ..lineTo(right, top + bracketLen),
       bracketPaint,
     );
@@ -241,7 +245,8 @@ class _ScanLaserPainter extends CustomPainter {
     canvas.drawPath(
       Path()
         ..moveTo(left, bottom - bracketLen)
-        ..lineTo(left, bottom)
+        ..lineTo(left, bottom - r)
+        ..quadraticBezierTo(left, bottom, left + r, bottom)
         ..lineTo(left + bracketLen, bottom),
       bracketPaint,
     );
@@ -249,7 +254,8 @@ class _ScanLaserPainter extends CustomPainter {
     canvas.drawPath(
       Path()
         ..moveTo(right - bracketLen, bottom)
-        ..lineTo(right, bottom)
+        ..lineTo(right - r, bottom)
+        ..quadraticBezierTo(right, bottom, right, bottom - r)
         ..lineTo(right, bottom - bracketLen),
       bracketPaint,
     );
@@ -308,7 +314,7 @@ class ResultUncertainView extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppDimens.rButton),
-                  border: Border.all(color: ink, width: 1.5),
+                  border: Border.all(color: context.harvest.border, width: 1),
                 ),
                 child: FruitImage(
                   imagePath: report.imagePath,
@@ -317,7 +323,7 @@ class ResultUncertainView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppDimens.s16),
-              const IndustrialTagChip(label: 'DETEKSI // TIDAK YAKIN'),
+              const IndustrialTagChip(label: 'DETEKSI · TIDAK YAKIN'),
               const SizedBox(height: AppDimens.s12),
               Text(
                 AppStrings.resultUncertainTitle,

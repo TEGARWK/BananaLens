@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../data/models/fruit_info.dart';
 import '../../data/models/ripeness.dart';
+import '../../data/models/scan_outcome.dart';
 import '../../data/models/scan_result.dart';
 import '../../providers/chat_notifier.dart';
 import '../../providers/service_providers.dart';
@@ -13,6 +14,7 @@ import '../widgets/history_detail_guidance_card.dart';
 import '../widgets/history_detail_hero_card.dart';
 import '../widgets/history_detail_sheets.dart';
 import '../widgets/primary_button.dart';
+import '../widgets/result_recipe_gating_section.dart';
 import '../widgets/rotten_guidance_sheet.dart';
 import '../widgets/soft_button.dart';
 
@@ -66,6 +68,31 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
     return '$day $month ${dt.year} · $hour:$min';
   }
 
+  ScanSuccess _toScanSuccess(ScanResult item) {
+    Map<String, double>? probs;
+    if (item.unripeProb != null ||
+        item.ripeProb != null ||
+        item.rottenProb != null) {
+      final unripe = (item.unripeProb ?? 0.0).clamp(0.0, 1.0);
+      final ripe = (item.ripeProb ?? 0.0).clamp(0.0, 1.0);
+      final rotten = (item.rottenProb ?? 0.0).clamp(0.0, 1.0);
+      final overripe = (1.0 - unripe - ripe - rotten).clamp(0.0, 1.0);
+      probs = <String, double>{
+        'unripe': unripe,
+        'ripe': ripe,
+        'overripe': overripe,
+        'rotten': rotten,
+      };
+    }
+    return ScanSuccess(
+      fruitLabel: item.fruitLabel,
+      ripenessLabel: item.ripenessLabel,
+      fruitConfidence: item.confidence,
+      ripenessConfidence: item.confidence,
+      classProbabilities: probs,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final item = widget.initialItem;
@@ -74,6 +101,7 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
     final fruitInfo = _fruitInfo;
     final fruitTitle = fruitInfo?.nameId ?? item.fruitLabel;
     final confPct = (item.confidence * 100).round();
+    final scanOutcome = _toScanSuccess(item);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -108,6 +136,7 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
             ),
           ),
           const SizedBox(height: AppDimens.s16),
+          ResultRecipeGatingSection(outcome: scanOutcome),
           if (fruitInfo != null) HistoryDetailNutritionSection(info: fruitInfo),
           HistoryDetailGuidanceCard(fruitInfo: fruitInfo, ripeness: ripeness),
           const SizedBox(height: AppDimens.s16),

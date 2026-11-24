@@ -159,16 +159,15 @@ class _HeaderRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 30,
-          height: 30,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(AppDimens.rSharp),
-            border: Border.all(color: ink, width: 1.2),
+            color: accent.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(AppDimens.rButton),
           ),
-          child: Icon(icon, size: 16, color: ink),
+          child: Icon(icon, size: 17, color: decision.id == 1 ? ink : accent),
         ),
-        const SizedBox(width: AppDimens.s8),
+        const SizedBox(width: AppDimens.s12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,18 +183,17 @@ class _HeaderRow extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimens.s8,
-                  vertical: 2,
+                  vertical: 3,
                 ),
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                  border: Border.all(color: ink, width: 1.0),
                 ),
                 child: Text(
                   decision.badge,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: badgeTextColor,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     fontSize: 10.5,
                   ),
                 ),
@@ -222,29 +220,43 @@ class _ActionTipBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final harvest = context.harvest;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppDimens.s12),
       decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(AppDimens.rSharp),
-        border: Border.all(color: ink.withValues(alpha: 0.2)),
+        color: accent.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(AppDimens.rButton),
+        border: Border.all(color: harvest.border, width: 1),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.lightbulb_outline_rounded, size: 16, color: ink),
-          const SizedBox(width: AppDimens.s8),
-          Expanded(
-            child: Text(
-              tips,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: ink.withValues(alpha: 0.85),
-                height: 1.35,
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 3, color: accent),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimens.s12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.lightbulb_outline_rounded, size: 16, color: ink),
+                    const SizedBox(width: AppDimens.s8),
+                    Expanded(
+                      child: Text(
+                        tips,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: ink.withValues(alpha: 0.88),
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -289,7 +301,7 @@ class _SelectorGroup<T> extends StatelessWidget {
             final isSelected = item == selected;
             return InkWell(
               onTap: () => onSelected(item),
-              borderRadius: BorderRadius.circular(AppDimens.rSharp),
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimens.s12,
@@ -298,17 +310,19 @@ class _SelectorGroup<T> extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? theme.colorScheme.primary
-                      : theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                      : harvest.primarySoft,
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
                   border: Border.all(
-                    color: isSelected ? ink : harvest.border,
-                    width: isSelected ? 1.4 : 1.0,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : harvest.border,
+                    width: 1.0,
                   ),
                 ),
                 child: Text(
                   labelOf(item),
                   style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                     color: isSelected ? theme.colorScheme.onPrimary : ink,
                   ),
                 ),

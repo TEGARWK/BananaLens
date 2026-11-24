@@ -28,7 +28,6 @@ class HistoryItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final ink = theme.colorScheme.onSurface;
     final ripeness = Ripeness.fromLabel(item.ripenessLabel);
     final itemKey = ValueKey(item.id ?? item.createdAt.toIso8601String());
     final confidencePct = (item.confidence * 100).toStringAsFixed(0);
@@ -48,7 +47,6 @@ class HistoryItemCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.error,
             borderRadius: BorderRadius.circular(AppDimens.rCard),
-            border: Border.all(color: ink, width: 1.5),
           ),
           child: Icon(
             Icons.delete_outline_rounded,
@@ -65,15 +63,15 @@ class HistoryItemCard extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppDimens.s12),
-                    border: Border.all(color: ink, width: 1.2),
+                    borderRadius: BorderRadius.circular(AppDimens.rButton),
+                    border: Border.all(color: harvest.border, width: 1),
                   ),
                   child: FruitImage(
                     imagePath: item.imagePath,
                     fruitLabel: item.fruitLabel,
                     width: 56,
                     height: 56,
-                    radius: AppDimens.s12 - 1,
+                    radius: AppDimens.rButton - 1,
                   ),
                 ),
                 const SizedBox(width: AppDimens.s12),
@@ -138,7 +136,6 @@ Future<bool> showDeleteHistoryDialog(
 ) async {
   final theme = Theme.of(context);
   final harvest = context.harvest;
-  final ink = theme.colorScheme.onSurface;
   final fruitName = FruitNameHelper.toIndonesian(item.fruitLabel);
 
   final confirmed = await showDialog<bool>(
@@ -155,7 +152,7 @@ Future<bool> showDeleteHistoryDialog(
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const IndustrialTagChip(label: 'HAPUS // RIWAYAT'),
+                const IndustrialTagChip(label: 'HAPUS · RIWAYAT'),
                 Icon(
                   Icons.delete_outline_rounded,
                   size: 20,
@@ -188,33 +185,18 @@ Future<bool> showDeleteHistoryDialog(
                 ),
                 const SizedBox(width: AppDimens.s12),
                 Expanded(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppDimens.rButton),
-                      boxShadow: [
-                        BoxShadow(
-                          color: ink,
-                          offset: const Offset(0, 4),
-                          blurRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.error,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppDimens.rButton,
-                          ),
-                          side: BorderSide(color: ink, width: 1.5),
-                        ),
-                        elevation: 0,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.error,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
                       ),
-                      child: const Text('Hapus'),
+                      elevation: 0,
                     ),
+                    child: const Text('Hapus'),
                   ),
                 ),
               ],

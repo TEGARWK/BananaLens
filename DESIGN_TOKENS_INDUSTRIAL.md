@@ -1,135 +1,96 @@
-# Design Tokens — BananaLens (Layered Tactile Industrial Minimalism)
+# Design Tokens — BananaLens (Editorial Flat Neo-Grid: Ripe Banana & Roasted Cocoa)
 
-> Referensi sistem desain resmi **BananaLens** bergaya **Instrument-Panel / Layered Tactile Industrial Minimalism** dengan aksen **Banana Volt Yellow** (`#F5D51E`), tipografi *pixel-matrix* + *geometric/mono*, serta komponen berlapis (*multi-stroke* & *hard offset depth*).
-
----
-
-## 1. Prinsip Desain Inti
-
-1. **Layered Tactile Physicality:** Komponen tidak datar polos—kartu, tombol, dan chip menggunakan kombinasi **border luar tegas + highlight stroke dalam + *hard offset depth plate*** agar terasa seperti tombol/panel instrumen fisik.
-2. **Banana Volt Yellow Accent:** Kanvas utama memakai *warm alabaster* (`#F5F6F1`) dan tinta arang (`#181A16`), dipadukan aksen kuning cerah **Banana Volt Yellow** (`#F5D51E`) untuk aksi utama, status aktif, bingkai fokus, dan penanda instrumen.
-3. **Pixel & Technical Typography:** Judul status utama (`Selamat Datang`, `Buat Profil Sehatmu`, `Lupa Kata Sandi?`) serta readout numerik memakai font *pixel-matrix* (`Silkscreen`), didukung `Space Grotesk` untuk heading, `Inter` untuk body, dan `JetBrains Mono` untuk label teknis.
-4. **Purposeful Motion:** Setiap interaksi kunci memiliki umpan balik gerak yang halus dan terukur (*focus tilt* pada input aktif, *horizontal slide* antar mode/layar autentikasi, animasi *pop & sway* pada ilustrasi panduan, dan stempel sukses kuning saat login/register).
-5. **Thumb-Zone & Touch-First:** Seluruh tombol utama memiliki tinggi minimal `48 dp` dan jarak antar target sentuh minimal `8 dp`.
+> Sistem desain resmi **BananaLens** bergaya **Editorial Flat Neo-Grid** yang terinspirasi dari tata letak *Swiss Editorial Grid* (bersih, datar, tipografi tegas, blok warna kontras tinggi) dengan perpaduan aksen **Ripe Banana Gold** (`#F4C418`) dan **Roasted Cocoa Brown** (`#5C3A21`) — **tanpa** banyak *stroke* tebal dan **tanpa** bayangan keras (*hard offset shadow*) ala Saweria.
 
 ---
 
-## 2. Color Tokens (Palet Warna)
+## 1. Prinsip Desain Inti (Anti-Saweria, Pro-Editorial)
 
-### 2.1 Light Mode (Primary — *Technical Paper*)
+1. **Flat Color-Blocking Over Heavy Strokes:** Hierarki visual dibangun melalui **kontras blok warna solid** (Kuning Pisang, Cokelat Kakao, Krem Hangat, dan Putih Bersih) serta perbedaan tonal permukaan—bukan menumpuk border `1.5–2px` di setiap tombol, chip, dan ikon.
+2. **Zero Chunky Offset Shadows:** Seluruh *hard offset drop shadow* (`offset(3,4)`, `offset(0,4)`, `offset(2,2)`) dan *double inner border* dihapus total. Permukaan tetap rata (*flat*), tenang, dan modern.
+3. **Warm Banana + Roasted Cocoa Pairing:** Menggantikan kombinasi kuning neon + hitam arang yang terlalu keras dengan **Ripe Banana Gold (`#F4C418`)** yang matang hangat dipadukan **Roasted Cocoa Brown (`#5C3A21`)** dan tinta **Deep Espresso (`#23170F`)** di atas kanvas **Warm Cream Paper (`#FAF7F0`)**.
+4. **Crisp Architectural Geometry:** Sudut komponen menggunakan radius ketat dan rapi (`2dp` chip, `6dp` tombol/input, `8dp` kartu, `10dp` hero) menggantikan sudut terlalu membulat (`20–22dp`).
+5. **Bold Editorial Typography:** Judul utama dan angka metrik (seperti `98%`, jumlah pindai) memakai **Space Grotesk ExtraBold (`w800`)** dengan *tracking* rapat, dipasangkan **Inter** untuk isi teks yang nyaman dibaca, dan **JetBrains Mono** hanya untuk *micro-label* metadata.
 
-| Token Name | Hex / Value | Peran & Penggunaan |
-|---|---|---|
-| `bgCanvas` | `#F5F6F1` | Latar utama layar (*warm alabaster*). |
-| `surfaceMuted` | `#EAECE2` | Latar komponen *recessed*: input field idle, tombol sekunder (`SoftButton`), track progress, dan chip netral. |
-| `surfaceCard` | `#EBEDE3` | Latar *specimen card* (`IndustrialSpecimenCard`) dengan tekstur garis vertikal halus (*micro-ribbed*). |
-| `surfaceElevated` | `#F9FAF6` | Latar bingkai ikon instrumen (`IndustrialBananaMark`) dan input saat aktif (*focused*). |
-| `accentPrimary` | `#F5D51E` | **Banana Volt Yellow** — tombol primer, bingkai fokus input, bayangan layer kartu, badge aktif, dan *scan sweep*. |
-| `accentPressed` | `#DEC010` | State tekan (*pressed*) / aksen kuning lebih dalam. |
-| `accentDisabled` | `#F6EBB0` | State nonaktif pada elemen aksen kuning. |
-| `inkPrimary` | `#181A16` | Teks utama, `onPrimary`, border instrumen (`1.5px–2px`), ikon, dan *hard offset depth* tombol utama. |
-| `inkBorderMuted` | `#4A4E42` | Border luar kartu specimen (`1.5px`) agar tidak hanya hitam pekat. |
-| `inkSecondary` | `#6B7062` | Label metadata sekunder, divider label, dan border tombol sekunder (`1.4px`). |
-| `borderHairline` | `#D8DBD0` | Garis pemisah tipis (`1px`), border input idle, dan *depth lip* tombol sekunder. |
-| `trackInactive` | `#D4D7CC` | Bagian *unfilled* pada dial dan progress bar. |
+---
 
-### 2.2 Dark Mode (*Night Instrument*)
+## 2. Color Tokens — Aturan Pembagian **60–30–10** (Tanpa Hitam)
 
-| Token Name | Hex / Value | Peran & Penggunaan |
-|---|---|---|
-| `dBackground` | `#121310` | Latar utama mode gelap. |
-| `dSurface` | `#1B1D18` | Latar kartu specimen mode gelap. |
-| `dPrimarySoft` | `#262821` | Latar input & tombol sekunder mode gelap. |
-| `dPrimary` | `#F5D51E` | Aksen kuning utama (*Banana Volt Yellow*). |
-| `dOnPrimary` | `#181A16` | Teks di atas tombol/badge kuning. |
-| `dText` | `#F2F3EE` | Teks utama mode gelap. |
-| `dMuted` | `#9A9F90` | Teks metadata mode gelap. |
-| `dBorder` | `#31342B` | Garis pemisah & border mode gelap. |
+### 2.1 Light Mode (*Warm Banana White + Yellow & Cocoa Brown + Leaf Green*)
 
-### 2.3 Semantic & Feedback Tokens
+| Porsi | Token Name | Hex / Value | Peran & Penempatan yang Tepat |
+|---|---|---|---|
+| **60% Primer** | `lBackground` | `#FFFDF7` | Kanvas utama layar (*Warm Banana White* — putih kekuningan hangat, lega). |
+| **60% Primer** | `lSurface` | `#FFFFFF` | Permukaan kartu konten utama (*Pure Crisp White*). |
+| **60% Primer** | `lPrimarySoft` | `#FFF6DC` | Permukaan lembut (*Soft Banana Cream*): input field, `SoftButton`, track bar. |
+| **60% Primer** | `lBorder` | `#EADCC5` | Garis pemisah tipis `1px` (*Warm Sand Hairline*). |
+| **30% Sekunder** | `lPrimary` | `#F4C418` | **Ripe Banana Gold** — Hero Scan Card, `PrimaryButton`, tombol utama. |
+| **30% Sekunder** | `lAccent` / `lSurfaceDark` / `lText` / `lOnPrimary` | `#3B2112` | **Dark Chocolate Brown** — pengganti total warna hitam: blok Tips Hari Ini, bar metrik kiri, tombol "Mulai Scan", teks utama, judul, dan stroke ikon (kontras 14.2:1 di atas putih & 9.2:1 di atas kuning — WCAG AAA). |
+| **30% Sekunder** | `lAccentWarm` | `#54321D` | *Deep Espresso Brown* — variasi coklat gelap sekunder. |
+| **30% Sekunder** | `lMuted` | `#6E5240` | *Dark Cocoa Muted* — teks sekunder & metadata. |
+| **10% Aksen** | `lLeafGreen` | `#A3D955` | **Fresh Light Leaf Green** — aksen kesegaran: blok *Mentah* di bar metrik, ikon *Resep Sehat*, 1 dari 3 pisang melayang, ikon *Pengingat Kesegaran*. |
+| **10% Aksen** | `lLeafStrong` | `#5D9412` | Hijau daun lebih pekat untuk ikon/teks aksen di atas permukaan terang. |
+| **10% Aksen** | `lLeafSoft` | `#EEF7DF` | Tint hijau lembut untuk strip rekomendasi harian & header kartu resep. |
+
+### 2.2 Dark Mode (*Warm Cocoa Night — Tanpa Hitam Pekat*)
 
 | Token Name | Hex / Value | Peran & Penggunaan |
 |---|---|---|
-| `statusSuccess` | `#4E7A27` | Status aman / buah matang optimal. |
-| `statusWarning` | `#C77D1A` | Peringatan perhatian / keyakinan rendah. |
-| `statusDanger` | `#C43E2B` (Light) / `#FF6B57` (Dark) | Error banner (`1.5px` border) & peringatan kritis. |
-| `overlayScrim` | `rgba(24, 26, 22, 0.25)` | Latar redup singkat untuk stempel overlay sukses autentikasi. |
+| `dBackground` | `#24170E` | Latar utama mode gelap (*Dark Roasted Cocoa*). |
+| `dSurface` | `#322015` | Latar kartu mode gelap (*Warm Chocolate*). |
+| `dPrimarySoft` | `#3F2A1D` | Latar input & tombol sekunder (*Mocha Surface*). |
+| `dPrimary` | `#F4C418` | **Ripe Banana Gold**. |
+| `dOnPrimary` | `#4A2C18` | Teks cokelat tua di atas tombol/badge kuning. |
+| `dAccent` | `#D49A6A` | **Warm Caramel** — aksen cokelat terang. |
+| `dLeafGreen` | `#A3D955` | **Fresh Light Leaf Green** (10% aksen). |
+| `dText` | `#FFF9EC` | Teks utama (*Warm Banana Cream*). |
+| `dMuted` | `#C8B09A` | Teks sekunder (*Warm Latte*). |
+| `dBorder` | `#4D3525` | Garis pemisah tipis `1px` mode gelap. |
+
+### 2.3 Semantic & Ripeness Tokens
+
+| Token Name | Light Hex | Dark Hex | Peran & Penggunaan |
+|---|---|---|---|
+| `unripe` (Mentah) | `#4F7D2A` | `#8BC34A` | Hijau daun alami yang serasi dengan palet cokelat-krem. |
+| `ripe` (Matang) | `#E6B00E` | `#F4C418` | Kuning pisang matang optimal. |
+| `overripe` (Terlalu Matang) | `#B86B27` | `#E0964F` | Karamel hangat untuk transisi sangat matang. |
+| `rotten` / `error` (Busuk) | `#C43E2B` | `#FF6B57` | Merah bata tegas untuk peringatan keamanan pangan & error. |
 
 ---
 
 ## 3. Typography Tokens (Tipografi)
 
-| Token Name | Font Family | Ukuran & Weight | Letter Spacing & Case | Penggunaan |
+| Token Name | Font Family | Ukuran & Weight | Letter Spacing | Penggunaan |
 |---|---|---|---|---|
-| `displayPixel` | `Silkscreen` (`tabular-nums`) | `19–36 sp`, Bold (`w700`) | `1.2 px`, Sentence/Display | Judul status Auth (`Selamat Datang`, `Buat Profil Sehatmu`, `Lupa Kata Sandi?`), stempel sukses (`16 sp`), dan readout angka (`36 sp`). |
-| `headlineLarge` | `Space Grotesk` | `26–32 sp`, Bold (`w700–w800`) | `-0.4 to -0.6 px` | Wordmark `BananaLens` di Splash dan heading besar. |
-| `headlineSmall` | `Space Grotesk` | `19 sp`, Bold (`w700–w800`) | `-0.25 px` | Judul slide Onboarding. |
-| `titleLarge` / `titleMedium` | `Space Grotesk` | `15–17 sp`, Bold (`w700`) | `-0.1 to -0.2 px` | Judul AppBar dan sub-judul kartu. |
-| `bodyLarge` / `bodyMedium` | `Inter` | `13.5–14.5 sp`, Regular/Medium | `0 px` | Teks input, deskripsi slide, dan teks tombol link. |
-| `bodySmall` | `Inter` | `12 sp`, Regular | `0 px` | Sub-judul deskriptif di Auth & Lupa Kata Sandi. |
-| `labelLarge` / `labelMedium` | `JetBrains Mono` | `11.5–12.5 sp`, Bold (`w600–w700`) | `1.0–1.1 px` | Label tombol CTA dan link sekunder. |
-| `labelSmall` | `JetBrains Mono` | `10.5 sp`, Bold (`w600–w700`) | `1.0–1.4 px`, **UPPERCASE** | Label field input (`EMAIL`, `KATA SANDI`), tag chip (`MOD-AUTH // MASUK`), dan badge splash. |
+| `pixelDisplayStyle` / `displaySmall` | `Space Grotesk` (`tabular-nums`) | `32–36 sp`, ExtraBold (`w800`) | `-0.8 to -0.9 px` | Angka KPI besar (`98%`, total pindai) dan judul hero bergaya editorial. |
+| `headlineLarge` | `Space Grotesk` | `26 sp`, ExtraBold (`w800`) | `-0.6 px` | Judul utama layar & wordmark `BananaLens`. |
+| `headlineMedium` | `Space Grotesk` | `22 sp`, ExtraBold (`w800`) | `-0.4 px` | Judul bagian utama dan nama buah pada hasil pindai. |
+| `titleLarge` / `titleMedium` | `Space Grotesk` | `15–17 sp`, Bold (`w700`) | `-0.1 to -0.2 px` | Judul AppBar dan judul kartu. |
+| `bodyLarge` / `bodyMedium` | `Inter` | `13.5–14.5 sp`, Regular/Medium | `0 px` | Teks isi, deskripsi resep, dan input form. |
+| `bodySmall` | `Inter` | `12 sp`, Regular | `0 px` | Keterangan pendukung dan metadata waktu. |
+| `labelLarge` | `Space Grotesk` | `13 sp`, Bold (`w700`) | `0.6 px` | Label tombol CTA (`PrimaryButton`, `SoftButton`, `AccentButton`). |
+| `labelMedium` / `labelSmall` | `JetBrains Mono` | `10.5–11.5 sp`, SemiBold/Bold | `0.8–0.9 px` | *Eyebrow tag*, kode kategori (`HASIL // PINDAI`), label persentase. |
 
 ---
 
-## 4. Spacing Tokens (Skala Spasi & Ergonomi Mobile)
+## 4. Radius, Scanner Corner & Stroke Tokens (Minimalist Flat)
 
-| Token Name | Nilai (`dp`) | Penggunaan |
+| Token / Motif | Nilai / Spesifikasi | Penggunaan |
 |---|---|---|
-| `s4` (`xs`) | `4` | Jarak mikro antar elemen rapat. |
-| `s8` (`sm`) | `8` | Gap minimum antar target sentuh dan jarak vertikal kecil. |
-| `s12` | `12` | Padding tag chip & divider autentikasi. |
-| `s16` (`md`) | `16` | Padding internal kartu/tombol & jarak antar field form. |
-| `s20` | `20` | Margin horizontal layar (`screenPadding`) dan padding `AuthHeader`. |
-| `s24` (`lg`) | `24` | Jarak antar blok utama dan padding vertikal kartu panduan. |
-| `s32` | `32` | Ruang napas atas/bawah di Splash Screen. |
-| `touchMin` | `48` | Tinggi minimum area sentuh (`PrimaryButton`, `SoftButton`, field input). |
+| **`ScannerCornerPainter` (`ScannerCornerStyle`)** | Variasi alami agar tidak repetitif: **`all4`** (`┌ ┐ └ ┘`) untuk elemen fokal scan (Hero Scan, Foto Hasil, Splash), **`diagonal2`** (`┌ ┘`) untuk kartu umum & tips, **`topLeft1` / `topRight1`** (`┌` / `┐`) untuk strip grid & kartu resep, **`none`** untuk blok metrik nyambung. | Memberi nuansa optical scanner yang organik & editorial tanpa mengulang 4 sudut di setiap kotak. |
+| **Joined Swiss-Grid Strip** | Kontainer menyatu (`IntrinsicHeight` + `VerticalDivider 1px`) tanpa celah antar-sel (contoh: strip 3 aksi cepat & bar metrik 2-tone Cokelat–Kuning). | Meniru ritme kotak-kotak menyambung yang rapi pada referensi editorial. |
+| `rSharp` | `2 dp` | `IndustrialTagChip`, bar progres — **0px stroke, 0px shadow**. |
+| `rButton` | `6 dp` | `PrimaryButton`, `SoftButton`, `AccentButton`, input field — **0px stroke (idle), 0px shadow**. |
+| `rCard` | `8 dp` | `IndustrialSpecimenCard`, dialog — **4 sudut scanner L-bracket, 0px full stroke, 0px shadow**. |
+| `rHero` | `10 dp` | `HomeHeroScanCard` / panel blok warna penuh — **4 sudut scanner L-bracket, 0px shadow**. |
+| `rSheet` | `16 dp` | Bottom sheet — **0px shadow, top radius 16dp**. |
+| `rPill` | `999 dp` | Hanya untuk indikator lingkaran kecil (avatar/dot). |
 
 ---
 
-## 5. Radius Tokens (Hirarki Sudut)
+## 5. Checklist Implementasi
 
-| Token Name | Nilai (`dp`) | Penggunaan |
-|---|---|---|
-| `rSharp` | `4` | `IndustrialTagChip`, indikator step Onboarding, progress bar Splash. |
-| `rButton` / `md` | `12–14` | `PrimaryButton`, `SoftButton`, `AppTextField`, bingkai `IndustrialBananaMark`. |
-| `rCard` | `20` | `IndustrialSpecimenCard`, kartu stempel sukses Auth, card splash emblem. |
-| `rHero` | `22` | Kartu hero utama. |
-| `rSheet` | `28` | Bottom sheet. |
-| `rPill` | `999` | Elemen kapsul / pill penuh. |
-
----
-
-## 6. Layered Border, Stroke & Shadow Tokens
-
-| Komponen / Token | Layering & Spesifikasi Stroke / Shadow |
-|---|---|
-| **`PrimaryButton`** | Fill `#F5D51E` + outer border `1.5px #181A16` + inner highlight border `1.2px rgba(255,255,255,0.55)` + hard offset plate `(0, 4)` `#181A16` + soft drop shadow `(0, 6)` blur `10`. |
-| **`SoftButton`** | Fill `#EAECE2` + outer border `1.4px #6B7062` + bottom depth lip `(0, 3)` `#D8DBD0`. |
-| **`IndustrialSpecimenCard`** | Fill `#EBEDE3` + tekstur vertikal *micro-ribbed* + outer border `1.5px #4A4E42` + inner highlight `1.2px` putih + hard offset plate `(3, 4)` `#F5D51E`. |
-| **`IndustrialBananaMark`** | Fill `#F9FAF6` + outer border `1.5px #181A16` + inner accent border `1.2px #F5D51E` + hard offset plate `(2.5, 2.5)` `#F5D51E`. |
-| **`IndustrialTagChip`** | Fill `#F5D51E` (atau `#EAECE2`) + border `1.4px #181A16` (atau `#6B7062`) + hard offset shadow `(2, 2)`. |
-| **`AppTextField` (Focused)** | Outer frame `2.5px #F5D51E` + solid bottom lip `(0, 3)` `#F5D51E` + inner border `1.5px #181A16` + fill `#EBEDE3`/`#F9FAF6`. |
-| **`AuthErrorBanner`** | Fill `errorContainer` + border `1.5px #C43E2B` + radius `14dp`. |
-
----
-
-## 7. Motion & Interaction Tokens
-
-| Interaksi | Spesifikasi Animasi |
-|---|---|
-| **Active Input Field (`AppTextField`)** | `TweenAnimationBuilder` `220ms` (`Curves.easeOutCubic`): rotasi miring halus `-0.014 rad` dan skala `1.012` saat fokus aktif. |
-| **Login ↔ Register (`AuthScreen` & `AuthHeader`)** | `AnimatedSize` + `AnimatedSwitcher` `280ms` (`Curves.easeOutCubic` / `easeInCubic`): *horizontal slide* kiri/kanan sesuai arah perpindahan mode. |
-| **Login ↔ Lupa Sandi (`app_router.dart`)** | `CustomTransitionPage` `300ms` (`Curves.easeOutCubic`): *horizontal slide* masuk dari kanan dan keluar ke kiri. |
-| **Onboarding Illustration** | `_AnimatedIllustrationFrame` `850ms` per slide: *pop-in* (`easeOutBack`), *vertical lift* `14dp`, dan *sway tilt* halus (`-0.035 rad` → `0`). |
-| **Login/Register Success Overlay** | `showAuthSuccessOverlay` `750ms`: stempel kuning `Berhasil Masuk` / `Akun Dibuat` dengan `easeOutBack` pop-in dan fade-out otomatis. |
-| **Splash Choreography** | `3400ms`: *dial radial ticks*, L-bracket *viewfinder*, sapuan scan kuning vertikal, dan progress bar berbingkai (mendukung *reduced motion*). |
-
----
-
-## 8. Checklist Implementasi (Flutter & Mobile UX)
-
-- [x] **No Hardcoded Brand Values:** Warna, radius, dan tipografi terpusat di `AppColors`, `AppDimens`, `AppTheme`, dan `HarvestColors`.
-- [x] **Kontras Terjamin:** Teks link sekunder (`Sudah punya akun? Masuk di sini`, `Lupa kata sandi?`, `Daftar di sini`) menggunakan `colorScheme.onSurface` + underline agar selalu terbaca jelas di latar terang.
-- [x] **Touch Targets:** Semua tombol CTA dan input memenuhi minimal `48 dp`.
-- [x] **Reduced Motion Safe:** Animasi splash dan panduan menghormati `MediaQuery.disableAnimationsOf(context)`.
+- [x] **Zero Saweria Artifacts:** Tidak ada lagi *hard offset shadow* (`offset(3,4)` / `offset(0,4)`), *double stroke*, maupun tekstur *micro-ribbed* pada komponen inti.
+- [x] **Yellow + Cocoa Brown System:** Warna primer `#F4C418` dan aksen cokelat `#5C3A21` / `#8C5A34` terpusat di `AppColors`, `HarvestColors`, dan `AppTheme`.
+- [x] **WCAG AAA Contrast:** Kuning + Espresso (`> 11:1`) dan Cokelat Kakao + Krem (`> 9.5:1`) lolos kontras aksesibilitas.
+- [x] **Touch Targets:** Seluruh tombol dan input mempertahankan tinggi minimum `48 dp`.

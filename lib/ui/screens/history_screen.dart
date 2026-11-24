@@ -208,15 +208,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final isSelected = _selectedFilter == key;
 
     final (selectedBg, selectedFg) = switch (key) {
-      'unripe' => (const Color(0xFF3E7D28), Colors.white),
+      'unripe' => (
+        harvest.unripe,
+        theme.brightness == Brightness.dark
+            ? theme.colorScheme.onPrimary
+            : Colors.white,
+      ),
       'overripe' => (harvest.overripe, Colors.white),
-      'rotten' => (const Color(0xFFC43E2B), Colors.white),
+      'rotten' => (harvest.rotten, Colors.white),
       _ => (theme.colorScheme.primary, theme.colorScheme.onPrimary),
     };
 
     return InkWell(
       onTap: () => setState(() => _selectedFilter = key),
-      borderRadius: BorderRadius.circular(AppDimens.rSharp),
+      borderRadius: BorderRadius.circular(AppDimens.rButton),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(
@@ -225,19 +230,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected ? selectedBg : harvest.primarySoft,
-          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
           border: Border.all(
-            color: isSelected ? ink : harvest.border,
-            width: isSelected ? 1.5 : 1.0,
+            color: isSelected ? selectedBg : harvest.border,
+            width: 1.0,
           ),
-          boxShadow: isSelected
-              ? [BoxShadow(color: ink, offset: const Offset(2, 2))]
-              : null,
         ),
         child: Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: isSelected ? selectedFg : harvest.muted,
+            color: isSelected ? selectedFg : ink,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
           ),
         ),

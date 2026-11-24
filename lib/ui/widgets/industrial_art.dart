@@ -5,8 +5,170 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 
-/// Technical line-art Banana emblem with yellow accent fill inside a
-/// tactile instrument frame (`1.5px` dark ink border).
+/// Controls how many scanner viewfinder L-brackets are drawn on a container
+/// so layouts stay natural and varied instead of repeating 4 corners everywhere.
+enum ScannerCornerStyle {
+  /// No corner brackets drawn.
+  none,
+
+  /// Single top-left corner bracket (`┌`).
+  topLeft1,
+
+  /// Single top-right corner bracket (`┐`).
+  topRight1,
+
+  /// Diagonal 2-corner pair (`┌` top-left and `┘` bottom-right).
+  diagonal2,
+
+  /// Full 4-corner optical viewfinder (`┌ ┐ └ ┘`) for focal scanner elements.
+  all4,
+}
+
+/// Paints smooth rounded optical scanner L-brackets (`┌ ┐ └ ┘`) in 1, 2, or 4 corners.
+class ScannerCornerPainter extends CustomPainter {
+  const ScannerCornerPainter({
+    required this.color,
+    this.bracketLength = 12,
+    this.strokeWidth = 1.8,
+    this.inset = 0,
+    this.cornerRadius = 4.0,
+    this.style = ScannerCornerStyle.all4,
+  });
+
+  final Color color;
+  final double bracketLength;
+  final double strokeWidth;
+  final double inset;
+  final double cornerRadius;
+  final ScannerCornerStyle style;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (style == ScannerCornerStyle.none) return;
+
+    final len = math.min(
+      bracketLength,
+      math.min(size.width, size.height) * 0.35,
+    );
+    final r = math.min(cornerRadius, len * 0.45);
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final left = inset + strokeWidth / 2;
+    final top = inset + strokeWidth / 2;
+    final right = size.width - inset - strokeWidth / 2;
+    final bottom = size.height - inset - strokeWidth / 2;
+
+    final drawTopLeft =
+        style == ScannerCornerStyle.all4 ||
+        style == ScannerCornerStyle.diagonal2 ||
+        style == ScannerCornerStyle.topLeft1;
+    final drawTopRight =
+        style == ScannerCornerStyle.all4 ||
+        style == ScannerCornerStyle.topRight1;
+    final drawBottomLeft = style == ScannerCornerStyle.all4;
+    final drawBottomRight =
+        style == ScannerCornerStyle.all4 ||
+        style == ScannerCornerStyle.diagonal2;
+
+    if (drawTopLeft) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(left, top + len)
+          ..lineTo(left, top + r)
+          ..quadraticBezierTo(left, top, left + r, top)
+          ..lineTo(left + len, top),
+        paint,
+      );
+    }
+
+    if (drawTopRight) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(right - len, top)
+          ..lineTo(right - r, top)
+          ..quadraticBezierTo(right, top, right, top + r)
+          ..lineTo(right, top + len),
+        paint,
+      );
+    }
+
+    if (drawBottomLeft) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(left, bottom - len)
+          ..lineTo(left, bottom - r)
+          ..quadraticBezierTo(left, bottom, left + r, bottom)
+          ..lineTo(left + len, bottom),
+        paint,
+      );
+    }
+
+    if (drawBottomRight) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(right - len, bottom)
+          ..lineTo(right - r, bottom)
+          ..quadraticBezierTo(right, bottom, right, bottom - r)
+          ..lineTo(right, bottom - len),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(ScannerCornerPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.bracketLength != bracketLength ||
+      oldDelegate.strokeWidth != strokeWidth ||
+      oldDelegate.inset != inset ||
+      oldDelegate.cornerRadius != cornerRadius ||
+      oldDelegate.style != style;
+}
+
+/// Wraps any child widget with crisp optical viewfinder L-brackets.
+class ScannerFrame extends StatelessWidget {
+  const ScannerFrame({
+    required this.child,
+    this.bracketLength = 14,
+    this.strokeWidth = 2.0,
+    this.bracketColor,
+    this.padding = const EdgeInsets.all(6),
+    this.inset = 0,
+    this.style = ScannerCornerStyle.all4,
+    super.key,
+  });
+
+  final Widget child;
+  final double bracketLength;
+  final double strokeWidth;
+  final Color? bracketColor;
+  final EdgeInsetsGeometry padding;
+  final double inset;
+  final ScannerCornerStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = bracketColor ?? context.harvest.accent;
+    return CustomPaint(
+      foregroundPainter: ScannerCornerPainter(
+        color: color,
+        bracketLength: bracketLength,
+        strokeWidth: strokeWidth,
+        inset: inset,
+        style: style,
+      ),
+      child: Padding(padding: padding, child: child),
+    );
+  }
+}
+
+/// Crisp flat editorial Banana emblem inside a solid Ripe Banana Gold block
+/// accented with diagonal 2-corner viewfinder brackets (`┌ ┘`).
 class IndustrialBananaMark extends StatelessWidget {
   const IndustrialBananaMark({
     this.size = 44,
@@ -22,16 +184,16 @@ class IndustrialBananaMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final ink = isDark ? theme.colorScheme.onSurface : const Color(0xFF181A16);
     final yellow = theme.colorScheme.primary;
-    final bg =
-        frameColor ??
-        (isDark ? theme.colorScheme.surface : const Color(0xFFF9FAF6));
+    final cocoa = theme.colorScheme.onPrimary;
+    final bg = frameColor ?? yellow;
 
     final art = CustomPaint(
-      size: Size.square(size * 0.64),
-      painter: _BananaLineArtPainter(inkColor: ink, accentColor: yellow),
+      size: Size.square(size * 0.62),
+      painter: _BananaMarkPainter(
+        inkColor: cocoa,
+        fillColor: showFrame ? theme.colorScheme.surface : yellow,
+      ),
     );
 
     if (!showFrame) return art;
@@ -42,43 +204,32 @@ class IndustrialBananaMark extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(AppDimens.rButton),
-        border: Border.all(color: ink, width: 1.5),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: yellow.withValues(alpha: 0.9),
-            offset: const Offset(2.5, 2.5),
-            blurRadius: 0,
-          ),
-        ],
       ),
-      child: Container(
-        margin: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppDimens.rButton - 3),
-          border: Border.all(color: yellow.withValues(alpha: 0.85), width: 1.2),
+      child: CustomPaint(
+        foregroundPainter: ScannerCornerPainter(
+          color: cocoa.withValues(alpha: 0.72),
+          bracketLength: math.max(5.0, size * 0.22),
+          strokeWidth: math.max(1.2, size * 0.036),
+          inset: math.max(2.0, size * 0.07),
+          style: ScannerCornerStyle.diagonal2,
         ),
-        alignment: Alignment.center,
-        child: art,
+        child: Center(child: art),
       ),
     );
   }
 }
 
-class _BananaLineArtPainter extends CustomPainter {
-  const _BananaLineArtPainter({
-    required this.inkColor,
-    required this.accentColor,
-  });
+class _BananaMarkPainter extends CustomPainter {
+  const _BananaMarkPainter({required this.inkColor, required this.fillColor});
 
   final Color inkColor;
-  final Color accentColor;
+  final Color fillColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    // Stylized technical banana silhouette (crescent + stem + tip).
     final bananaPath = Path()
       ..moveTo(w * 0.72, h * 0.16)
       ..lineTo(w * 0.78, h * 0.11)
@@ -90,63 +241,45 @@ class _BananaLineArtPainter extends CustomPainter {
       ..close();
 
     final fillPaint = Paint()
-      ..color = accentColor
+      ..color = inkColor
       ..style = PaintingStyle.fill;
     canvas.drawPath(bananaPath, fillPaint);
 
-    final strokePaint = Paint()
-      ..color = inkColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(1.4, w * 0.055)
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round;
-    canvas.drawPath(bananaPath, strokePaint);
-
-    // Subtle ridge line inside banana for technical line-art feel.
     final ridgePath = Path()
       ..moveTo(w * 0.68, h * 0.34)
       ..quadraticBezierTo(w * 0.60, h * 0.62, w * 0.28, h * 0.73);
     final ridgePaint = Paint()
-      ..color = inkColor.withValues(alpha: 0.75)
+      ..color = fillColor.withValues(alpha: 0.7)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(1.0, w * 0.032)
+      ..strokeWidth = math.max(1.2, w * 0.045)
       ..strokeCap = StrokeCap.round;
     canvas.drawPath(ridgePath, ridgePaint);
-
-    // Micro measurement tick marks at top-left.
-    final tickPaint = Paint()
-      ..color = inkColor.withValues(alpha: 0.55)
-      ..strokeWidth = math.max(1.0, w * 0.03);
-    canvas.drawLine(
-      Offset(w * 0.14, h * 0.18),
-      Offset(w * 0.28, h * 0.18),
-      tickPaint,
-    );
-    canvas.drawLine(
-      Offset(w * 0.14, h * 0.28),
-      Offset(w * 0.22, h * 0.28),
-      tickPaint,
-    );
   }
 
   @override
-  bool shouldRepaint(_BananaLineArtPainter oldDelegate) =>
-      oldDelegate.inkColor != inkColor ||
-      oldDelegate.accentColor != accentColor;
+  bool shouldRepaint(_BananaMarkPainter oldDelegate) =>
+      oldDelegate.inkColor != inkColor || oldDelegate.fillColor != fillColor;
 }
 
-/// Specimen card with subtle vertical micro-ribbed lines and 1px hairline border.
+/// Crisp flat editorial card with configurable 1, 2, or 4 scanner L-brackets
+/// (defaults to natural 2-corner diagonal `┌ ┘`) and subtle 1px warm hairline.
 class IndustrialSpecimenCard extends StatelessWidget {
   const IndustrialSpecimenCard({
     required this.child,
     this.padding = const EdgeInsets.all(AppDimens.s16),
     this.backgroundColor,
+    this.showScanCorners = true,
+    this.cornerStyle = ScannerCornerStyle.diagonal2,
+    this.cornerColor,
     super.key,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final Color? backgroundColor;
+  final bool showScanCorners;
+  final ScannerCornerStyle cornerStyle;
+  final Color? cornerColor;
 
   @override
   Widget build(BuildContext context) {
@@ -155,69 +288,35 @@ class IndustrialSpecimenCard extends StatelessWidget {
     final bg = backgroundColor != null
         ? Color.alphaBlend(backgroundColor!, theme.colorScheme.surface)
         : theme.colorScheme.surface;
-    final isDark = theme.brightness == Brightness.dark;
-    final outerInk = isDark
-        ? theme.colorScheme.primary.withValues(alpha: 0.7)
-        : const Color(0xFF4A4E42);
+    final reticleColor = cornerColor ?? harvest.accent.withValues(alpha: 0.45);
+    final effectiveStyle = showScanCorners
+        ? cornerStyle
+        : ScannerCornerStyle.none;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 4, right: 3),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(AppDimens.rCard),
-        border: Border.all(color: outerInk, width: 1.5),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.65),
-            offset: const Offset(3, 4),
-            blurRadius: 0,
-          ),
-        ],
+        border: Border.all(color: harvest.border, width: 1),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppDimens.rCard - 1.5),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: isDark ? 0.08 : 0.75),
-            width: 1.2,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppDimens.rCard - 2),
-          child: CustomPaint(
-            painter: _MicroRibbedPainter(
-              lineColor: harvest.border.withValues(alpha: 0.4),
-            ),
-            child: Padding(padding: padding, child: child),
-          ),
-        ),
-      ),
+      child: effectiveStyle != ScannerCornerStyle.none
+          ? CustomPaint(
+              foregroundPainter: ScannerCornerPainter(
+                color: reticleColor,
+                bracketLength: 11,
+                strokeWidth: 1.6,
+                inset: 5,
+                style: effectiveStyle,
+              ),
+              child: Padding(padding: padding, child: child),
+            )
+          : Padding(padding: padding, child: child),
     );
   }
 }
 
-class _MicroRibbedPainter extends CustomPainter {
-  const _MicroRibbedPainter({required this.lineColor});
-
-  final Color lineColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = lineColor
-      ..strokeWidth = 0.8;
-    const step = 7.0;
-    for (double x = step; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_MicroRibbedPainter oldDelegate) =>
-      oldDelegate.lineColor != lineColor;
-}
-
-/// Technical uppercase monospace badge with optional yellow accent fill.
+/// Flat borderless editorial tag chip using Roasted Cocoa Brown or Soft Oat
+/// color-blocking — zero stroke, zero hard shadow.
 class IndustrialTagChip extends StatelessWidget {
   const IndustrialTagChip({
     required this.label,
@@ -232,39 +331,29 @@ class IndustrialTagChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final isDark = theme.brightness == Brightness.dark;
-    final ink = isDark ? theme.colorScheme.onSurface : const Color(0xFF181A16);
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppDimens.s12,
-        vertical: AppDimens.s4 + 2,
+        horizontal: AppDimens.s8 + 2,
+        vertical: AppDimens.s4 + 1,
       ),
       decoration: BoxDecoration(
-        color: accent ? theme.colorScheme.primary : harvest.primarySoft,
+        color: accent ? harvest.accent : harvest.primarySoft,
         borderRadius: BorderRadius.circular(AppDimens.rSharp),
-        border: Border.all(color: accent ? ink : harvest.muted, width: 1.4),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: (accent ? ink : harvest.border).withValues(alpha: 0.85),
-            offset: const Offset(2, 2),
-            blurRadius: 0,
-          ),
-        ],
       ),
       child: Text(
         label.toUpperCase(),
         style: theme.textTheme.labelSmall?.copyWith(
-          color: accent ? theme.colorScheme.onPrimary : ink,
+          color: accent ? harvest.onAccent : theme.colorScheme.onSurface,
           fontWeight: FontWeight.w700,
-          letterSpacing: 1.2,
+          letterSpacing: 0.9,
         ),
       ),
     );
   }
 }
 
-/// Precision 60-tick radial dial painter for instrument backgrounds.
+/// Precision 48-tick radial dial painter for splash/scanner instrument accents.
 class RadialDialTicksPainter extends CustomPainter {
   const RadialDialTicksPainter({
     required this.tickColor,
@@ -291,8 +380,8 @@ class RadialDialTicksPainter extends CustomPainter {
       final paint = Paint()
         ..color = isActive && isMajor
             ? accentColor
-            : tickColor.withValues(alpha: isMajor ? 0.55 : 0.28)
-        ..strokeWidth = isMajor ? 1.6 : 1.0
+            : tickColor.withValues(alpha: isMajor ? 0.5 : 0.24)
+        ..strokeWidth = isMajor ? 1.5 : 1.0
         ..strokeCap = StrokeCap.butt;
 
       final p1 = Offset(

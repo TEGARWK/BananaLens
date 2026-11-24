@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
+import 'package:fruitlens/core/theme/harvest_colors.dart';
 import 'package:fruitlens/providers/auth_providers.dart';
 import 'package:fruitlens/services/auth_service.dart';
 import 'package:fruitlens/ui/widgets/app_text_field.dart';
 import 'package:fruitlens/ui/widgets/auth_widgets.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 import 'package:fruitlens/ui/widgets/primary_button.dart';
 import 'package:go_router/go_router.dart';
 
 /// Authentication screen supporting Login, Registration (via animated switch),
-/// and navigation to Forgot Password page.
+/// and navigation to Forgot Password page in Editorial Scanner Flat style.
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key, this.initialRegister = false});
 
@@ -133,87 +135,102 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   Widget _buildFormFields(BuildContext context, bool isLoading) {
     final theme = Theme.of(context);
+    final harvest = context.harvest;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        if (_isRegister) ...<Widget>[
-          AppTextField(
-            controller: _nameController,
-            label: 'Nama Lengkap',
-            hintText: 'Contoh: Budi Santoso',
-            prefixIcon: Icons.person_outline_rounded,
-            textInputAction: TextInputAction.next,
-            validator: (String? v) =>
-                (v == null || v.trim().isEmpty) ? 'Nama wajib diisi' : null,
-          ),
-          const SizedBox(height: AppDimens.s16),
-        ],
-        AppTextField(
-          controller: _emailController,
-          label: 'Email',
-          hintText: LocalAuthService.demoEmail,
-          prefixIcon: Icons.email_outlined,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-          validator: (String? v) => (v == null || !v.contains('@'))
-              ? 'Format email tidak valid'
-              : null,
-        ),
-        const SizedBox(height: AppDimens.s16),
-        _buildPasswordField(
-          controller: _passwordController,
-          label: 'Kata Sandi',
-          hint: 'Minimal 6 karakter',
-          icon: Icons.lock_outline_rounded,
-          obscure: _obscurePassword,
-          onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
-          action: _isRegister ? TextInputAction.next : TextInputAction.done,
-          onSubmit: _isRegister ? null : (_) => _submit(),
-          validator: (String? v) => (v == null || v.length < 6)
-              ? 'Kata sandi minimal 6 karakter'
-              : null,
-        ),
-        if (_isRegister) ...<Widget>[
-          const SizedBox(height: AppDimens.s16),
-          _buildPasswordField(
-            controller: _confirmPasswordController,
-            label: 'Konfirmasi Kata Sandi',
-            hint: 'Ulangi kata sandi',
-            icon: Icons.verified_user_outlined,
-            obscure: _obscureConfirm,
-            onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
-            action: TextInputAction.done,
-            onSubmit: (_) => _submit(),
-            validator: (String? v) {
-              if (v == null || v.isEmpty) {
-                return 'Konfirmasi kata sandi wajib diisi';
-              }
-              if (v != _passwordController.text) {
-                return 'Kata sandi tidak cocok';
-              }
-              return null;
-            },
-          ),
-        ] else
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: isLoading ? null : _openForgotPassword,
-              child: Text(
-                'Lupa kata sandi?',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w700,
-                  decoration: TextDecoration.underline,
+        IndustrialSpecimenCard(
+          padding: const EdgeInsets.all(AppDimens.s20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (_isRegister) ...<Widget>[
+                AppTextField(
+                  controller: _nameController,
+                  label: 'Nama Lengkap',
+                  hintText: 'Contoh: Budi Santoso',
+                  prefixIcon: Icons.person_outline_rounded,
+                  textInputAction: TextInputAction.next,
+                  validator: (String? v) => (v == null || v.trim().isEmpty)
+                      ? 'Nama wajib diisi'
+                      : null,
                 ),
+                const SizedBox(height: AppDimens.s16),
+              ],
+              AppTextField(
+                controller: _emailController,
+                label: 'Email',
+                hintText: LocalAuthService.demoEmail,
+                prefixIcon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                validator: (String? v) => (v == null || !v.contains('@'))
+                    ? 'Format email tidak valid'
+                    : null,
               ),
-            ),
+              const SizedBox(height: AppDimens.s16),
+              _buildPasswordField(
+                controller: _passwordController,
+                label: 'Kata Sandi',
+                hint: 'Minimal 6 karakter',
+                icon: Icons.lock_outline_rounded,
+                obscure: _obscurePassword,
+                onToggle: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+                action: _isRegister
+                    ? TextInputAction.next
+                    : TextInputAction.done,
+                onSubmit: _isRegister ? null : (_) => _submit(),
+                validator: (String? v) => (v == null || v.length < 6)
+                    ? 'Kata sandi minimal 6 karakter'
+                    : null,
+              ),
+              if (_isRegister) ...<Widget>[
+                const SizedBox(height: AppDimens.s16),
+                _buildPasswordField(
+                  controller: _confirmPasswordController,
+                  label: 'Konfirmasi Kata Sandi',
+                  hint: 'Ulangi kata sandi',
+                  icon: Icons.verified_user_outlined,
+                  obscure: _obscureConfirm,
+                  onToggle: () =>
+                      setState(() => _obscureConfirm = !_obscureConfirm),
+                  action: TextInputAction.done,
+                  onSubmit: (_) => _submit(),
+                  validator: (String? v) {
+                    if (v == null || v.isEmpty) {
+                      return 'Konfirmasi kata sandi wajib diisi';
+                    }
+                    if (v != _passwordController.text) {
+                      return 'Kata sandi tidak cocok';
+                    }
+                    return null;
+                  },
+                ),
+              ] else
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: isLoading ? null : _openForgotPassword,
+                    child: Text(
+                      'Lupa kata sandi?',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: harvest.accent,
+                        fontWeight: FontWeight.w700,
+                        decoration: TextDecoration.underline,
+                        decorationColor: harvest.accent,
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: AppDimens.s16),
+              PrimaryButton(
+                text: _isRegister ? 'Buat Akun Sekarang' : 'Masuk',
+                isLoading: isLoading,
+                onPressed: _submit,
+              ),
+            ],
           ),
-        const SizedBox(height: AppDimens.s16),
-        PrimaryButton(
-          text: _isRegister ? 'Buat Akun Sekarang' : 'Masuk',
-          isLoading: isLoading,
-          onPressed: _submit,
         ),
         const SizedBox(height: AppDimens.s8),
         AuthSwitchPrompt(isRegister: _isRegister, onToggle: _toggleMode),

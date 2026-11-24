@@ -134,9 +134,7 @@ class NutritionPanel extends StatelessWidget {
               _MacroBento(
                 label: AppStrings.resultFiber,
                 value: info.fiber,
-                barColor: isDark
-                    ? const Color(0xFF81C784)
-                    : const Color(0xFF2E7D32),
+                barColor: isDark ? AppColors.dLeafGreen : AppColors.lLeafStrong,
                 icon: Icons.eco_rounded,
               ),
             ],

@@ -29,25 +29,27 @@ class HomeSmartReminderCard extends ConsumerWidget {
 
     String reminderText;
     IconData reminderIcon;
-    Color badgeColor;
+    Color badgeBg;
+    Color badgeFg;
 
     if (recentRipe != null) {
       final fruitName = FruitNameHelper.toIndonesian(recentRipe.fruitLabel);
       reminderText =
           '$fruitName yang kamu scan siap disantap atau diolah menjadi smoothie sebelum terlalu matang!';
       reminderIcon = Icons.alarm_rounded;
-      badgeColor = theme.colorScheme.primary;
+      badgeBg = theme.colorScheme.primary;
+      badgeFg = theme.colorScheme.onPrimary;
     } else {
       reminderText =
           'Tahukah kamu? Bungkus pangkal tangkai pisang matang agar gas etilen tidak membuatnya cepat menghitam.';
       reminderIcon = Icons.eco_rounded;
-      badgeColor = harvest.primarySoft;
+      badgeBg = harvest.accent;
+      badgeFg = harvest.onAccent;
     }
 
     final goalText = userProfile?.goal != null && userProfile!.goal.isNotEmpty
         ? 'Cocok untuk target ${userProfile.goal}: Pisang matang pas kaya kalium & serat untuk energi harian.'
         : 'Rekomendasi harian: Nikmati pisang matang segar atau olahan rendah gula sesuai kebutuhanmu.';
-    final ink = theme.colorScheme.onSurface;
 
     return IndustrialSpecimenCard(
       child: Column(
@@ -57,13 +59,14 @@ class HomeSmartReminderCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(AppDimens.s8),
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
-                  color: badgeColor,
-                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                  border: Border.all(color: ink, width: 1.2),
+                  color: badgeBg,
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
                 ),
-                child: Icon(reminderIcon, size: 18, color: ink),
+                alignment: Alignment.center,
+                child: Icon(reminderIcon, size: 19, color: badgeFg),
               ),
               const SizedBox(width: AppDimens.s12),
               Expanded(
@@ -76,12 +79,12 @@ class HomeSmartReminderCard extends ConsumerWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       reminderText,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: harvest.muted,
-                        height: 1.35,
+                        height: 1.4,
                       ),
                     ),
                   ],
@@ -89,23 +92,34 @@ class HomeSmartReminderCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppDimens.s8),
-          Divider(height: 1, color: harvest.border),
-          const SizedBox(height: AppDimens.s8),
-          Row(
-            children: [
-              Icon(Icons.person_pin_rounded, size: 15, color: ink),
-              const SizedBox(width: AppDimens.s4),
-              Expanded(
-                child: Text(
-                  goalText,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: harvest.muted,
-                    fontSize: 11,
+          const SizedBox(height: AppDimens.s12),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimens.s12,
+              vertical: AppDimens.s8,
+            ),
+            decoration: BoxDecoration(
+              color: harvest.primarySoft,
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.person_pin_rounded, size: 16, color: harvest.accent),
+                const SizedBox(width: AppDimens.s8),
+                Expanded(
+                  child: Text(
+                    goalText,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.85,
+                      ),
+                      fontSize: 11.5,
+                      height: 1.35,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

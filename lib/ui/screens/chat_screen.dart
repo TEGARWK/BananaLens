@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/chat_turn.dart';
 import '../../providers/chat_notifier.dart';
 import '../widgets/chat_bubble.dart';
+import '../widgets/chat_composer.dart';
+import '../widgets/chat_context_banner.dart';
 import '../widgets/chat_history_sheet.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -85,41 +88,39 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final theme = Theme.of(context);
     final harvest = context.harvest;
     final ink = theme.colorScheme.onSurface;
+    final isDark = theme.brightness == Brightness.dark;
+    final hasContext =
+        chatState.scanContext != null && chatState.scanContext!.isNotEmpty;
+    final leafDot = isDark ? AppColors.dLeafGreen : AppColors.lLeafStrong;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
+        scrolledUnderElevation: 0,
         titleSpacing: AppDimens.screenPadding,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.55),
-          ),
+          child: Container(height: 1, color: harvest.border),
         ),
         title: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(AppDimens.rButton - 2),
-                border: Border.all(color: ink, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: ink,
-                    offset: const Offset(2, 2),
-                    blurRadius: 0,
-                  ),
-                ],
+                color: isDark
+                    ? theme.colorScheme.primary
+                    : AppColors.lSurfaceDark,
+                borderRadius: BorderRadius.circular(AppDimens.rButton),
               ),
               child: Icon(
                 Icons.auto_awesome_rounded,
-                color: theme.colorScheme.onPrimary,
-                size: 19,
+                color: isDark
+                    ? theme.colorScheme.onPrimary
+                    : AppColors.lPrimary,
+                size: 18,
               ),
             ),
             const SizedBox(width: AppDimens.s12),
@@ -132,26 +133,32 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
+                      color: ink,
                     ),
                   ),
+                  const SizedBox(height: 1),
                   Row(
                     children: [
                       Container(
-                        width: 8,
-                        height: 8,
+                        width: 7,
+                        height: 7,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3E7D28),
+                          color: leafDot,
                           shape: BoxShape.circle,
-                          border: Border.all(color: ink, width: 1),
                         ),
                       ),
                       const SizedBox(width: 5),
-                      Text(
-                        'ONLINE // AI',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: ink,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
+                      Flexible(
+                        child: Text(
+                          'ONLINE · ASISTEN AI',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: harvest.muted,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
+                            letterSpacing: 0.6,
+                          ),
                         ),
                       ),
                     ],
@@ -162,169 +169,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ],
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppDimens.s8),
-            child: Center(
-              child: InkWell(
-                onTap: () => ChatHistorySheet.show(context),
-                borderRadius: BorderRadius.circular(AppDimens.rButton - 2),
-                child: Tooltip(
-                  message: 'Riwayat Chat',
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: harvest.primarySoft,
-                      borderRadius: BorderRadius.circular(
-                        AppDimens.rButton - 2,
-                      ),
-                      border: Border.all(color: ink, width: 1.3),
-                    ),
-                    child: Icon(Icons.history_rounded, color: ink, size: 19),
-                  ),
-                ),
-              ),
-            ),
+          _HeaderIconButton(
+            tooltip: 'Riwayat Chat',
+            icon: Icons.history_rounded,
+            backgroundColor: theme.scaffoldBackgroundColor,
+            foregroundColor: ink,
+            borderColor: harvest.border,
+            onTap: () => ChatHistorySheet.show(context),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: AppDimens.s12),
-            child: Center(
-              child: InkWell(
-                onTap: () => _startNewChat(context),
-                borderRadius: BorderRadius.circular(AppDimens.rButton - 2),
-                child: Tooltip(
-                  message: 'Chat Baru',
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(
-                        AppDimens.rButton - 2,
-                      ),
-                      border: Border.all(color: ink, width: 1.4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: ink,
-                          offset: const Offset(1.5, 1.5),
-                          blurRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.add_comment_outlined,
-                      color: theme.colorScheme.onPrimary,
-                      size: 18,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          const SizedBox(width: AppDimens.s8),
+          _HeaderIconButton(
+            tooltip: 'Chat Baru',
+            icon: Icons.add_comment_outlined,
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
+            onTap: () => _startNewChat(context),
           ),
+          const SizedBox(width: AppDimens.screenPadding),
         ],
       ),
       body: Column(
         children: [
-          // Banner Konteks Buah Terpasang
-          if (chatState.scanContext != null &&
-              chatState.scanContext!.isNotEmpty) ...[
-            Container(
-              margin: const EdgeInsets.fromLTRB(
-                AppDimens.screenPadding,
-                AppDimens.s12,
-                AppDimens.screenPadding,
-                AppDimens.s4,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimens.s12,
-                vertical: AppDimens.s8 + 2,
-              ),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(AppDimens.rButton),
-                border: Border.all(color: ink, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary,
-                    offset: const Offset(2, 2.5),
-                    blurRadius: 0,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                      border: Border.all(color: ink, width: 1.2),
-                    ),
-                    child: Icon(
-                      Icons.center_focus_strong_rounded,
-                      size: 17,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: AppDimens.s12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'KONTEKS PINDAI AKTIF',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: harvest.muted,
-                            fontSize: 9.5,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Konteks: ${chatState.scanContext}',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: ink,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppDimens.s8),
-                  InkWell(
-                    onTap: () => ref
-                        .read(chatNotifierProvider.notifier)
-                        .setScanContext(null),
-                    borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                    child: Tooltip(
-                      message: 'Lepas konteks',
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: harvest.primarySoft,
-                          borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                          border: Border.all(color: ink, width: 1.2),
-                        ),
-                        child: Icon(Icons.close_rounded, size: 16, color: ink),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          if (hasContext)
+            ChatContextBanner(
+              scanContext: chatState.scanContext!,
+              onDismiss: () =>
+                  ref.read(chatNotifierProvider.notifier).setScanContext(null),
             ),
-          ],
-
-          // Daftar Pesan
           Expanded(
             child: ListView(
               controller: _scrollController,
-              padding: const EdgeInsets.all(AppDimens.screenPadding),
+              padding: const EdgeInsets.fromLTRB(
+                AppDimens.screenPadding,
+                AppDimens.s16,
+                AppDimens.screenPadding,
+                AppDimens.s12,
+              ),
               children: [
                 ...chatState.messages.map((turn) {
                   return ChatBubble(
@@ -334,197 +214,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 }),
                 if (chatState.isLoading) ...[
                   const SizedBox(height: AppDimens.s8),
-                  const _TypingIndicator(),
+                  const ChatTypingIndicator(),
                 ],
                 if (chatState.error != null) ...[
                   const SizedBox(height: AppDimens.s8),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      padding: const EdgeInsets.all(AppDimens.s12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.error.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(AppDimens.rButton),
-                        border: Border.all(
-                          color: theme.colorScheme.error,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.error_outline_rounded,
-                            size: 18,
-                            color: theme.colorScheme.error,
-                          ),
-                          const SizedBox(width: AppDimens.s8),
-                          Flexible(
-                            child: Text(
-                              chatState.error!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.error,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _ChatErrorNotice(message: chatState.error!),
                 ],
               ],
             ),
           ),
-
-          // Chip Saran Cepat (Touch target >= 44dp)
-          Builder(
-            builder: (context) {
-              final hasContext =
-                  chatState.scanContext != null &&
-                  chatState.scanContext!.isNotEmpty;
-              final chips = hasContext
-                  ? _contextSuggestedChips
-                  : _suggestedChips;
-              return Container(
-                height: 48,
-                margin: const EdgeInsets.only(bottom: AppDimens.s8),
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppDimens.screenPadding,
-                    0,
-                    AppDimens.screenPadding,
-                    3,
-                  ),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: chips.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(width: AppDimens.s8),
-                  itemBuilder: (context, idx) {
-                    final prompt = chips[idx];
-                    return InkWell(
-                      onTap: () => _sendMessage(prompt),
-                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppDimens.s12 + 2,
-                          vertical: AppDimens.s8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: harvest.primarySoft,
-                          borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                          border: Border.all(color: ink, width: 1.3),
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.colorScheme.primary,
-                              offset: const Offset(2, 2),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          prompt,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: ink,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12.5,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
+          ChatSuggestedChips(
+            prompts: hasContext ? _contextSuggestedChips : _suggestedChips,
+            onSelect: _sendMessage,
           ),
-
-          // Kolom Input & Tombol Kirim 48dp Taktil
-          Container(
-            decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor,
-              border: Border(
-                top: BorderSide(color: harvest.border, width: 1.2),
-              ),
-            ),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppDimens.screenPadding,
-                  AppDimens.s8,
-                  AppDimens.screenPadding,
-                  AppDimens.s8,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _textController,
-                        onSubmitted: (_) => _sendMessage(),
-                        decoration: InputDecoration(
-                          hintText: 'Tanyakan seputar buah...',
-                          isDense: true,
-                          filled: true,
-                          fillColor: harvest.primarySoft,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: AppDimens.s16,
-                            vertical: AppDimens.s12,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppDimens.rButton,
-                            ),
-                            borderSide: BorderSide(
-                              color: harvest.border,
-                              width: 1.2,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppDimens.rButton,
-                            ),
-                            borderSide: BorderSide(color: ink, width: 1.6),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppDimens.s8),
-                    Semantics(
-                      button: true,
-                      label: 'Kirim pesan',
-                      child: InkWell(
-                        onTap: () => _sendMessage(),
-                        borderRadius: BorderRadius.circular(AppDimens.rButton),
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
-                            borderRadius: BorderRadius.circular(
-                              AppDimens.rButton,
-                            ),
-                            border: Border.all(color: ink, width: 1.5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: ink,
-                                offset: const Offset(0, 3),
-                                blurRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.send_rounded,
-                            color: theme.colorScheme.onPrimary,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          ChatInputComposer(
+            controller: _textController,
+            onSend: _sendMessage,
+            isLoading: chatState.isLoading,
           ),
         ],
       ),
@@ -532,79 +238,91 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
-class _TypingIndicator extends StatefulWidget {
-  const _TypingIndicator();
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({
+    required this.tooltip,
+    required this.icon,
+    required this.backgroundColor,
+    required this.foregroundColor,
+    required this.onTap,
+    this.borderColor,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final Color? borderColor;
+  final VoidCallback onTap;
 
   @override
-  State<_TypingIndicator> createState() => _TypingIndicatorState();
+  Widget build(BuildContext context) {
+    return Center(
+      child: Tooltip(
+        message: tooltip,
+        child: Material(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppDimens.rButton),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppDimens.rButton),
+                border: borderColor != null
+                    ? Border.all(color: borderColor!, width: 1)
+                    : null,
+              ),
+              child: Icon(icon, color: foregroundColor, size: 19),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _TypingIndicatorState extends State<_TypingIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animController;
+class _ChatErrorNotice extends StatelessWidget {
+  const _ChatErrorNotice({required this.message});
 
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
+  final String message;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ink = theme.colorScheme.onSurface;
-
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimens.s16,
-          vertical: AppDimens.s12,
-        ),
+        padding: const EdgeInsets.all(AppDimens.s12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppDimens.rButton),
-          border: Border.all(color: ink, width: 1.4),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.primary,
-              offset: const Offset(2, 2),
-              blurRadius: 0,
-            ),
-          ],
+          color: theme.colorScheme.error.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(AppDimens.rCard),
+          border: Border.all(
+            color: theme.colorScheme.error.withValues(alpha: 0.45),
+            width: 1,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: List.generate(3, (index) {
-            return AnimatedBuilder(
-              animation: _animController,
-              builder: (context, child) {
-                final delay = index * 0.25;
-                final val = (_animController.value - delay) % 1.0;
-                final opacity = (val > 0.5 ? (1.0 - val) : val) * 2;
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: ink.withValues(
-                      alpha: (0.25 + (opacity * 0.75)).clamp(0.0, 1.0),
-                    ),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                );
-              },
-            );
-          }),
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 18,
+              color: theme.colorScheme.error,
+            ),
+            const SizedBox(width: AppDimens.s8),
+            Flexible(
+              child: Text(
+                message,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

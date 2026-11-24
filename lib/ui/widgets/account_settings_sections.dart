@@ -20,8 +20,6 @@ class AccountIdentityBanner extends StatelessWidget {
     final name = user.name.trim().isNotEmpty ? user.name.trim() : 'Pengguna';
     final initial = name[0].toUpperCase();
 
-    final ink = theme.colorScheme.onSurface;
-
     return IndustrialSpecimenCard(
       padding: const EdgeInsets.all(AppDimens.s16),
       child: Row(
@@ -32,14 +30,6 @@ class AccountIdentityBanner extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(AppDimens.rButton),
-              border: Border.all(color: ink, width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: ink,
-                  offset: const Offset(2, 2),
-                  blurRadius: 0,
-                ),
-              ],
             ),
             alignment: Alignment.center,
             child: Text(
@@ -106,9 +96,8 @@ class AccountPasswordTile extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.45),
-                borderRadius: BorderRadius.circular(AppDimens.rButton - 2),
-                border: Border.all(color: ink, width: 1.3),
+                color: harvest.primarySoft,
+                borderRadius: BorderRadius.circular(AppDimens.rButton),
               ),
               child: Icon(Icons.lock_reset_rounded, size: 20, color: ink),
             ),

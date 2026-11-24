@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitlens/core/theme/app_colors.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
 
@@ -77,8 +78,11 @@ class AccountGoalSelector extends StatelessWidget {
     required bool selected,
   }) {
     final ink = theme.colorScheme.onSurface;
+    final leafStrong = theme.brightness == Brightness.dark
+        ? AppColors.dLeafGreen
+        : AppColors.lLeafStrong;
     return Material(
-      color: selected ? primary.withValues(alpha: 0.25) : Colors.transparent,
+      color: selected ? harvest.primarySoft : Colors.transparent,
       borderRadius: BorderRadius.circular(AppDimens.rButton),
       child: InkWell(
         onTap: () => onChanged(option.title),
@@ -91,18 +95,9 @@ class AccountGoalSelector extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppDimens.rButton),
             border: Border.all(
-              color: selected ? ink : harvest.border,
-              width: selected ? 1.6 : 1,
+              color: selected ? primary : harvest.border,
+              width: selected ? 1.4 : 1,
             ),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: primary,
-                      offset: const Offset(0, 2.5),
-                      blurRadius: 0,
-                    ),
-                  ]
-                : null,
           ),
           child: Row(
             children: [
@@ -111,11 +106,7 @@ class AccountGoalSelector extends StatelessWidget {
                 height: 38,
                 decoration: BoxDecoration(
                   color: selected ? primary : harvest.primarySoft,
-                  borderRadius: BorderRadius.circular(AppDimens.s12),
-                  border: Border.all(
-                    color: selected ? ink : harvest.border,
-                    width: 1.2,
-                  ),
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
                 ),
                 child: Icon(
                   option.icon,
@@ -149,7 +140,7 @@ class AccountGoalSelector extends StatelessWidget {
                     ? Icons.check_circle_rounded
                     : Icons.radio_button_unchecked_rounded,
                 size: 20,
-                color: selected ? primary : harvest.muted,
+                color: selected ? leafStrong : harvest.muted,
               ),
             ],
           ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/fruit_info.dart';
@@ -21,7 +22,7 @@ import 'result_recipe_gating_section.dart';
 import 'ripeness_chip.dart';
 import 'soft_button.dart';
 
-/// Streamlined 4-block post-scan report:
+/// Streamlined 4-block post-scan report in Editorial Scanner Flat style:
 /// 1. Hero status + collapsible AI score breakdown
 /// 2. Interactive SPK decision & action card
 /// 3. Compact nutrition & benefits summary
@@ -56,8 +57,8 @@ class ResultSuccessView extends ConsumerWidget {
     );
     final ink = theme.colorScheme.onSurface;
     final (accBg, accFg) = switch (ripeness) {
-      Ripeness.unripe => (const Color(0xFF3E7D28), Colors.white),
-      Ripeness.rotten => (const Color(0xFFC43E2B), Colors.white),
+      Ripeness.unripe => (harvest.unripe, Colors.white),
+      Ripeness.rotten => (harvest.rotten, Colors.white),
       _ => (theme.colorScheme.primary, theme.colorScheme.onPrimary),
     };
 
@@ -153,26 +154,44 @@ class ResultSuccessView extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const IndustrialTagChip(label: 'HASIL // PINDAI', accent: true),
-              Text(
-                'BANANALENS AI',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: harvest.muted,
-                ),
+              const IndustrialTagChip(label: 'HASIL · PINDAI', accent: true),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? AppColors.dLeafGreen
+                          : AppColors.lLeafStrong,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    'BANANALENS AI',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: harvest.muted,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
           const SizedBox(height: AppDimens.s12),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppDimens.rButton),
-              border: Border.all(color: ink, width: 1.5),
-            ),
+          ScannerFrame(
+            bracketLength: 18,
+            strokeWidth: 2.2,
+            bracketColor: theme.colorScheme.primary,
+            padding: const EdgeInsets.all(6),
             child: FruitImage(
               imagePath: report.imagePath,
               fruitLabel: outcome.fruitLabel,
               height: 168,
-              radius: AppDimens.rButton - 1,
+              radius: AppDimens.rButton,
             ),
           ),
           const SizedBox(height: AppDimens.s16),
@@ -205,14 +224,6 @@ class ResultSuccessView extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: accBg,
                   borderRadius: BorderRadius.circular(AppDimens.rButton),
-                  border: Border.all(color: ink, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: ink,
-                      offset: const Offset(2, 2),
-                      blurRadius: 0,
-                    ),
-                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -284,14 +295,6 @@ class ResultSuccessView extends ConsumerWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(AppDimens.rCard),
-            border: Border.all(color: ink, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: ink,
-                offset: const Offset(2, 2.5),
-                blurRadius: 0,
-              ),
-            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -324,7 +327,6 @@ class ResultSuccessView extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                  border: Border.all(color: ink, width: 1.2),
                 ),
                 child: Text(
                   'Per 100 g',
@@ -373,17 +375,20 @@ class ResultSuccessView extends ConsumerWidget {
               Row(
                 children: [
                   Container(
-                    width: 28,
-                    height: 28,
+                    width: 30,
+                    height: 30,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                      border: Border.all(color: ink, width: 1.2),
+                      color: theme.brightness == Brightness.dark
+                          ? AppColors.dLeafSoft
+                          : AppColors.lLeafSoft,
+                      borderRadius: BorderRadius.circular(AppDimens.rButton),
                     ),
                     child: Icon(
                       Icons.health_and_safety_outlined,
                       size: 16,
-                      color: ink,
+                      color: theme.brightness == Brightness.dark
+                          ? AppColors.dLeafGreen
+                          : AppColors.lLeafStrong,
                     ),
                   ),
                   const SizedBox(width: AppDimens.s8),
@@ -405,7 +410,6 @@ class ResultSuccessView extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: harvest.primarySoft,
                           borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                          border: Border.all(color: ink, width: 1),
                         ),
                         child: Text(
                           info.vitamins,

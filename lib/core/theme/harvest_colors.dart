@@ -32,22 +32,22 @@ class HarvestColors extends ThemeExtension<HarvestColors> {
     onAccent: AppColors.onAccent,
     muted: AppColors.lMuted,
     border: AppColors.lBorder,
-    unripe: Color(0xFF7CB342),
-    ripe: Color(0xFFF5B700),
-    overripe: Color(0xFFFF8A3D),
-    rotten: Color(0xFFE5484D),
+    unripe: AppColors.lLeafStrong,
+    ripe: Color(0xFFE6B00E),
+    overripe: Color(0xFFB86B27),
+    rotten: Color(0xFFC43E2B),
   );
 
   static const dark = HarvestColors(
     primarySoft: AppColors.dPrimarySoft,
     accent: AppColors.dAccent,
-    onAccent: AppColors.onAccent,
+    onAccent: AppColors.dOnPrimary,
     muted: AppColors.dMuted,
     border: AppColors.dBorder,
-    unripe: Color(0xFF9CCC65),
-    ripe: Color(0xFFFACC15),
-    overripe: Color(0xFFFFA24D),
-    rotten: Color(0xFFFF6B70),
+    unripe: AppColors.dLeafGreen,
+    ripe: Color(0xFFF4C418),
+    overripe: Color(0xFFE0964F),
+    rotten: Color(0xFFFF6B57),
   );
 
   Color forRipeness(Ripeness r) {

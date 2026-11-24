@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/app_theme.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
+import 'package:fruitlens/ui/widgets/industrial_art.dart';
 
-/// Illustrated header adapting smoothly between Login and Register modes.
+/// Illustrated editorial header adapting smoothly between Login and Register
+/// modes, framed inside crisp 4-corner scanner viewfinder brackets (`┌ ┐ └ ┘`).
 class AuthHeader extends StatelessWidget {
   const AuthHeader({super.key, required this.isRegister});
 
@@ -36,22 +38,44 @@ class AuthHeader extends StatelessWidget {
         child: Column(
           key: ValueKey<bool>(isRegister),
           children: <Widget>[
+            IndustrialTagChip(
+              label: isRegister
+                  ? 'DAFTAR // BANANALENS'
+                  : 'MASUK // BANANALENS',
+              accent: true,
+            ),
+            const SizedBox(height: AppDimens.s16),
             Center(
-              child: Image.asset(
-                isRegister
-                    ? 'assets/images/auth/auth_register.png'
-                    : 'assets/images/auth/auth_login.png',
-                height: isRegister ? 132 : 168,
-                fit: BoxFit.contain,
+              child: ScannerFrame(
+                bracketLength: 16,
+                strokeWidth: 2.0,
+                bracketColor: harvest.accent,
+                padding: const EdgeInsets.all(AppDimens.s12),
+                child: Container(
+                  width: 196,
+                  height: isRegister ? 124 : 152,
+                  decoration: BoxDecoration(
+                    color: harvest.primarySoft,
+                    borderRadius: BorderRadius.circular(AppDimens.rButton),
+                  ),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(AppDimens.s8),
+                  child: Image.asset(
+                    isRegister
+                        ? 'assets/images/auth/auth_register.png'
+                        : 'assets/images/auth/auth_login.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: AppDimens.s12),
+            const SizedBox(height: AppDimens.s16),
             Text(
               isRegister ? 'Buat Profil Sehatmu' : 'Selamat Datang',
               textAlign: TextAlign.center,
               style: AppTheme.pixelDisplayStyle(
                 context,
-                fontSize: 19,
+                fontSize: 24,
                 color: theme.colorScheme.onSurface,
               ),
             ),
@@ -98,9 +122,10 @@ class AuthSwitchPrompt extends StatelessWidget {
           child: Text(
             isRegister ? 'Masuk di sini' : 'Daftar di sini',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface,
+              color: harvest.accent,
               fontWeight: FontWeight.w800,
               decoration: TextDecoration.underline,
+              decorationColor: harvest.accent,
             ),
           ),
         ),
@@ -109,7 +134,7 @@ class AuthSwitchPrompt extends StatelessWidget {
   }
 }
 
-/// Inline Fresh Harvest error banner shared across auth forms and screens.
+/// Flat editorial error banner with a crisp left accent bar (zero full-box stroke).
 class AuthErrorBanner extends StatelessWidget {
   const AuthErrorBanner({super.key, required this.message});
 
@@ -119,37 +144,41 @@ class AuthErrorBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(AppDimens.s12),
-      decoration: BoxDecoration(
-        color: colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(AppDimens.rButton),
-        border: Border.all(color: colorScheme.error, width: 1.5),
-      ),
-      child: Row(
-        children: <Widget>[
-          Icon(
-            Icons.error_outline_rounded,
-            size: 18,
-            color: colorScheme.onErrorContainer,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppDimens.rButton),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.error.withValues(alpha: 0.12),
+          border: Border(
+            left: BorderSide(color: colorScheme.error, width: 3.5),
           ),
-          const SizedBox(width: AppDimens.s8),
-          Expanded(
-            child: Text(
-              message,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onErrorContainer,
-                fontWeight: FontWeight.w500,
+        ),
+        padding: const EdgeInsets.all(AppDimens.s12),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              Icons.error_outline_rounded,
+              size: 18,
+              color: colorScheme.error,
+            ),
+            const SizedBox(width: AppDimens.s8),
+            Expanded(
+              child: Text(
+                message,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-/// Labeled divider separating primary auth form from Demo Login.
+/// Labeled divider separating primary auth form from secondary actions.
 class AuthDivider extends StatelessWidget {
   const AuthDivider({super.key, this.label = 'atau'});
 
@@ -175,7 +204,7 @@ class AuthDivider extends StatelessWidget {
   }
 }
 
-/// Shows a brief tactile yellow instrument stamp animation upon login/register success.
+/// Shows a crisp flat Banana Gold scanner stamp overlay upon login/register success.
 void showAuthSuccessOverlay(BuildContext context, {required bool isRegister}) {
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   if (overlay == null) return;
@@ -232,6 +261,7 @@ class _AuthSuccessOverlayState extends State<_AuthSuccessOverlay>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final harvest = context.harvest;
     final ink = theme.colorScheme.onSurface;
     final yellow = theme.colorScheme.primary;
 
@@ -251,58 +281,62 @@ class _AuthSuccessOverlayState extends State<_AuthSuccessOverlay>
             curve: Curves.easeIn,
           ).transform(t);
           final opacity = (inCurve.clamp(0.0, 1.0)) * (1.0 - outCurve);
-          final scale = 0.85 + (0.15 * inCurve);
+          final scale = 0.88 + (0.12 * inCurve);
 
           return Opacity(
             opacity: opacity.clamp(0.0, 1.0),
             child: Container(
-              color: ink.withValues(alpha: 0.25 * (1.0 - outCurve)),
+              color: ink.withValues(alpha: 0.22 * (1.0 - outCurve)),
               alignment: Alignment.center,
               child: Transform.scale(
                 scale: scale,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimens.s24,
-                    vertical: AppDimens.s20,
-                  ),
                   decoration: BoxDecoration(
                     color: yellow,
-                    borderRadius: BorderRadius.circular(AppDimens.rCard),
-                    border: Border.all(color: ink, width: 2),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: ink,
-                        offset: const Offset(0, 4),
-                        blurRadius: 0,
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(AppDimens.rHero),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Icon(
-                        Icons.verified_rounded,
-                        size: 36,
-                        color: theme.colorScheme.onPrimary,
+                  child: CustomPaint(
+                    foregroundPainter: ScannerCornerPainter(
+                      color: harvest.accent,
+                      bracketLength: 14,
+                      strokeWidth: 2.0,
+                      inset: 8,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimens.s32,
+                        vertical: AppDimens.s24,
                       ),
-                      const SizedBox(height: AppDimens.s8),
-                      Text(
-                        widget.isRegister ? 'Akun Dibuat' : 'Berhasil Masuk',
-                        style: AppTheme.pixelDisplayStyle(
-                          context,
-                          fontSize: 16,
-                          color: theme.colorScheme.onPrimary,
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            Icons.verified_rounded,
+                            size: 36,
+                            color: theme.colorScheme.onPrimary,
+                          ),
+                          const SizedBox(height: AppDimens.s8),
+                          Text(
+                            widget.isRegister
+                                ? 'Akun Dibuat'
+                                : 'Berhasil Masuk',
+                            style: AppTheme.pixelDisplayStyle(
+                              context,
+                              fontSize: 18,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: AppDimens.s4),
+                          Text(
+                            'AKSES DITERIMA // BANANALENS',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: harvest.accent,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: AppDimens.s4),
-                      Text(
-                        'AKSES DITERIMA // BANANALENS',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),

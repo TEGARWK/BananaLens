@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 
-/// Fresh Harvest / Night Harvest Bottom Navigation Bar with an integrated
-/// center FloatingActionButton that sits cleanly inside the bar.
+/// Clean 60-30-10 Editorial Bottom Navigation Bar with an integrated
+/// center Scan FloatingActionButton.
 ///
-/// Fixes:
-/// 1. Center scan FAB does not protrude upward into the chat input field.
-/// 2. Hides navigation bar cleanly when the software keyboard appears so it
-///    does not float above the keyboard or push the chat input awkwardly high.
+/// - Uses flat surface + 1px warm sand hairline (no hard brutalist shadows).
+/// - Hides cleanly when the software keyboard is open.
 class MainScaffoldWithNav extends StatelessWidget {
   const MainScaffoldWithNav({required this.navigationShell, super.key});
 
@@ -31,6 +30,14 @@ class MainScaffoldWithNav extends StatelessWidget {
     final currentIndex = navigationShell.currentIndex;
     final isDark = theme.brightness == Brightness.dark;
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final isScanActive = currentIndex == 2;
+
+    final scanBg = isScanActive
+        ? (isDark ? theme.colorScheme.primary : AppColors.lSurfaceDark)
+        : theme.colorScheme.primary;
+    final scanFg = isScanActive
+        ? (isDark ? theme.colorScheme.onPrimary : AppColors.lPrimary)
+        : theme.colorScheme.onPrimary;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -43,20 +50,11 @@ class MainScaffoldWithNav extends StatelessWidget {
                 border: Border(
                   top: BorderSide(color: harvest.border, width: 1),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: isDark
-                        ? Colors.black.withValues(alpha: 0.4)
-                        : Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
               ),
               child: SafeArea(
                 top: false,
                 child: SizedBox(
-                  height: 64,
+                  height: 66,
                   child: Row(
                     children: [
                       // Kiri 1: Beranda (Branch 0)
@@ -79,33 +77,29 @@ class MainScaffoldWithNav extends StatelessWidget {
                           onTap: () => _onDestinationSelected(1),
                         ),
                       ),
-                      // Tengah: Tombol Scan FAB (Branch 2) terintegrasi rapi di dalam bar
+                      // Tengah: Tombol Scan FAB (Branch 2)
                       SizedBox(
                         width: 68,
                         child: Center(
-                          child: Container(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: theme.colorScheme.onSurface,
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: theme.colorScheme.onSurface,
-                                  offset: const Offset(0, 2.5),
-                                  blurRadius: 0,
-                                ),
-                              ],
+                              border: isScanActive
+                                  ? Border.all(
+                                      color: theme.colorScheme.primary,
+                                      width: 2,
+                                    )
+                                  : null,
                             ),
                             child: FloatingActionButton(
                               onPressed: () => _onDestinationSelected(2),
                               elevation: 0,
                               highlightElevation: 0,
-                              backgroundColor: theme.colorScheme.primary,
-                              foregroundColor: theme.colorScheme.onPrimary,
+                              backgroundColor: scanBg,
+                              foregroundColor: scanFg,
                               shape: const CircleBorder(),
                               tooltip: AppStrings.navScan,
                               child: const Icon(
@@ -177,17 +171,14 @@ class _NavTabItem extends StatelessWidget {
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(AppDimens.rSharp),
-              border: isSelected ? Border.all(color: ink, width: 1.2) : null,
+              color: isSelected ? harvest.primarySoft : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
             ),
             child: Icon(isSelected ? activeIcon : icon, color: color, size: 20),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
           Text(
             label,
             maxLines: 1,

@@ -240,11 +240,7 @@ class _ResultRecipeGatingSectionState
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
-              Icons.schedule_rounded,
-              color: Color(0xFF3E7D28),
-              size: 24,
-            ),
+            Icon(Icons.schedule_rounded, color: harvest.unripe, size: 24),
             const SizedBox(width: AppDimens.s12),
             Expanded(
               child: Column(
@@ -253,7 +249,7 @@ class _ResultRecipeGatingSectionState
                   Text(
                     'Tunggu dulu sampai matang',
                     style: theme.textTheme.titleSmall?.copyWith(
-                      color: const Color(0xFF3E7D28),
+                      color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -327,10 +323,7 @@ class _ResultRecipeGatingSectionState
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.hourglass_bottom_rounded,
-                    color: Color(0xFF3E7D28),
-                  ),
+                  Icon(Icons.hourglass_bottom_rounded, color: harvest.unripe),
                   const SizedBox(width: AppDimens.s12),
                   Expanded(
                     child: Text(

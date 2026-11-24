@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitlens/core/theme/app_colors.dart';
 import 'package:fruitlens/core/theme/app_radius.dart';
 import 'package:fruitlens/core/theme/app_spacing.dart';
 import 'package:go_router/go_router.dart';
@@ -73,7 +74,6 @@ class FruitLensAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       );
     } else if (leadingIcon != null) {
-      final ink = colorScheme.onSurface;
       leadingWidget = Padding(
         padding: const EdgeInsets.only(left: AppSpacing.md),
         child: Center(
@@ -83,14 +83,6 @@ class FruitLensAppBar extends StatelessWidget implements PreferredSizeWidget {
             decoration: BoxDecoration(
               color: colorScheme.primary,
               borderRadius: AppRadius.roundedMd,
-              border: Border.all(color: ink, width: 1.5),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: ink,
-                  offset: const Offset(2, 2),
-                  blurRadius: 0,
-                ),
-              ],
             ),
             child: Icon(leadingIcon, color: colorScheme.onPrimary, size: 20),
           ),
@@ -133,7 +125,9 @@ class FruitLensAppBar extends StatelessWidget implements PreferredSizeWidget {
                     width: 7,
                     height: 7,
                     decoration: BoxDecoration(
-                      color: colorScheme.primary,
+                      color: theme.brightness == Brightness.dark
+                          ? AppColors.dLeafGreen
+                          : AppColors.lLeafStrong,
                       shape: BoxShape.circle,
                     ),
                   ),

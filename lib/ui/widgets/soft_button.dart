@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 
+/// Flat tonal secondary button in Soft Oat (Light) / Warm Mocha (Dark)
+/// without heavy borders or hard offset drop shadows.
 class SoftButton extends StatelessWidget {
   const SoftButton({
     super.key,
@@ -40,7 +42,7 @@ class SoftButton extends StatelessWidget {
             style: theme.textTheme.labelLarge?.copyWith(
               color: ink,
               fontWeight: FontWeight.w700,
-              letterSpacing: 0.9,
+              letterSpacing: 0.4,
             ),
           ),
         ),
@@ -56,17 +58,6 @@ class SoftButton extends StatelessWidget {
         child: Container(
           height: height < 48 ? 48 : height,
           padding: const EdgeInsets.symmetric(horizontal: AppDimens.s16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppDimens.rButton),
-            border: Border.all(color: harvest.muted, width: 1.4),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: harvest.border,
-                offset: const Offset(0, 3),
-                blurRadius: 0,
-              ),
-            ],
-          ),
           alignment: Alignment.center,
           child: childWidget,
         ),
@@ -75,6 +66,7 @@ class SoftButton extends StatelessWidget {
   }
 }
 
+/// Flat Roasted Cocoa Brown accent CTA button with Warm Cream text.
 class AccentButton extends StatelessWidget {
   const AccentButton({
     super.key,
@@ -101,7 +93,7 @@ class AccentButton extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (icon != null) ...[
-          Icon(icon, size: 20, color: harvest.onAccent),
+          Icon(icon, size: 18, color: harvest.onAccent),
           const SizedBox(width: AppDimens.s8),
         ],
         Text(
@@ -109,6 +101,7 @@ class AccentButton extends StatelessWidget {
           style: theme.textTheme.labelLarge?.copyWith(
             color: harvest.onAccent,
             fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
           ),
         ),
       ],
@@ -121,7 +114,7 @@ class AccentButton extends StatelessWidget {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(AppDimens.rButton),
         child: Container(
-          height: height,
+          height: height < 48 ? 48 : height,
           padding: const EdgeInsets.symmetric(horizontal: AppDimens.s20),
           alignment: Alignment.center,
           child: childWidget,

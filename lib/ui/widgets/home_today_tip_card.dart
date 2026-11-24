@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import 'fruit_vector_icon.dart';
@@ -20,7 +21,8 @@ class FruitTipItem {
   final String fruit;
 }
 
-/// Card showing the tip of the day with a bottom sheet reader.
+/// High-contrast Deep Espresso editorial tip card framed with Ripe Banana Gold
+/// 2-corner diagonal scanner brackets (`┌ ┘`), paired with a flat modal reader.
 class HomeTodayTipCard extends StatelessWidget {
   const HomeTodayTipCard({super.key});
 
@@ -90,9 +92,8 @@ class HomeTodayTipCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.scaffoldBackgroundColor,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppDimens.rHero),
+              top: Radius.circular(AppDimens.rSheet),
             ),
-            border: Border(top: BorderSide(color: ink, width: 1.6)),
           ),
           padding: const EdgeInsets.fromLTRB(
             AppDimens.s20,
@@ -108,12 +109,12 @@ class HomeTodayTipCard extends StatelessWidget {
               children: [
                 Center(
                   child: Container(
-                    width: 44,
-                    height: 5,
+                    width: 40,
+                    height: 4,
                     margin: const EdgeInsets.only(bottom: AppDimens.s16),
                     decoration: BoxDecoration(
-                      color: ink.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                      color: harvest.muted.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(AppDimens.rPill),
                     ),
                   ),
                 ),
@@ -128,7 +129,7 @@ class HomeTodayTipCard extends StatelessWidget {
                       'BANANALENS',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: harvest.muted,
-                        letterSpacing: 1.3,
+                        letterSpacing: 1.2,
                       ),
                     ),
                   ],
@@ -198,93 +199,117 @@ class HomeTodayTipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final harvest = context.harvest;
-    final ink = theme.colorScheme.onSurface;
+    final isDark = theme.brightness == Brightness.dark;
+    final yellow = theme.colorScheme.primary;
+    final onYellow = theme.colorScheme.onPrimary;
+    final darkBlockBg = isDark
+        ? theme.colorScheme.surface
+        : AppColors.lSurfaceDark;
+    const creamText = AppColors.lBackground;
 
     final dayIndex = DateTime.now().weekday % tipsList.length;
     final tip = tipsList[dayIndex];
 
-    return IndustrialSpecimenCard(
-      backgroundColor: harvest.primarySoft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Container(
+      decoration: BoxDecoration(
+        color: darkBlockBg,
+        borderRadius: BorderRadius.circular(AppDimens.rHero),
+      ),
+      child: CustomPaint(
+        foregroundPainter: ScannerCornerPainter(
+          color: yellow.withValues(alpha: 0.8),
+          bracketLength: 14,
+          strokeWidth: 1.8,
+          inset: 7,
+          style: ScannerCornerStyle.diagonal2,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppDimens.s16),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                  border: Border.all(color: ink, width: 1.3),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.lightbulb_outline_rounded,
-                  color: theme.colorScheme.onPrimary,
-                  size: 20,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: yellow,
+                      borderRadius: BorderRadius.circular(AppDimens.rButton),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.lightbulb_outline_rounded,
+                      color: onYellow,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: AppDimens.s12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tips Hari Ini: ${tip.title}',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: creamText,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: AppDimens.s4),
+                        Text(
+                          tip.shortText,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: creamText.withValues(alpha: 0.78),
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppDimens.s12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tips Hari Ini: ${tip.title}',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
+              const SizedBox(height: AppDimens.s12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Material(
+                  color: yellow,
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
+                  child: InkWell(
+                    onTap: () => showTipDialog(context, tip),
+                    borderRadius: BorderRadius.circular(AppDimens.rButton),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimens.s12,
+                        vertical: 7,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Baca selengkapnya',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: onYellow,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 14,
+                            color: onYellow,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: AppDimens.s4),
-                    Text(
-                      tip.shortText,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: ink.withValues(alpha: 0.8),
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppDimens.s12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: InkWell(
-              onTap: () => showTipDialog(context, tip),
-              borderRadius: BorderRadius.circular(AppDimens.rSharp),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimens.s12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                  border: Border.all(color: ink, width: 1.2),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Baca selengkapnya',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: ink,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward_rounded, size: 13, color: ink),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/chat_session.dart';
@@ -9,7 +10,7 @@ import 'industrial_art.dart';
 import 'primary_button.dart';
 import 'soft_button.dart';
 
-/// Tactile industrial bottom sheet displaying saved AI chat sessions and
+/// Clean editorial bottom sheet displaying saved AI chat sessions and
 /// quick New Chat / Delete actions.
 class ChatHistorySheet extends ConsumerWidget {
   const ChatHistorySheet({super.key});
@@ -40,7 +41,7 @@ class ChatHistorySheet extends ConsumerWidget {
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppDimens.rHero),
         ),
-        border: Border(top: BorderSide(color: ink, width: 1.6)),
+        border: Border(top: BorderSide(color: harvest.border, width: 1)),
       ),
       padding: const EdgeInsets.fromLTRB(
         AppDimens.s20,
@@ -56,11 +57,11 @@ class ChatHistorySheet extends ConsumerWidget {
           children: [
             Center(
               child: Container(
-                width: 44,
-                height: 5,
+                width: 40,
+                height: 4,
                 margin: const EdgeInsets.only(bottom: AppDimens.s16),
                 decoration: BoxDecoration(
-                  color: ink.withValues(alpha: 0.35),
+                  color: harvest.border,
                   borderRadius: BorderRadius.circular(AppDimens.rSharp),
                 ),
               ),
@@ -69,49 +70,41 @@ class ChatHistorySheet extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const IndustrialTagChip(
-                  label: 'RIWAYAT // CHAT AI',
+                  label: 'RIWAYAT · CHAT AI',
                   accent: true,
                 ),
-                InkWell(
-                  onTap: () {
-                    ref.read(chatNotifierProvider.notifier).startNewChat();
-                    Navigator.of(context).pop();
-                  },
-                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppDimens.s12,
-                      vertical: AppDimens.s4 + 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                      border: Border.all(color: ink, width: 1.3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: ink,
-                          offset: const Offset(2, 2),
-                          blurRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.add_rounded,
-                          size: 15,
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Chat Baru',
-                          style: theme.textTheme.labelSmall?.copyWith(
+                Material(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
+                  child: InkWell(
+                    onTap: () {
+                      ref.read(chatNotifierProvider.notifier).startNewChat();
+                      Navigator.of(context).pop();
+                    },
+                    borderRadius: BorderRadius.circular(AppDimens.rButton),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimens.s12,
+                        vertical: AppDimens.s4 + 3,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.add_rounded,
+                            size: 16,
                             color: theme.colorScheme.onPrimary,
-                            fontWeight: FontWeight.w700,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Text(
+                            'Chat Baru',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -131,8 +124,13 @@ class ChatHistorySheet extends ConsumerWidget {
             ),
             const SizedBox(height: AppDimens.s16),
             if (sessions.isEmpty)
-              IndustrialSpecimenCard(
+              Container(
                 padding: const EdgeInsets.all(AppDimens.s16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(AppDimens.rCard),
+                  border: Border.all(color: harvest.border, width: 1),
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -140,8 +138,7 @@ class ChatHistorySheet extends ConsumerWidget {
                       height: 40,
                       decoration: BoxDecoration(
                         color: harvest.primarySoft,
-                        borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                        border: Border.all(color: harvest.border),
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
                       ),
                       child: Icon(Icons.forum_outlined, color: ink, size: 20),
                     ),
@@ -179,7 +176,7 @@ class ChatHistorySheet extends ConsumerWidget {
                       onDelete: () async {
                         final ok = await _confirmDelete(
                           context,
-                          tag: 'HAPUS // CHAT',
+                          tag: 'HAPUS · CHAT',
                           title: 'Hapus Percakapan?',
                           message:
                               'Percakapan "${session.title}" akan dihapus permanen.',
@@ -207,7 +204,7 @@ class ChatHistorySheet extends ConsumerWidget {
                       onPressed: () async {
                         final ok = await _confirmDelete(
                           context,
-                          tag: 'HAPUS // SEMUA CHAT',
+                          tag: 'HAPUS · SEMUA CHAT',
                           title: 'Hapus Semua Riwayat?',
                           message:
                               'Seluruh riwayat percakapan dengan BananaLens AI akan dihapus permanen.',
@@ -271,116 +268,107 @@ class _SessionTile extends StatelessWidget {
     final theme = Theme.of(context);
     final harvest = context.harvest;
     final ink = theme.colorScheme.onSurface;
+    final isDark = theme.brightness == Brightness.dark;
+    final leafBg = isDark ? AppColors.dLeafSoft : AppColors.lLeafSoft;
+    final leafStrong = isDark ? AppColors.dLeafGreen : AppColors.lLeafStrong;
     final userCount = session.messages.where((m) => m.isUser).length;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimens.rButton),
-      child: Container(
-        padding: const EdgeInsets.all(AppDimens.s12),
-        decoration: BoxDecoration(
-          color: isActive
-              ? theme.colorScheme.primary.withValues(alpha: 0.25)
-              : theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppDimens.rButton),
-          border: Border.all(
-            color: isActive ? ink : harvest.border,
-            width: isActive ? 1.6 : 1.1,
+    return Material(
+      color: isActive ? harvest.primarySoft : theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(AppDimens.rCard),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDimens.rCard),
+        child: Container(
+          padding: const EdgeInsets.all(AppDimens.s12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppDimens.rCard),
+            border: Border.all(
+              color: isActive ? theme.colorScheme.primary : harvest.border,
+              width: isActive ? 1.4 : 1,
+            ),
           ),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary,
-                    offset: const Offset(0, 2.5),
-                    blurRadius: 0,
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: isActive
-                    ? theme.colorScheme.primary
-                    : harvest.primarySoft,
-                borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                border: Border.all(
-                  color: isActive ? ink : harvest.border,
-                  width: 1.2,
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? theme.colorScheme.primary
+                      : harvest.primarySoft,
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
+                ),
+                child: Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  size: 18,
+                  color: isActive ? theme.colorScheme.onPrimary : ink,
                 ),
               ),
-              child: Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 18,
-                color: isActive ? theme.colorScheme.onPrimary : ink,
-              ),
-            ),
-            const SizedBox(width: AppDimens.s12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          session.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      if (isActive) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
-                            borderRadius: BorderRadius.circular(
-                              AppDimens.rSharp,
-                            ),
-                            border: Border.all(color: ink, width: 1),
-                          ),
+              const SizedBox(width: AppDimens.s12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
                           child: Text(
-                            'AKTIF',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onPrimary,
-                              fontSize: 9,
+                            session.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w700,
+                              color: ink,
                             ),
                           ),
                         ),
+                        if (isActive) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: leafBg,
+                              borderRadius: BorderRadius.circular(
+                                AppDimens.rSharp,
+                              ),
+                            ),
+                            child: Text(
+                              'AKTIF',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: leafStrong,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '$userCount pertanyaan · ${_formatTime(session.updatedAt)}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: harvest.muted,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 3),
+                    Text(
+                      '$userCount pertanyaan · ${_formatTime(session.updatedAt)}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: harvest.muted,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.delete_outline_rounded,
-                size: 19,
-                color: harvest.muted,
+              IconButton(
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  size: 19,
+                  color: harvest.muted,
+                ),
+                tooltip: 'Hapus percakapan ini',
+                onPressed: onDelete,
               ),
-              tooltip: 'Hapus percakapan ini',
-              onPressed: onDelete,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -396,15 +384,19 @@ Future<bool?> _confirmDelete(
 }) {
   final theme = Theme.of(context);
   final harvest = context.harvest;
-  final ink = theme.colorScheme.onSurface;
 
   return showDialog<bool>(
     context: context,
     builder: (ctx) => Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: AppDimens.s24),
-      child: IndustrialSpecimenCard(
+      child: Container(
         padding: const EdgeInsets.all(AppDimens.s20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppDimens.rCard),
+          border: Border.all(color: harvest.border, width: 1),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -445,33 +437,18 @@ Future<bool?> _confirmDelete(
                 ),
                 const SizedBox(width: AppDimens.s12),
                 Expanded(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppDimens.rButton),
-                      boxShadow: [
-                        BoxShadow(
-                          color: ink,
-                          offset: const Offset(0, 4),
-                          blurRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.error,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppDimens.rButton,
-                          ),
-                          side: BorderSide(color: ink, width: 1.5),
-                        ),
-                        elevation: 0,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.error,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppDimens.rButton),
                       ),
-                      child: Text(confirmLabel),
+                      elevation: 0,
                     ),
+                    child: Text(confirmLabel),
                   ),
                 ),
               ],

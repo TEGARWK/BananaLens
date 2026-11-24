@@ -45,9 +45,8 @@ class _ResultProbabilityAccordionState
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.45),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                    border: Border.all(color: ink, width: 1.2),
                   ),
                   child: Icon(Icons.bar_chart_rounded, size: 16, color: ink),
                 ),
@@ -89,10 +88,10 @@ class _ResultProbabilityAccordionState
     final prob = entry.value;
     final rip = Ripeness.fromLabel(rawClass);
     final barColor = switch (rip) {
-      Ripeness.unripe => const Color(0xFF3E7D28),
+      Ripeness.unripe => harvest.unripe,
       Ripeness.ripe => theme.colorScheme.primary,
-      Ripeness.overripe => const Color(0xFFD97706),
-      Ripeness.rotten => const Color(0xFFC43E2B),
+      Ripeness.overripe => harvest.overripe,
+      Ripeness.rotten => harvest.rotten,
       null => theme.colorScheme.primary,
     };
     final labelIndo = switch (rawClass) {
@@ -137,7 +136,6 @@ class _ResultProbabilityAccordionState
             decoration: BoxDecoration(
               color: harvest.primarySoft,
               borderRadius: BorderRadius.circular(AppDimens.rSharp),
-              border: Border.all(color: ink.withValues(alpha: 0.45), width: 1),
             ),
             child: Align(
               alignment: Alignment.centerLeft,

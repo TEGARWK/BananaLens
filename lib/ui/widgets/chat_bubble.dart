@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 
+/// Clean 60-30-10 editorial chat bubble for BananaLens AI and user turns.
 class ChatBubble extends StatelessWidget {
   const ChatBubble({super.key, required this.text, required this.isUser});
 
@@ -18,36 +20,30 @@ class ChatBubble extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final borderRadius = BorderRadius.only(
-      topLeft: const Radius.circular(AppDimens.rButton),
-      topRight: const Radius.circular(AppDimens.rButton),
+      topLeft: const Radius.circular(AppDimens.rCard),
+      topRight: const Radius.circular(AppDimens.rCard),
       bottomLeft: isUser
-          ? const Radius.circular(AppDimens.rButton)
+          ? const Radius.circular(AppDimens.rCard)
           : const Radius.circular(AppDimens.rSharp),
       bottomRight: isUser
           ? const Radius.circular(AppDimens.rSharp)
-          : const Radius.circular(AppDimens.rButton),
+          : const Radius.circular(AppDimens.rCard),
     );
 
     final backgroundColor = isUser
         ? theme.colorScheme.primary
         : theme.colorScheme.surface;
 
-    final textColor = isUser
-        ? theme.colorScheme.onPrimary
-        : (theme.textTheme.bodyLarge?.color ?? ink);
+    final textColor = isUser ? theme.colorScheme.onPrimary : ink;
 
-    final borderColor = isUser
-        ? (isDark ? theme.colorScheme.primary : const Color(0xFF181A16))
-        : (isDark
-              ? theme.colorScheme.primary.withValues(alpha: 0.6)
-              : const Color(0xFF4A4E42));
+    final leafAccent = isDark ? AppColors.dLeafGreen : AppColors.lLeafStrong;
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: AppDimens.s4 + 2),
+        margin: const EdgeInsets.symmetric(vertical: AppDimens.s4 + 1),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * (isUser ? 0.78 : 0.88),
+          maxWidth: MediaQuery.of(context).size.width * (isUser ? 0.80 : 0.88),
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: AppDimens.s16,
@@ -56,24 +52,16 @@ class ChatBubble extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: borderRadius,
-          border: Border.all(color: borderColor, width: 1.4),
-          boxShadow: [
-            BoxShadow(
-              color: isUser
-                  ? (isDark ? Colors.black : const Color(0xFF181A16))
-                  : theme.colorScheme.primary.withValues(alpha: 0.65),
-              offset: const Offset(2, 2.5),
-              blurRadius: 0,
-            ),
-          ],
+          border: isUser ? null : Border.all(color: harvest.border, width: 1),
         ),
         child: isUser
             ? Text(
                 text,
-                style: theme.textTheme.bodyLarge?.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: textColor,
                   fontWeight: FontWeight.w600,
-                  height: 1.4,
+                  height: 1.45,
+                  fontSize: 14.5,
                 ),
               )
             : Column(
@@ -84,11 +72,11 @@ class ChatBubble extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 7,
-                        height: 7,
+                        width: 6,
+                        height: 6,
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          border: Border.all(color: ink, width: 1),
+                          color: leafAccent,
+                          shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -96,8 +84,9 @@ class ChatBubble extends StatelessWidget {
                         'BANANALENS AI',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: harvest.muted,
-                          fontSize: 9.5,
-                          letterSpacing: 1.1,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.0,
                         ),
                       ),
                     ],
@@ -107,37 +96,43 @@ class ChatBubble extends StatelessWidget {
                     data: text,
                     selectable: true,
                     styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                      p: theme.textTheme.bodyLarge?.copyWith(
+                      p: theme.textTheme.bodyMedium?.copyWith(
                         color: textColor,
-                        height: 1.45,
+                        height: 1.5,
                         fontSize: 14.5,
                       ),
-                      strong: theme.textTheme.bodyLarge?.copyWith(
+                      strong: theme.textTheme.bodyMedium?.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.w700,
                         fontSize: 14.5,
                       ),
-                      em: theme.textTheme.bodyLarge?.copyWith(
+                      em: theme.textTheme.bodyMedium?.copyWith(
                         color: textColor,
                         fontStyle: FontStyle.italic,
                         fontSize: 14.5,
                       ),
-                      listBullet: theme.textTheme.bodyLarge?.copyWith(
-                        color: ink,
-                        fontWeight: FontWeight.bold,
+                      listBullet: theme.textTheme.bodyMedium?.copyWith(
+                        color: leafAccent,
+                        fontWeight: FontWeight.w700,
                         fontSize: 14.5,
                       ),
                       h1: theme.textTheme.titleLarge?.copyWith(
                         color: textColor,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                       h2: theme.textTheme.titleMedium?.copyWith(
                         color: textColor,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                       ),
                       h3: theme.textTheme.titleSmall?.copyWith(
                         color: textColor,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      blockquoteDecoration: BoxDecoration(
+                        color: harvest.primarySoft,
+                        border: Border(
+                          left: BorderSide(color: leafAccent, width: 3),
+                        ),
                       ),
                       blockSpacing: 8.0,
                       listIndent: 16.0,

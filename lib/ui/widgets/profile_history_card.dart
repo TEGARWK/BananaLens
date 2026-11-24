@@ -100,7 +100,7 @@ class ProfileHistoryCard extends ConsumerWidget {
         ),
         InkWell(
           onTap: () => context.go('/history'),
-          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppDimens.s12,
@@ -108,15 +108,15 @@ class ProfileHistoryCard extends ConsumerWidget {
             ),
             decoration: BoxDecoration(
               color: harvest.primarySoft,
-              borderRadius: BorderRadius.circular(AppDimens.rSharp),
-              border: Border.all(color: ink, width: 1.2),
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
+              border: Border.all(color: harvest.border, width: 1),
             ),
             child: Text(
               'Lihat Semua',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: ink,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
+                letterSpacing: 0.4,
               ),
             ),
           ),
@@ -143,8 +143,7 @@ class ProfileHistoryCard extends ConsumerWidget {
           height: 36,
           decoration: BoxDecoration(
             color: harvest.primarySoft,
-            borderRadius: BorderRadius.circular(AppDimens.rSharp),
-            border: Border.all(color: harvest.border),
+            borderRadius: BorderRadius.circular(AppDimens.rButton),
           ),
           child: Icon(icon, color: ink, size: 18),
         ),
@@ -156,32 +155,24 @@ class ProfileHistoryCard extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: AppDimens.s8),
-        InkWell(
-          onTap: onAction,
-          borderRadius: BorderRadius.circular(AppDimens.rSharp),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimens.s12,
-              vertical: AppDimens.s8 - 2,
-            ),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              borderRadius: BorderRadius.circular(AppDimens.rSharp),
-              border: Border.all(color: ink, width: 1.4),
-              boxShadow: [
-                BoxShadow(
-                  color: ink,
-                  offset: const Offset(2, 2),
-                  blurRadius: 0,
+        Material(
+          color: theme.colorScheme.primary,
+          borderRadius: BorderRadius.circular(AppDimens.rButton),
+          child: InkWell(
+            onTap: onAction,
+            borderRadius: BorderRadius.circular(AppDimens.rButton),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimens.s12,
+                vertical: AppDimens.s8 - 1,
+              ),
+              child: Text(
+                actionLabel,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
                 ),
-              ],
-            ),
-            child: Text(
-              actionLabel,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.4,
               ),
             ),
           ),

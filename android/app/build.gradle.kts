@@ -31,7 +31,9 @@ android {
     }
 
     androidResources {
-        noCompress += listOf("tflite", "lite", "bin")
+        // Only TFLite models need uncompressed mmap access. Excluding "bin"
+        // lets Flutter's debug kernel_blob.bin (~81 MB) be compressed.
+        noCompress += listOf("tflite", "lite")
     }
 
     buildTypes {
@@ -39,6 +41,12 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

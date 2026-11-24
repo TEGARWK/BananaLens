@@ -1,4 +1,4 @@
-/// Standard dimensions, spacing, and border radiuses for BananaLens Industrial theme.
+/// Standard dimensions, spacing, and crisp editorial border radiuses for BananaLens.
 abstract final class AppDimens {
   // Spacing (kelipatan 4)
   static const double s4 = 4;
@@ -12,11 +12,11 @@ abstract final class AppDimens {
   // Layar
   static const double screenPadding = 20;
 
-  // Radius
-  static const double rSharp = 4;
-  static const double rCard = 20;
-  static const double rButton = 14;
-  static const double rHero = 22;
-  static const double rSheet = 28;
+  // Crisp Editorial Geometry (flat neo-grid, zero bubbly Saweria pills)
+  static const double rSharp = 2;
+  static const double rButton = 6;
+  static const double rCard = 8;
+  static const double rHero = 10;
+  static const double rSheet = 16;
   static const double rPill = 999;
 }

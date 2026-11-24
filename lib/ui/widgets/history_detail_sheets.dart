@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/ripeness.dart';
@@ -13,7 +14,7 @@ Future<void> showHistoryFullscreenImage(
 }) {
   return showDialog<void>(
     context: context,
-    barrierColor: Colors.black.withValues(alpha: 0.9),
+    barrierColor: AppColors.dSurfaceDark.withValues(alpha: 0.92),
     builder: (dialogContext) {
       return Stack(
         children: [
@@ -40,7 +41,9 @@ Future<void> showHistoryFullscreenImage(
                 onPressed: () => Navigator.of(dialogContext).pop(),
                 tooltip: 'Tutup',
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.black.withValues(alpha: 0.65),
+                  backgroundColor: AppColors.dSurfaceDark.withValues(
+                    alpha: 0.72,
+                  ),
                   foregroundColor: Colors.white,
                 ),
                 icon: const Icon(Icons.close),
@@ -87,10 +90,7 @@ Future<void> showHistoryConfidenceBreakdownSheet(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(AppDimens.rCard),
-            border: Border.all(color: ink, width: 1.8),
-            boxShadow: [
-              BoxShadow(color: ink, offset: const Offset(3, 4), blurRadius: 0),
-            ],
+            border: Border.all(color: harvest.border, width: 1),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -102,8 +102,7 @@ Future<void> showHistoryConfidenceBreakdownSheet(
                     padding: const EdgeInsets.all(AppDimens.s8),
                     decoration: BoxDecoration(
                       color: harvest.primarySoft,
-                      borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                      border: Border.all(color: ink, width: 1.2),
+                      borderRadius: BorderRadius.circular(AppDimens.rButton),
                     ),
                     child: Icon(Icons.bar_chart_rounded, size: 18, color: ink),
                   ),
@@ -210,7 +209,6 @@ class _RipenessBreakdownRow extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: barColor,
                       borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                      border: Border.all(color: ink, width: 1),
                     ),
                     child: Text(
                       'TERDETEKSI',
@@ -235,23 +233,19 @@ class _RipenessBreakdownRow extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 6),
-        Container(
-          height: 8,
-          decoration: BoxDecoration(
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          child: Container(
+            height: 8,
             color: harvest.primarySoft,
-            borderRadius: BorderRadius.circular(AppDimens.rSharp),
-            border: Border.all(
-              color: isDetected ? ink : harvest.border,
-              width: 1,
-            ),
-          ),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: FractionallySizedBox(
-              widthFactor: fraction.clamp(0.0, 1.0),
-              child: ColoredBox(
-                color: barColor,
-                child: const SizedBox.expand(),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: fraction.clamp(0.0, 1.0),
+                child: ColoredBox(
+                  color: barColor,
+                  child: const SizedBox.expand(),
+                ),
               ),
             ),
           ),

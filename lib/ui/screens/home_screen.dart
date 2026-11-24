@@ -166,22 +166,30 @@ class _HomeHeader extends StatelessWidget {
           label: 'Buka profil saya',
           child: InkWell(
             onTap: () => context.go('/profile'),
-            borderRadius: BorderRadius.circular(AppDimens.rSharp),
+            borderRadius: BorderRadius.circular(AppDimens.rButton),
             child: Container(
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                border: Border.all(color: ink, width: 1.5),
-                boxShadow: [BoxShadow(color: ink, offset: const Offset(2, 2))],
+                color: harvest.accent,
+                borderRadius: BorderRadius.circular(AppDimens.rButton),
               ),
-              alignment: Alignment.center,
-              child: Text(
-                name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                  fontWeight: FontWeight.w800,
+              child: CustomPaint(
+                foregroundPainter: ScannerCornerPainter(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.85),
+                  bracketLength: 8,
+                  strokeWidth: 1.4,
+                  inset: 3,
+                  style: ScannerCornerStyle.diagonal2,
+                ),
+                child: Center(
+                  child: Text(
+                    name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: harvest.onAccent,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
             ),

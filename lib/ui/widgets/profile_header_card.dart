@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitlens/core/theme/app_colors.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/app_theme.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
@@ -37,7 +38,7 @@ class ProfileHeaderCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const IndustrialTagChip(label: 'MODE TAMU // OFFLINE'),
+              const IndustrialTagChip(label: 'MODE TAMU · OFFLINE'),
               Text(
                 'BANANALENS',
                 style: theme.textTheme.labelSmall?.copyWith(
@@ -56,14 +57,6 @@ class ProfileHeaderCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(AppDimens.rButton),
-                  border: Border.all(color: ink, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: ink,
-                      offset: const Offset(2.5, 2.5),
-                      blurRadius: 0,
-                    ),
-                  ],
                 ),
                 child: Icon(
                   Icons.person_outline_rounded,
@@ -137,7 +130,9 @@ class ProfileHeaderCard extends StatelessWidget {
     final profile = user!;
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final ink = theme.colorScheme.onSurface;
+    final isDark = theme.brightness == Brightness.dark;
+    final leafBg = isDark ? AppColors.dLeafSoft : AppColors.lLeafSoft;
+    final leafFg = isDark ? AppColors.dLeafGreen : AppColors.lLeafStrong;
     final displayName = profile.name.trim().isNotEmpty
         ? profile.name.trim()
         : 'Pengguna BananaLens';
@@ -152,7 +147,39 @@ class ProfileHeaderCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const IndustrialTagChip(label: 'AKUN AKTIF', accent: true),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.s8 + 2,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: leafBg,
+                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: leafFg,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'AKUN AKTIF',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: leafFg,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Text(
                 'BANANALENS',
                 style: theme.textTheme.labelSmall?.copyWith(
@@ -171,14 +198,6 @@ class ProfileHeaderCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(AppDimens.rButton),
-                  border: Border.all(color: ink, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: ink,
-                      offset: const Offset(2.5, 2.5),
-                      blurRadius: 0,
-                    ),
-                  ],
                 ),
                 alignment: Alignment.center,
                 child: Text(

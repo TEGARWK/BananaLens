@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitlens/core/theme/app_colors.dart';
 import 'package:fruitlens/core/theme/app_dimens.dart';
 import 'package:fruitlens/core/theme/harvest_colors.dart';
 import 'package:fruitlens/ui/widgets/industrial_art.dart';
@@ -44,14 +45,13 @@ class ProfileMenuSection extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 8,
-                height: 8,
+                width: 6,
+                height: 6,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  border: Border.all(
-                    color: theme.colorScheme.onSurface,
-                    width: 1.2,
-                  ),
+                  color: theme.brightness == Brightness.dark
+                      ? AppColors.dLeafGreen
+                      : AppColors.lLeafStrong,
+                  shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: AppDimens.s8),
@@ -95,9 +95,8 @@ class _MenuRowTile extends StatelessWidget {
     final ink = theme.colorScheme.onSurface;
     final iconColor = item.isDestructive ? theme.colorScheme.error : ink;
     final badgeBg = item.isDestructive
-        ? theme.colorScheme.error.withValues(alpha: 0.14)
-        : theme.colorScheme.primary.withValues(alpha: 0.45);
-    final badgeBorder = item.isDestructive ? theme.colorScheme.error : ink;
+        ? theme.colorScheme.error.withValues(alpha: 0.12)
+        : harvest.primarySoft;
 
     return InkWell(
       onTap: item.onTap,
@@ -114,8 +113,7 @@ class _MenuRowTile extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: badgeBg,
-                borderRadius: BorderRadius.circular(AppDimens.rButton - 2),
-                border: Border.all(color: badgeBorder, width: 1.3),
+                borderRadius: BorderRadius.circular(AppDimens.rButton),
               ),
               child: Icon(item.icon, size: 19, color: iconColor),
             ),

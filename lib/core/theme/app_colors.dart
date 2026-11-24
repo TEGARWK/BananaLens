@@ -1,40 +1,70 @@
 import 'package:flutter/material.dart';
 
-/// Central color definitions and brand seeds for BananaLens
-/// "Instrument-Panel / Tactile Industrial Minimalism" (Light & Night).
+/// Central color definitions for BananaLens following a strict 60-30-10 rule:
+/// - 60% Primary Base: Warm Banana White (`#FFFDF7`), Crisp White (`#FFFFFF`), Soft Banana Cream (`#FFF6DC`)
+/// - 30% Secondary Brand: Ripe Banana Gold (`#F4C418`) + Dark Chocolate Brown (`#3B2112`) — ZERO BLACK
+/// - 10% Accent: Fresh Banana Leaf Green (`#5D9412` / `#A3D955` / `#EEF7DF`)
 abstract final class AppColors {
-  // Light: Technical Paper + Banana Volt Yellow
-  static const Color lPrimary = Color(0xFFF5D51E);
-  static const Color lOnPrimary = Color(0xFF181A16);
-  static const Color lPrimarySoft = Color(0xFFEAECE2);
-  static const Color lAccent = Color(0xFFDEC010);
-  static const Color lBackground = Color(0xFFF5F6F1);
-  static const Color lSurface = Color(0xFFEBEDE3);
-  static const Color lText = Color(0xFF181A16);
-  static const Color lMuted = Color(0xFF6B7062);
-  static const Color lBorder = Color(0xFFD8DBD0);
-  static const Color lError = Color(0xFFC43E2B);
+  // ── Light Mode (60% Warm White/Cream · 30% Yellow & Dark Brown · 10% Green) ──
+  static const Color lBackground = Color(0xFFFFFDF7); // 60%: Warm Banana White
+  static const Color lSurface = Color(0xFFFFFFFF); // 60%: Pure Crisp White
+  static const Color lPrimarySoft = Color(0xFFFFF6DC); // 60%: Soft Banana Cream
+  static const Color lBorder = Color(0xFFEADCC5); // Subtle Warm Sand Hairline
 
-  // Dark: Night Instrument + Banana Volt Yellow
-  static const Color dPrimary = Color(0xFFF5D51E);
-  static const Color dOnPrimary = Color(0xFF181A16);
-  static const Color dPrimarySoft = Color(0xFF262821);
-  static const Color dAccent = Color(0xFFDEC010);
-  static const Color dBackground = Color(0xFF121310);
-  static const Color dSurface = Color(0xFF1B1D18);
-  static const Color dText = Color(0xFFF2F3EE);
-  static const Color dMuted = Color(0xFF9A9F90);
-  static const Color dBorder = Color(0xFF31342B);
-  static const Color dError = Color(0xFFFF6B57);
+  static const Color lPrimary = Color(0xFFF4C418); // 30%: Ripe Banana Gold
+  static const Color lOnPrimary = Color(0xFF3B2112); // 30%: Dark Chocolate Ink
+  static const Color lAccent = Color(0xFF3B2112); // 30%: Dark Chocolate Brown
+  static const Color lAccentWarm = Color(
+    0xFF54321D,
+  ); // 30%: Deep Espresso Brown
+  static const Color lSurfaceDark = Color(
+    0xFF3B2112,
+  ); // 30%: Dark Chocolate Block (no black)
+  static const Color lText = Color(
+    0xFF3B2112,
+  ); // 30%: Dark Chocolate Ink (WCAG AAA)
+  static const Color lMuted = Color(0xFF6E5240); // Dark Cocoa Muted
 
-  static const Color onAccent = Color(0xFF181A16);
-  static const Color instrumentInk = Color(0xFF181A16);
-  static const Color trackInactive = Color(0xFFD4D7CC);
+  static const Color lLeafGreen = Color(
+    0xFFA3D955,
+  ); // 10%: Fresh Light Leaf Green
+  static const Color lLeafStrong = Color(
+    0xFF5D9412,
+  ); // 10%: Leaf Green for text/icons
+  static const Color lLeafSoft = Color(0xFFEEF7DF); // 10%: Soft Leaf Green Tint
+  static const Color lError = Color(0xFFC43E2B); // Semantic Brick Red
 
-  // Backward compatibility alias
+  // ── Dark Mode (Dark Chocolate Night — zero pure black) ──
+  static const Color dBackground = Color(0xFF21130B); // Deep Dark Chocolate
+  static const Color dSurface = Color(0xFF2E1B10); // Dark Chocolate Card
+  static const Color dPrimarySoft = Color(0xFF3B2315); // Espresso Surface
+  static const Color dSurfaceDark = Color(
+    0xFF1A0F08,
+  ); // Deepest Chocolate Block
+  static const Color dPrimary = Color(0xFFF4C418); // Ripe Banana Gold
+  static const Color dOnPrimary = Color(0xFF3B2112); // Dark Chocolate Ink
+  static const Color dAccent = Color(
+    0xFFC48B5C,
+  ); // Warm Cocoa Accent (dark mode contrast)
+  static const Color dAccentWarm = Color(0xFF8C5A34); // Deep Caramel
+  static const Color dLeafGreen = Color(0xFFA3D955); // Fresh Light Leaf Green
+  static const Color dLeafStrong = Color(0xFF9CCC65); // Leaf Green Dark Mode
+  static const Color dLeafSoft = Color(0xFF273618); // Dark Leaf Tint
+  static const Color dText = Color(0xFFFFF9EC); // Warm Banana Cream Ink
+  static const Color dMuted = Color(0xFFC8B09A); // Warm Latte Muted
+  static const Color dBorder = Color(0xFF4A2E1D); // Dark Chocolate Hairline
+  static const Color dError = Color(0xFFFF6B57); // Soft Coral Red
+
+  static const Color onAccent = Color(
+    0xFFFFFDF7,
+  ); // Warm White on Dark Chocolate
+  static const Color instrumentInk = Color(0xFF3B2112);
+  static const Color trackInactive = Color(0xFFF0E4CF);
+
+  // Backward compatibility aliases
   static const Color primarySeed = lPrimary;
   static const Color secondarySeed = lAccent;
-  static const Color tertiarySeed = Color(0xFF00796B);
+  static const Color tertiarySeed = lLeafStrong;
   static const Color lightBackground = lBackground;
   static const Color lightSurface = lSurface;
   static const Color lightSurfaceVariant = lPrimarySoft;
@@ -43,7 +73,7 @@ abstract final class AppColors {
   static const Color darkSurfaceVariant = dPrimarySoft;
 }
 
-/// Semantic colors for fruit ripeness status (backward compatibility).
+/// Semantic colors for fruit ripeness status.
 @immutable
 class RipenessColors extends ThemeExtension<RipenessColors> {
   const RipenessColors({
@@ -78,33 +108,33 @@ class RipenessColors extends ThemeExtension<RipenessColors> {
   final Color onRottenContainer;
 
   static const RipenessColors light = RipenessColors(
-    unripe: Color(0xFF7CB342),
-    unripeContainer: Color(0xFFE8F5E9),
-    onUnripeContainer: Color(0xFF1B5E20),
-    ripe: Color(0xFFF5B700),
-    ripeContainer: Color(0xFFFFF9C4),
-    onRipeContainer: Color(0xFFF57F17),
-    overripe: Color(0xFFFF8A3D),
-    overripeContainer: Color(0xFFFFE0B2),
-    onOverripeContainer: Color(0xFFBF360C),
-    rotten: Color(0xFFE5484D),
-    rottenContainer: Color(0xFFFFEBEE),
-    onRottenContainer: Color(0xFFB71C1C),
+    unripe: Color(0xFF5D9412),
+    unripeContainer: Color(0xFFEEF7DF),
+    onUnripeContainer: Color(0xFF335409),
+    ripe: Color(0xFFE6B00E),
+    ripeContainer: Color(0xFFFFF6DC),
+    onRipeContainer: Color(0xFF3B2112),
+    overripe: Color(0xFFB86B27),
+    overripeContainer: Color(0xFFFAEAD9),
+    onOverripeContainer: Color(0xFF3B2112),
+    rotten: Color(0xFFC43E2B),
+    rottenContainer: Color(0xFFFCE9E6),
+    onRottenContainer: Color(0xFF7D2215),
   );
 
   static const RipenessColors dark = RipenessColors(
-    unripe: Color(0xFF9CCC65),
-    unripeContainer: Color(0xFF1B3326),
-    onUnripeContainer: Color(0xFFC8E6C9),
-    ripe: Color(0xFFFACC15),
-    ripeContainer: Color(0xFF332900),
-    onRipeContainer: Color(0xFFFFFDE7),
-    overripe: Color(0xFFFFA24D),
-    overripeContainer: Color(0xFF381A05),
-    onOverripeContainer: Color(0xFFFFE0B2),
-    rotten: Color(0xFFFF6B70),
-    rottenContainer: Color(0xFF3B1012),
-    onRottenContainer: Color(0xFFFFCDD2),
+    unripe: Color(0xFFA3D955),
+    unripeContainer: Color(0xFF273618),
+    onUnripeContainer: Color(0xFFDDF2BE),
+    ripe: Color(0xFFF4C418),
+    ripeContainer: Color(0xFF3D2E0E),
+    onRipeContainer: Color(0xFFFFF5CC),
+    overripe: Color(0xFFE0964F),
+    overripeContainer: Color(0xFF3E2614),
+    onOverripeContainer: Color(0xFFFFE1C2),
+    rotten: Color(0xFFFF6B57),
+    rottenContainer: Color(0xFF421C17),
+    onRottenContainer: Color(0xFFFFD1CA),
   );
 
   @override

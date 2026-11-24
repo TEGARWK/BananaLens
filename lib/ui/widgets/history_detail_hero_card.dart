@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/ripeness.dart';
@@ -40,7 +41,7 @@ class HistoryDetailHeroCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const IndustrialTagChip(label: 'CATATAN // PINDAI', accent: true),
+              const IndustrialTagChip(label: 'CATATAN · PINDAI', accent: true),
               const SizedBox(width: AppDimens.s8),
               Expanded(
                 child: Text(
@@ -96,8 +97,8 @@ class HistoryDetailHeroCard extends StatelessWidget {
 
   (Color, Color) _accuracyColors(Ripeness? value, ThemeData theme) {
     return switch (value) {
-      Ripeness.rotten => (const Color(0xFFC43E2B), Colors.white),
-      Ripeness.unripe => (const Color(0xFF3E7D28), Colors.white),
+      Ripeness.rotten => (AppColors.lError, Colors.white),
+      Ripeness.unripe => (AppColors.lLeafStrong, Colors.white),
       Ripeness.overripe => (const Color(0xFFD97706), Colors.white),
       Ripeness.ripe ||
       null => (theme.colorScheme.primary, theme.colorScheme.onPrimary),
@@ -119,6 +120,7 @@ class _HeroPhotoBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final harvest = context.harvest;
     final ink = theme.colorScheme.onSurface;
 
     return Stack(
@@ -130,11 +132,11 @@ class _HeroPhotoBox extends StatelessWidget {
             height: 204,
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(AppDimens.rCard - 4),
-              border: Border.all(color: ink, width: 1.2),
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
+              border: Border.all(color: harvest.border, width: 1),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppDimens.rCard - 5),
+              borderRadius: BorderRadius.circular(AppDimens.rButton - 1),
               child: FruitImage(
                 imagePath: imagePath,
                 fruitLabel: fruitLabel,
@@ -150,18 +152,18 @@ class _HeroPhotoBox extends StatelessWidget {
           bottom: AppDimens.s8,
           child: Material(
             color: theme.colorScheme.surface.withValues(alpha: 0.94),
-            borderRadius: BorderRadius.circular(AppDimens.rSharp),
+            borderRadius: BorderRadius.circular(AppDimens.rButton),
             child: InkWell(
               onTap: onOpenFullscreen,
-              borderRadius: BorderRadius.circular(AppDimens.rSharp),
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimens.s8 + 2,
                   vertical: AppDimens.s4 + 2,
                 ),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppDimens.rSharp),
-                  border: Border.all(color: ink, width: 1.2),
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
+                  border: Border.all(color: harvest.border, width: 1),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -202,66 +204,55 @@ class _ConfidenceTapBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ink = theme.colorScheme.onSurface;
 
     return Tooltip(
       message: 'Ketuk untuk lihat rincian skor AI',
-      child: Container(
-        decoration: BoxDecoration(
-          color: bgColor,
+      child: Material(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(AppDimens.rButton),
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(AppDimens.rButton),
-          border: Border.all(color: ink, width: 1.5),
-          boxShadow: [
-            BoxShadow(color: ink, offset: const Offset(2, 2.5), blurRadius: 0),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppDimens.rButton),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(AppDimens.rButton),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimens.s12,
-                vertical: AppDimens.s8,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '$confPct%',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: fgColor,
-                          fontWeight: FontWeight.w800,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimens.s12,
+              vertical: AppDimens.s8,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$confPct%',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: fgColor,
+                        fontWeight: FontWeight.w800,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
-                      const SizedBox(width: AppDimens.s4),
-                      Icon(Icons.bar_chart_rounded, size: 16, color: fgColor),
-                    ],
-                  ),
-                  Text(
-                    'Akurasi Kematangan',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: fgColor.withValues(alpha: 0.9),
-                      fontSize: 10,
                     ),
+                    const SizedBox(width: AppDimens.s4),
+                    Icon(Icons.bar_chart_rounded, size: 16, color: fgColor),
+                  ],
+                ),
+                Text(
+                  'Akurasi Kematangan',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: fgColor.withValues(alpha: 0.9),
+                    fontSize: 10,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Ketuk untuk rincian',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: fgColor.withValues(alpha: 0.8),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w600,
-                    ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Ketuk untuk rincian',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: fgColor.withValues(alpha: 0.8),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
