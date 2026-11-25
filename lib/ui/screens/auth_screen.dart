@@ -87,6 +87,24 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
+  Future<void> _loginWithGoogle() async {
+    if (ref.read(authNotifierProvider).isLoading) return;
+    setState(() => _errorMessage = null);
+
+    try {
+      await ref.read(authNotifierProvider.notifier).loginWithGoogle();
+      _navigateBackOrHome();
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _errorMessage = e.message);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _errorMessage = 'Gagal masuk dengan Google. Silakan coba lagi.',
+        );
+      }
+    }
+  }
+
   Future<void> _openForgotPassword() async {
     final email = _emailController.text.trim();
     final route = Uri(
@@ -229,6 +247,45 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 isLoading: isLoading,
                 onPressed: _submit,
               ),
+              const SizedBox(height: AppDimens.s12),
+              Row(
+                children: <Widget>[
+                  Expanded(child: Divider(color: harvest.border)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimens.s12,
+                    ),
+                    child: Text(
+                      'atau',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: harvest.muted,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: harvest.border)),
+                ],
+              ),
+              const SizedBox(height: AppDimens.s12),
+              OutlinedButton.icon(
+                onPressed: isLoading ? null : _loginWithGoogle,
+                icon: const _GoogleGMark(),
+                label: Text(
+                  _isRegister ? 'Daftar dengan Google' : 'Masuk dengan Google',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.surface,
+                  side: BorderSide(color: harvest.border, width: 1.4),
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppDimens.rButton),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -302,6 +359,31 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GoogleGMark extends StatelessWidget {
+  const _GoogleGMark();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withValues(alpha: 0.22),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        'G',
+        style: theme.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w900,
+          color: theme.colorScheme.onSurface,
         ),
       ),
     );

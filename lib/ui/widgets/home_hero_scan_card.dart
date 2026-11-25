@@ -13,10 +13,12 @@ class HomeHeroScanCard extends StatefulWidget {
     super.key,
     required this.onScanTap,
     required this.onGalleryTap,
+    this.isBusy = false,
   });
 
   final VoidCallback onScanTap;
   final VoidCallback onGalleryTap;
+  final bool isBusy;
 
   @override
   State<HomeHeroScanCard> createState() => _HomeHeroScanCardState();
@@ -134,7 +136,7 @@ class _HomeHeroScanCardState extends State<HomeHeroScanCard>
                         ),
                         const SizedBox(height: AppDimens.s4),
                         Text(
-                          'Cek kematangan & saran olahan secara instan.',
+                          'Ketahui tingkat kematangan pisang dan temukan rekomendasi olahan yang cocok.',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: textInk.withValues(alpha: 0.82),
                             height: 1.38,
@@ -164,7 +166,7 @@ class _HomeHeroScanCardState extends State<HomeHeroScanCard>
                     color: cocoaAccent,
                     borderRadius: BorderRadius.circular(AppDimens.rButton),
                     child: InkWell(
-                      onTap: widget.onScanTap,
+                      onTap: widget.isBusy ? null : widget.onScanTap,
                       borderRadius: BorderRadius.circular(AppDimens.rButton),
                       child: Container(
                         height: 48,
@@ -181,7 +183,7 @@ class _HomeHeroScanCardState extends State<HomeHeroScanCard>
                             ),
                             const SizedBox(width: AppDimens.s8),
                             Text(
-                              'Mulai Scan',
+                              'Scan Pisang',
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: onCocoaAccent,
                                 fontWeight: FontWeight.w700,
@@ -199,7 +201,7 @@ class _HomeHeroScanCardState extends State<HomeHeroScanCard>
                         : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(AppDimens.rButton),
                     child: InkWell(
-                      onTap: widget.onGalleryTap,
+                      onTap: widget.isBusy ? null : widget.onGalleryTap,
                       borderRadius: BorderRadius.circular(AppDimens.rButton),
                       child: Container(
                         height: 48,
@@ -209,14 +211,24 @@ class _HomeHeroScanCardState extends State<HomeHeroScanCard>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              color: textInk,
-                              size: 18,
-                            ),
+                            if (widget.isBusy)
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: textInk,
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.photo_library_outlined,
+                                color: textInk,
+                                size: 18,
+                              ),
                             const SizedBox(width: AppDimens.s4 + 2),
                             Text(
-                              'Galeri',
+                              widget.isBusy ? 'Memproses...' : 'Buka Galeri',
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: textInk,
                                 fontWeight: FontWeight.w700,

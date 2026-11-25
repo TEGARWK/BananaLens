@@ -21,6 +21,9 @@ enum RipenessBucket {
   }
 }
 
+/// Origin of a recipe entry.
+enum RecipeSource { local, ai }
+
 /// Culinary category for a recipe.
 enum RecipeType {
   food('food', 'Makanan'),
@@ -68,6 +71,7 @@ class Recipe {
     this.type = RecipeType.food,
     this.safetyNotes,
     this.isReviewed = true,
+    this.source = RecipeSource.local,
     this.createdAt,
     this.updatedAt,
   });
@@ -108,6 +112,9 @@ class Recipe {
       type: RecipeType.fromString(json['type'] as String? ?? 'food'),
       safetyNotes: json['safety_notes'] as String?,
       isReviewed: reviewed,
+      source: (json['source'] as String?)?.toLowerCase() == 'ai'
+          ? RecipeSource.ai
+          : RecipeSource.local,
       createdAt: _parseDate(json['created_at']),
       updatedAt: _parseDate(json['updated_at']),
     );
@@ -146,6 +153,7 @@ class Recipe {
   final RecipeType type;
   final String? safetyNotes;
   final bool isReviewed;
+  final RecipeSource source;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 

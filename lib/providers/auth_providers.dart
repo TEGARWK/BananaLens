@@ -44,6 +44,23 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
     }
   }
 
+  Future<void> loginWithGoogle() async {
+    final previous = state.asData?.value;
+    state = const AsyncLoading();
+    try {
+      final user = await ref.read(authServiceProvider).loginWithGoogle();
+      state = AsyncData(user);
+      unawaited(
+        ref
+            .read(cloudSyncServiceProvider)
+            .syncPendingScans(user.uid, ref.read(historyRepositoryProvider)),
+      );
+    } catch (error) {
+      state = AsyncData(previous);
+      rethrow;
+    }
+  }
+
   Future<void> register(String email, String password, String name) async {
     final previous = state.asData?.value;
     state = const AsyncLoading();

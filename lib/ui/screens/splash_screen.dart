@@ -6,11 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
-import '../widgets/industrial_art.dart';
 import '../widgets/splash_scanner_mark.dart';
 
-/// Animated brand launch splash screen showcasing the BananaLens optical
-/// scanner viewfinder mark in flat Ripe Banana Gold & Roasted Cocoa Brown.
+/// Animated brand launch splash screen showcasing the FruitLens scanner mark.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({
     this.onCompleted,
@@ -56,6 +54,8 @@ class _SplashScreenState extends State<SplashScreen>
       );
     } else {
       _controller.addStatusListener(_handleStatusChanged);
+      // Start after the first rendered frame so Android's native splash
+      // handoff never clips the opening pop-in choreography.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_finished) {
           _controller.forward();
@@ -95,15 +95,10 @@ class _SplashScreenState extends State<SplashScreen>
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimens.s16),
-          child: CustomPaint(
-            foregroundPainter: ScannerCornerPainter(
-              color: harvest.accent.withValues(alpha: 0.22),
-              bracketLength: 22,
-              strokeWidth: 1.8,
-            ),
+      body: Stack(
+        children: [
+          _SplashBackgroundAura(harvest: harvest, theme: theme),
+          SafeArea(
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, _) {
@@ -111,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppDimens.s24,
+                      horizontal: AppDimens.s32,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -121,8 +116,8 @@ class _SplashScreenState extends State<SplashScreen>
                         const SizedBox(height: AppDimens.s24),
                         _AnimatedBrandWordmark(progress: t),
                         const Spacer(flex: 3),
-                        _OpticalProgressBar(progress: t),
-                        const SizedBox(height: AppDimens.s24),
+                        _OpticalProgressPill(progress: t),
+                        const SizedBox(height: AppDimens.s32),
                       ],
                     ),
                   ),
@@ -130,8 +125,23 @@ class _SplashScreenState extends State<SplashScreen>
               },
             ),
           ),
-        ),
+        ],
       ),
+    );
+  }
+}
+
+class _SplashBackgroundAura extends StatelessWidget {
+  const _SplashBackgroundAura({required this.harvest, required this.theme});
+
+  final HarvestColors harvest;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: theme.scaffoldBackgroundColor,
+      child: const SizedBox.expand(),
     );
   }
 }
@@ -144,16 +154,21 @@ class _AnimatedBrandWordmark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final harvest = context.harvest;
+    final isDark = theme.brightness == Brightness.dark;
+    final yellow = theme.colorScheme.primary;
+    const ink = Color(0xFF181A16);
+    final taglineColor = isDark
+        ? const Color(0xFFD6D3C9)
+        : const Color(0xFF4B4E46);
 
     final titleT = const Interval(
-      0.26,
-      0.54,
+      0.28,
+      0.56,
       curve: Curves.easeOutCubic,
     ).transform(progress);
     final subT = const Interval(
-      0.38,
-      0.66,
+      0.40,
+      0.68,
       curve: Curves.easeOutCubic,
     ).transform(progress);
 
@@ -166,11 +181,11 @@ class _AnimatedBrandWordmark extends StatelessWidget {
             offset: Offset(0, (1.0 - titleT) * 14),
             child: Text(
               AppStrings.appName,
-              style: theme.textTheme.displaySmall?.copyWith(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: theme.colorScheme.onSurface,
-                letterSpacing: -0.8,
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontSize: 33,
+                fontWeight: FontWeight.w900,
+                color: yellow,
+                letterSpacing: -0.6,
               ),
             ),
           ),
@@ -180,9 +195,27 @@ class _AnimatedBrandWordmark extends StatelessWidget {
           opacity: subT,
           child: Transform.translate(
             offset: Offset(0, (1.0 - subT) * 10),
-            child: const IndustrialTagChip(
-              label: AppStrings.splashBadge,
-              accent: true,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimens.s12,
+                vertical: AppDimens.s4 + 2,
+              ),
+              decoration: BoxDecoration(
+                color: yellow,
+                borderRadius: BorderRadius.circular(AppDimens.rSharp),
+                border: Border.all(color: ink, width: 1.4),
+                boxShadow: const [
+                  BoxShadow(color: ink, offset: Offset(2, 2), blurRadius: 0),
+                ],
+              ),
+              child: Text(
+                AppStrings.splashBadge,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: ink,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                ),
+              ),
             ),
           ),
         ),
@@ -193,8 +226,8 @@ class _AnimatedBrandWordmark extends StatelessWidget {
             AppStrings.splashTagline,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: harvest.muted,
-              fontWeight: FontWeight.w500,
+              color: taglineColor,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -203,58 +236,48 @@ class _AnimatedBrandWordmark extends StatelessWidget {
   }
 }
 
-class _OpticalProgressBar extends StatelessWidget {
-  const _OpticalProgressBar({required this.progress});
+class _OpticalProgressPill extends StatelessWidget {
+  const _OpticalProgressPill({required this.progress});
 
   final double progress;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final harvest = context.harvest;
+    final isDark = theme.brightness == Brightness.dark;
+    final borderInk = isDark
+        ? theme.colorScheme.onSurface
+        : const Color(0xFF181A16);
+    final trackColor = isDark
+        ? const Color(0xFF2B2822)
+        : const Color(0xFFF3F0E6);
     final barFade = const Interval(0.14, 0.34).transform(progress);
     final fillFraction = const Interval(
       0.16,
-      0.86,
+      0.85,
       curve: Curves.easeInOutCubic,
     ).transform(progress);
-    final percent = (fillFraction * 100).round();
 
     return Opacity(
       opacity: barFade,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 156,
-            height: 6,
-            decoration: BoxDecoration(
-              color: harvest.primarySoft,
-              borderRadius: BorderRadius.circular(AppDimens.rSharp),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: FractionallySizedBox(
-                widthFactor: fillFraction.clamp(0.06, 1.0),
-                child: ColoredBox(
-                  color: harvest.accent,
-                  child: const SizedBox.expand(),
-                ),
-              ),
+      child: Container(
+        width: 140,
+        height: 8,
+        decoration: BoxDecoration(
+          color: trackColor,
+          borderRadius: BorderRadius.circular(AppDimens.rSharp),
+          border: Border.all(color: borderInk, width: 1.2),
+        ),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: FractionallySizedBox(
+            widthFactor: fillFraction.clamp(0.08, 1.0),
+            child: ColoredBox(
+              color: theme.colorScheme.primary,
+              child: const SizedBox.expand(),
             ),
           ),
-          const SizedBox(height: AppDimens.s8),
-          Text(
-            'MENYIAPKAN SCANNER · $percent%',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: harvest.muted,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.0,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

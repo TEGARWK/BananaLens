@@ -1,13 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fruitlens/data/models/user_profile.dart';
 import 'package:fruitlens/services/auth_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Firebase Authentication implementation of [AuthService].
 ///
-/// Handles user login, registration, password resets, and session management
-/// via Firebase Auth, with supplementary profile fields cached locally in
-/// [SharedPreferences] until Cloud Firestore is fully synchronized.
+/// Handles user login, Google Sign-In, registration, password resets, and session
+/// management via Firebase Auth, with supplementary profile fields cached locally
+/// in [SharedPreferences] until Cloud Firestore is fully synchronized.
 class FirebaseAuthService implements AuthService {
   FirebaseAuthService({
     fb.FirebaseAuth? firebaseAuth,
@@ -17,6 +19,7 @@ class FirebaseAuthService implements AuthService {
 
   final fb.FirebaseAuth _auth;
   SharedPreferences? _prefs;
+  bool _googleInitialized = false;
 
   static const String _profileMetaPrefix = 'fruitlens_fb_meta_';
 
@@ -79,6 +82,69 @@ class FirebaseAuthService implements AuthService {
       if (e is AuthException) rethrow;
       throw const AuthException(
         'Gagal masuk ke akun. Periksa koneksi internet dan coba lagi.',
+      );
+    }
+  }
+
+  @override
+  Future<UserProfile> loginWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn.instance;
+      if (!_googleInitialized) {
+        final webClientId = dotenv.isInitialized
+            ? dotenv.env['GOOGLE_WEB_CLIENT_ID']?.trim()
+            : null;
+        await googleSignIn.initialize(
+          serverClientId: (webClientId != null && webClientId.isNotEmpty)
+              ? webClientId
+              : null,
+        );
+        _googleInitialized = true;
+      }
+
+      final account = await googleSignIn.authenticate();
+      final idToken = account.authentication.idToken;
+      if (idToken == null || idToken.isEmpty) {
+        throw const AuthException(
+          'Token Google tidak tersedia. Pastikan Google Sign-In & SHA-1 sudah dikonfigurasi di Firebase.',
+        );
+      }
+
+      final credential = fb.GoogleAuthProvider.credential(idToken: idToken);
+      final userCred = await _auth.signInWithCredential(credential);
+      final user = userCred.user;
+      if (user == null) {
+        throw const AuthException('Gagal masuk dengan akun Google.');
+      }
+
+      final existing = await getCurrentUser();
+      final profile =
+          existing ??
+          UserProfile(
+            uid: user.uid,
+            email: user.email ?? account.email,
+            name: user.displayName ?? account.displayName ?? '',
+          );
+
+      final storage = await _storage;
+      await storage.setString(
+        '$_profileMetaPrefix${profile.uid}',
+        profile.toJsonString(),
+      );
+      return profile;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw const AuthException('Masuk dengan Google dibatalkan.');
+      }
+      throw const AuthException(
+        'Gagal masuk dengan Google. Periksa konfigurasi atau koneksi internet.',
+      );
+    } on fb.FirebaseAuthException catch (e) {
+      throw AuthException(_mapFirebaseError(e));
+    } catch (e) {
+      if (e is AuthException) rethrow;
+      throw const AuthException(
+        'Gagal masuk dengan Google. Periksa koneksi internet dan coba lagi.',
       );
     }
   }
@@ -155,6 +221,13 @@ class FirebaseAuthService implements AuthService {
   @override
   Future<void> logout() async {
     await _auth.signOut();
+    if (_googleInitialized) {
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {
+        // Ignore Google sign-out errors if platform session is already cleared.
+      }
+    }
   }
 
   String _mapFirebaseError(fb.FirebaseAuthException e) {

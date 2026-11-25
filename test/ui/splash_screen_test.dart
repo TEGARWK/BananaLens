@@ -43,6 +43,15 @@ class _StubAuthService implements AuthService {
       _user ?? UserProfile(uid: '1', email: email);
 
   @override
+  Future<UserProfile> loginWithGoogle() async =>
+      _user ??
+      const UserProfile(
+        uid: 'google_1',
+        email: 'google@fruitlens.id',
+        name: 'Google User',
+      );
+
+  @override
   Future<UserProfile> register(
     String email,
     String password,
@@ -140,7 +149,7 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(find.byType(SplashScreen), findsNothing);
-      expect(find.text('Mulai Scan'), findsOneWidget);
+      expect(find.text('Scan Pisang'), findsOneWidget);
     },
   );
 

@@ -59,6 +59,49 @@ void main() {
     expect(find.text('Beranda Target'), findsNothing);
   });
 
+  testWidgets('renders Masuk dengan Google button and shows error when Firebase inactive', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Masuk dengan Google'), findsOneWidget);
+    await tester.tap(find.text('Masuk dengan Google'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Masuk dengan Google membutuhkan layanan Firebase yang aktif.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets(
+    'renders Masuk dengan Google button and shows error when Firebase inactive',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Masuk dengan Google'), findsOneWidget);
+      await tester.tap(find.text('Masuk dengan Google'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Masuk dengan Google membutuhkan layanan Firebase yang aktif.',
+        ),
+        findsOneWidget,
+      );
+    },
+  );
+
   testWidgets(
     'switches Login/Register via bottom prompt and validates signup',
     (tester) async {

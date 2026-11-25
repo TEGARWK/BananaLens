@@ -41,6 +41,13 @@ class _StaticAuthService implements AuthService {
       UserProfile(uid: '1', email: email);
 
   @override
+  Future<UserProfile> loginWithGoogle() async => const UserProfile(
+    uid: 'google_1',
+    email: 'google@fruitlens.id',
+    name: 'Google User',
+  );
+
+  @override
   Future<UserProfile> register(
     String email,
     String password,
@@ -76,7 +83,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tab 0 (Home) aktif awal
-      expect(find.text('Mulai Scan'), findsOneWidget);
+      expect(find.text('Scan Pisang'), findsOneWidget);
 
       // Pindah ke Tab 1 (Tanya AI)
       await tester.tap(find.text(AppStrings.navChat));
@@ -101,7 +108,7 @@ void main() {
       // Kembali ke Tab 0 (Home)
       await tester.tap(find.text(AppStrings.navHome));
       await tester.pumpAndSettle();
-      expect(find.text('Mulai Scan'), findsOneWidget);
+      expect(find.text('Scan Pisang'), findsOneWidget);
     });
   });
 }

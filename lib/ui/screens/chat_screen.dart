@@ -11,6 +11,7 @@ import '../widgets/chat_bubble.dart';
 import '../widgets/chat_composer.dart';
 import '../widgets/chat_context_banner.dart';
 import '../widgets/chat_history_sheet.dart';
+import '../widgets/chat_starter_grid.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -22,20 +23,6 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
-
-  static const List<String> _suggestedChips = [
-    'Cara simpan pisang biar tidak cepat hitam?',
-    'Pisang bintik cokelat masih aman dimakan?',
-    'Ide olahan pisang yang terlalu matang?',
-    'Apa manfaat pisang mentah yang direbus?',
-  ];
-
-  static const List<String> _contextSuggestedChips = [
-    'Apakah pisang ini masih aman dikonsumsi?',
-    'Ide olahan yang cocok untuk kondisi ini?',
-    'Berapa lama & bagaimana cara menyimpannya?',
-    'Apa saja kandungan gizinya?',
-  ];
 
   @override
   void dispose() {
@@ -91,6 +78,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final hasContext =
         chatState.scanContext != null && chatState.scanContext!.isNotEmpty;
+    final hasUserMessages = chatState.messages.any((m) => m.isUser);
     final leafDot = isDark ? AppColors.dLeafGreen : AppColors.lLeafStrong;
 
     return Scaffold(
@@ -110,16 +98,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: isDark
-                    ? theme.colorScheme.primary
-                    : AppColors.lSurfaceDark,
+                color: theme.colorScheme.primary,
                 borderRadius: BorderRadius.circular(AppDimens.rButton),
               ),
               child: Icon(
                 Icons.auto_awesome_rounded,
-                color: isDark
-                    ? theme.colorScheme.onPrimary
-                    : AppColors.lPrimary,
+                color: theme.colorScheme.onPrimary,
                 size: 18,
               ),
             ),
@@ -188,51 +172,66 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           const SizedBox(width: AppDimens.screenPadding),
         ],
       ),
-      body: Column(
-        children: [
-          if (hasContext)
-            ChatContextBanner(
-              scanContext: chatState.scanContext!,
-              onDismiss: () =>
-                  ref.read(chatNotifierProvider.notifier).setScanContext(null),
-            ),
-          Expanded(
-            child: ListView(
-              controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(
-                AppDimens.screenPadding,
-                AppDimens.s16,
-                AppDimens.screenPadding,
-                AppDimens.s12,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 840),
+          child: Column(
+            children: [
+              if (hasContext)
+                ChatContextBanner(
+                  scanContext: chatState.scanContext!,
+                  onDismiss: () => ref
+                      .read(chatNotifierProvider.notifier)
+                      .setScanContext(null),
+                ),
+              Expanded(
+                child: ListView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(
+                    AppDimens.screenPadding,
+                    AppDimens.s16,
+                    AppDimens.screenPadding,
+                    AppDimens.s12,
+                  ),
+                  children: [
+                    ...chatState.messages.map((turn) {
+                      return ChatBubble(
+                        text: turn.content,
+                        isUser: turn.role == ChatRole.user,
+                      );
+                    }),
+                    if (!hasUserMessages && !chatState.isLoading)
+                      ChatStarterGrid(
+                        hasContext: hasContext,
+                        onSelectPrompt: _sendMessage,
+                      ),
+                    if (chatState.isLoading) ...[
+                      const SizedBox(height: AppDimens.s8),
+                      const ChatTypingIndicator(),
+                    ],
+                    if (chatState.error != null) ...[
+                      const SizedBox(height: AppDimens.s8),
+                      _ChatErrorNotice(
+                        message: chatState.error!,
+                        onRetry: () {
+                          ref
+                              .read(chatNotifierProvider.notifier)
+                              .retryLastMessage();
+                          _scrollToBottom();
+                        },
+                      ),
+                    ],
+                  ],
+                ),
               ),
-              children: [
-                ...chatState.messages.map((turn) {
-                  return ChatBubble(
-                    text: turn.content,
-                    isUser: turn.role == ChatRole.user,
-                  );
-                }),
-                if (chatState.isLoading) ...[
-                  const SizedBox(height: AppDimens.s8),
-                  const ChatTypingIndicator(),
-                ],
-                if (chatState.error != null) ...[
-                  const SizedBox(height: AppDimens.s8),
-                  _ChatErrorNotice(message: chatState.error!),
-                ],
-              ],
-            ),
+              ChatInputComposer(
+                controller: _textController,
+                onSend: _sendMessage,
+                isLoading: chatState.isLoading,
+              ),
+            ],
           ),
-          ChatSuggestedChips(
-            prompts: hasContext ? _contextSuggestedChips : _suggestedChips,
-            onSelect: _sendMessage,
-          ),
-          ChatInputComposer(
-            controller: _textController,
-            onSend: _sendMessage,
-            isLoading: chatState.isLoading,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -258,24 +257,28 @@ class _HeaderIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Tooltip(
-        message: tooltip,
-        child: Material(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(AppDimens.rButton),
-          child: InkWell(
-            onTap: onTap,
+      child: Semantics(
+        button: true,
+        label: tooltip,
+        child: Tooltip(
+          message: tooltip,
+          child: Material(
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(AppDimens.rButton),
-            child: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppDimens.rButton),
-                border: borderColor != null
-                    ? Border.all(color: borderColor!, width: 1)
-                    : null,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppDimens.rButton),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppDimens.rButton),
+                  border: borderColor != null
+                      ? Border.all(color: borderColor!, width: 1)
+                      : null,
+                ),
+                child: Icon(icon, color: foregroundColor, size: 19),
               ),
-              child: Icon(icon, color: foregroundColor, size: 19),
             ),
           ),
         ),
@@ -285,9 +288,10 @@ class _HeaderIconButton extends StatelessWidget {
 }
 
 class _ChatErrorNotice extends StatelessWidget {
-  const _ChatErrorNotice({required this.message});
+  const _ChatErrorNotice({required this.message, required this.onRetry});
 
   final String message;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -320,6 +324,23 @@ class _ChatErrorNotice extends StatelessWidget {
                   color: theme.colorScheme.error,
                   fontWeight: FontWeight.w600,
                 ),
+              ),
+            ),
+            const SizedBox(width: AppDimens.s8),
+            TextButton(
+              onPressed: onRetry,
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.error,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.s8,
+                  vertical: 4,
+                ),
+                minimumSize: const Size(44, 36),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                'Coba lagi',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
               ),
             ),
           ],

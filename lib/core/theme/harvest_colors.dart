@@ -33,8 +33,8 @@ class HarvestColors extends ThemeExtension<HarvestColors> {
     muted: AppColors.lMuted,
     border: AppColors.lBorder,
     unripe: AppColors.lLeafStrong,
-    ripe: Color(0xFFE6B00E),
-    overripe: Color(0xFFB86B27),
+    ripe: Color(0xFFFFC914),
+    overripe: Color(0xFFC66A28),
     rotten: Color(0xFFC43E2B),
   );
 
@@ -45,8 +45,8 @@ class HarvestColors extends ThemeExtension<HarvestColors> {
     muted: AppColors.dMuted,
     border: AppColors.dBorder,
     unripe: AppColors.dLeafGreen,
-    ripe: Color(0xFFF4C418),
-    overripe: Color(0xFFE0964F),
+    ripe: Color(0xFFFFC914),
+    overripe: Color(0xFFE38A47),
     rotten: Color(0xFFFF6B57),
   );
 

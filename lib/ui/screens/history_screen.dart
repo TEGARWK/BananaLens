@@ -15,16 +15,40 @@ import '../widgets/history_item_card.dart';
 import '../widgets/shimmer_box.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
-  const HistoryScreen({super.key});
+  const HistoryScreen({super.key, this.initialFilter});
+
+  final String? initialFilter;
 
   @override
   ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
 }
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  static const _validFilters = {'all', 'unripe', 'ripe', 'overripe', 'rotten'};
+
   String _selectedFilter = 'all';
   String _searchQuery = '';
   final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final filter = widget.initialFilter;
+    if (filter != null && _validFilters.contains(filter)) {
+      _selectedFilter = filter;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant HistoryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final filter = widget.initialFilter;
+    if (filter != oldWidget.initialFilter &&
+        filter != null &&
+        _validFilters.contains(filter)) {
+      setState(() => _selectedFilter = filter);
+    }
+  }
 
   @override
   void dispose() {

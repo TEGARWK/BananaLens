@@ -84,9 +84,8 @@ class ChatInputComposer extends StatelessWidget {
     final theme = Theme.of(context);
     final harvest = context.harvest;
     final ink = theme.colorScheme.onSurface;
-    final isDark = theme.brightness == Brightness.dark;
-    final sendBg = isDark ? theme.colorScheme.primary : AppColors.lSurfaceDark;
-    final sendFg = isDark ? theme.colorScheme.onPrimary : AppColors.lPrimary;
+    final sendBg = theme.colorScheme.primary;
+    final sendFg = theme.colorScheme.onPrimary;
 
     return Container(
       decoration: BoxDecoration(
@@ -107,8 +106,12 @@ class ChatInputComposer extends StatelessWidget {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  minLines: 1,
+                  maxLines: 4,
                   textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => onSend(),
+                  onSubmitted: (_) {
+                    if (!isLoading) onSend();
+                  },
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: ink,
                     fontSize: 14.5,
@@ -244,7 +247,7 @@ class _ChatTypingIndicatorState extends State<ChatTypingIndicator>
             }),
             const SizedBox(width: AppDimens.s8),
             Text(
-              'Mengetik...',
+              'AI sedang berpikir...',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: harvest.muted,
                 fontSize: 11,

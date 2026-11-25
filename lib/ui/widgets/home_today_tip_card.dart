@@ -13,12 +13,14 @@ class FruitTipItem {
     required this.shortText,
     required this.fullText,
     required this.fruit,
+    required this.category,
   });
 
   final String title;
   final String shortText;
   final String fullText;
   final String fruit;
+  final String category;
 }
 
 /// High-contrast Deep Espresso editorial tip card framed with Ripe Banana Gold
@@ -34,6 +36,7 @@ class HomeTodayTipCard extends StatelessWidget {
       fullText:
           'Bintik cokelat kecil (sugar spots) pada kulit pisang kuning menandakan pisang sudah sangat matang dan manis alami. Dagingnya tetap bagus, mudah dicerna, dan cocok dijadikan smoothie, pancake, atau banana bread tanpa banyak gula tambahan.',
       fruit: 'banana',
+      category: 'Pematangan',
     ),
     FruitTipItem(
       title: 'Bungkus Tangkai Pisang',
@@ -42,6 +45,7 @@ class HomeTodayTipCard extends StatelessWidget {
       fullText:
           'Gas etilen paling banyak keluar dari pangkal tangkai pisang. Bungkus rapat bagian tangkai dengan plastik wrap atau kertas aluminium, lalu gantung di suhu ruang sejuk agar pisang matang 2-3 hari lebih awet.',
       fruit: 'banana',
+      category: 'Penyimpanan',
     ),
     FruitTipItem(
       title: 'Manfaat Pisang Mentah',
@@ -50,6 +54,7 @@ class HomeTodayTipCard extends StatelessWidget {
       fullText:
           'Pisang mentah (hijau) memiliki kadar gula lebih rendah dan tinggi pati resisten sebagai prebiotik alami. Sebaiknya jangan dimakan mentah langsung; rebus dengan sedikit garam atau olah menjadi keripik pisang renyah.',
       fruit: 'banana',
+      category: 'Nutrisi',
     ),
     FruitTipItem(
       title: 'Mematangkan Pisang Lebih Cepat',
@@ -58,6 +63,7 @@ class HomeTodayTipCard extends StatelessWidget {
       fullText:
           'Jika kamu membeli pisang mentah dan ingin segera dinikmati, masukkan ke dalam kantong kertas cokelat yang dilipat longgar. Gas etilen alami akan terperangkap di dalamnya sehingga proses pematangan lebih cepat dan merata.',
       fruit: 'banana',
+      category: 'Pematangan',
     ),
     FruitTipItem(
       title: 'Bekukan Pisang Sebelum Busuk',
@@ -66,6 +72,7 @@ class HomeTodayTipCard extends StatelessWidget {
       fullText:
           'Jangan buang pisang yang kulitnya mulai sangat berbintik jika dagingnya masih padat dan tidak berbau asam. Kupas, potong-potong, simpan dalam wadah kedap udara di freezer—tahan hingga 2 bulan dan siap diblender kapan saja.',
       fruit: 'banana',
+      category: 'Penyimpanan',
     ),
     FruitTipItem(
       title: 'Kenali Tanda Pisang Busuk',
@@ -74,6 +81,7 @@ class HomeTodayTipCard extends StatelessWidget {
       fullText:
           'Pisang yang sudah busuk ditandai bau asam menyengat, cairan merembes dari kulit, atau adanya bercak jamur. Hindari mengonsumsinya dan manfaatkan sebagai bahan kompos organik untuk tanaman.',
       fruit: 'banana',
+      category: 'Keamanan',
     ),
   ];
 
@@ -250,6 +258,28 @@ class HomeTodayTipCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimens.s8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: yellow.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(
+                              AppDimens.rSharp,
+                            ),
+                          ),
+                          child: Text(
+                            tip.category.toUpperCase(),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: yellow,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppDimens.s4),
                         Text(
                           'Tips Hari Ini: ${tip.title}',
                           style: theme.textTheme.titleSmall?.copyWith(
@@ -260,6 +290,8 @@ class HomeTodayTipCard extends StatelessWidget {
                         const SizedBox(height: AppDimens.s4),
                         Text(
                           tip.shortText,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: creamText.withValues(alpha: 0.78),
                             height: 1.4,

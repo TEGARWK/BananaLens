@@ -172,7 +172,9 @@ GoRouter createAppRouter({
               GoRoute(
                 path: '/history',
                 builder: (BuildContext context, GoRouterState state) =>
-                    const HistoryScreen(),
+                    HistoryScreen(
+                      initialFilter: state.uri.queryParameters['filter'],
+                    ),
               ),
             ],
           ),

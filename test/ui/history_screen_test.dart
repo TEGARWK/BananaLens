@@ -108,6 +108,45 @@ void main() {
     expect(find.textContaining('80% yakin'), findsNothing);
   });
 
+  testWidgets('applies initialFilter when provided from home stats', (
+    tester,
+  ) async {
+    final repo = InMemoryHistoryRepository();
+    await repo.insert(
+      ScanResult(
+        imagePath: 'dummy1.jpg',
+        fruitLabel: 'banana',
+        ripenessLabel: 'ripe',
+        confidence: 0.80,
+        createdAt: DateTime(2026, 11, 21, 10, 0),
+      ),
+    );
+    await repo.insert(
+      ScanResult(
+        imagePath: 'dummy2.jpg',
+        fruitLabel: 'banana',
+        ripenessLabel: 'unripe',
+        confidence: 0.91,
+        createdAt: DateTime(2026, 11, 21, 11, 0),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [historyRepositoryProvider.overrideWithValue(repo)],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const HistoryScreen(initialFilter: 'unripe'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 hasil pindai'), findsOneWidget);
+    expect(find.textContaining('91% yakin'), findsOneWidget);
+    expect(find.textContaining('80% yakin'), findsNothing);
+  });
+
   testWidgets('renders history detail screen with scan info and nutrition', (
     tester,
   ) async {

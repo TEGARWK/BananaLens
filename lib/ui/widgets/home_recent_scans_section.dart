@@ -55,13 +55,15 @@ class HomeRecentScansSection extends StatelessWidget {
           ),
           data: (items) {
             if (items.isEmpty) {
-              return const IndustrialSpecimenCard(
-                padding: EdgeInsets.symmetric(vertical: AppDimens.s20),
+              return IndustrialSpecimenCard(
+                padding: const EdgeInsets.symmetric(vertical: AppDimens.s20),
                 child: EmptyState(
                   icon: Icons.history_rounded,
                   title: 'Belum Ada Riwayat',
                   message:
-                      'Pindai buah pertamamu untuk melihat hasil analisis kematangan dan nutrisi di sini.',
+                      'Pindai pisang pertamamu untuk mengetahui tingkat kematangan dan rekomendasi olahannya.',
+                  actionText: 'Scan Pisang Pertama',
+                  onAction: () => context.go('/scan'),
                 ),
               );
             }
@@ -104,7 +106,7 @@ class HomeRecentScansSection extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    '${FruitNameHelper.formatRelativeDate(recents[i].createdAt)} · ${(recents[i].confidence * 100).toStringAsFixed(0)}% yakin',
+                                    _buildSubtitle(recents[i]),
                                     style: theme.textTheme.labelSmall?.copyWith(
                                       color: harvest.muted,
                                     ),
@@ -139,6 +141,17 @@ class HomeRecentScansSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  static String _buildSubtitle(ScanResult item) {
+    final datePart = FruitNameHelper.formatRelativeDate(item.createdAt);
+    final hh = item.createdAt.hour.toString().padLeft(2, '0');
+    final mm = item.createdAt.minute.toString().padLeft(2, '0');
+    final base = '$datePart · $hh.$mm';
+    if (item.confidence > 0) {
+      return '$base · Keyakinan ${(item.confidence * 100).toStringAsFixed(0)}%';
+    }
+    return base;
   }
 }
 

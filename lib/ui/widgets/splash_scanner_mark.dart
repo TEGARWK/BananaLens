@@ -6,15 +6,15 @@ import '../../core/theme/harvest_colors.dart';
 import 'industrial_art.dart';
 import 'splash_scanner_painters.dart';
 
-/// Animated BananaLens brand emblem framed by crisp 4-corner Roasted Cocoa
-/// viewfinder brackets (`┌ ┐ └ ┘`) and a smooth optical scan sweep beam.
+/// Animated BananaLens brand emblem with precision radial dial ticks,
+/// viewfinder brackets, and an optical yellow scan sweep.
 class SplashScannerMark extends StatelessWidget {
-  const SplashScannerMark({required this.progress, this.size = 116, super.key});
+  const SplashScannerMark({required this.progress, this.size = 124, super.key});
 
   /// Normalized animation timeline in `[0.0, 1.0]`.
   final double progress;
 
-  /// Width and height of the inner emblem block.
+  /// Width and height of the inner instrument emblem box.
   final double size;
 
   @override
@@ -22,9 +22,9 @@ class SplashScannerMark extends StatelessWidget {
     final theme = Theme.of(context);
     final harvest = context.harvest;
     final t = progress.clamp(0.0, 1.0);
-    final yellow = theme.colorScheme.primary;
     final isDark = theme.brightness == Brightness.dark;
-    final bracketColor = isDark ? yellow : harvest.accent;
+    final ink = isDark ? theme.colorScheme.onSurface : const Color(0xFF181A16);
+    final yellow = theme.colorScheme.primary;
 
     // Pop-in spring for the core emblem (0.00 -> 0.25).
     final entryT = const Interval(
@@ -32,7 +32,7 @@ class SplashScannerMark extends StatelessWidget {
       0.25,
       curve: Curves.easeOutBack,
     ).transform(t);
-    final iconScale = 0.78 + (0.22 * entryT);
+    final iconScale = 0.72 + (0.28 * entryT);
     final iconOpacity = const Interval(
       0.0,
       0.16,
@@ -40,13 +40,13 @@ class SplashScannerMark extends StatelessWidget {
     ).transform(t);
 
     final bracketT = const Interval(
-      0.06,
+      0.08,
       0.32,
       curve: Curves.easeOutCubic,
     ).transform(t);
-    final scanWindow = const Interval(0.16, 0.78).transform(t);
-    final scanActive = t >= 0.16 && t <= 0.78;
-    final containerExtent = size + 44;
+    final scanWindow = const Interval(0.16, 0.76).transform(t);
+    final scanActive = t >= 0.16 && t <= 0.76;
+    final containerExtent = size + 56;
 
     return Semantics(
       label: AppStrings.splashSemantics,
@@ -59,20 +59,27 @@ class SplashScannerMark extends StatelessWidget {
           children: [
             CustomPaint(
               size: Size.square(containerExtent),
+              painter: RadialDialTicksPainter(
+                tickColor: harvest.muted,
+                accentColor: yellow,
+                progress: t,
+              ),
+            ),
+            CustomPaint(
+              size: Size.square(size + 30),
               painter: ViewfinderBracketsPainter(
-                bracketColor: bracketColor,
+                bracketColor: ink,
                 bracketProgress: bracketT,
                 innerSize: size,
               ),
             ),
-            _FlatEmblemBlock(
+            _InstrumentEmblemCard(
               size: size,
               opacity: iconOpacity.clamp(0.0, 1.0),
               scale: iconScale,
               scanActive: scanActive,
               scanWindow: scanWindow,
-              blockColor: yellow,
-              beamColor: isDark ? harvest.onAccent : harvest.accent,
+              primary: yellow,
             ),
           ],
         ),
@@ -81,15 +88,14 @@ class SplashScannerMark extends StatelessWidget {
   }
 }
 
-class _FlatEmblemBlock extends StatelessWidget {
-  const _FlatEmblemBlock({
+class _InstrumentEmblemCard extends StatelessWidget {
+  const _InstrumentEmblemCard({
     required this.size,
     required this.opacity,
     required this.scale,
     required this.scanActive,
     required this.scanWindow,
-    required this.blockColor,
-    required this.beamColor,
+    required this.primary,
   });
 
   final double size;
@@ -97,8 +103,7 @@ class _FlatEmblemBlock extends StatelessWidget {
   final double scale;
   final bool scanActive;
   final double scanWindow;
-  final Color blockColor;
-  final Color beamColor;
+  final Color primary;
 
   @override
   Widget build(BuildContext context) {
@@ -106,32 +111,31 @@ class _FlatEmblemBlock extends StatelessWidget {
       opacity: opacity,
       child: Transform.scale(
         scale: scale,
-        child: Container(
+        child: SizedBox(
           width: size,
           height: size,
-          decoration: BoxDecoration(
-            color: blockColor,
-            borderRadius: BorderRadius.circular(AppDimens.rHero),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Center(
-                child: IndustrialBananaMark(
-                  size: size * 0.76,
-                  showFrame: false,
-                ),
-              ),
-              if (scanActive)
-                CustomPaint(
-                  painter: InnerSweepBeamPainter(
-                    scanProgress: scanWindow,
-                    beamColor: beamColor,
-                    glowColor: beamColor,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppDimens.rCard),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Transform.scale(
+                  scale: 1.35,
+                  child: Image.asset(
+                    'assets/images/brand/splash_logo.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
-            ],
+                if (scanActive)
+                  CustomPaint(
+                    painter: InnerSweepBeamPainter(
+                      scanProgress: scanWindow,
+                      beamColor: primary,
+                      glowColor: primary,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

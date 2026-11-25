@@ -227,6 +227,7 @@ class GeminiRecipeService implements LiveRecipeGenerator {
               ? null
               : safetyNotes,
           isReviewed: true,
+          source: RecipeSource.ai,
           createdAt: now,
           updatedAt: now,
         ),

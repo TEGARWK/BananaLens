@@ -31,6 +31,15 @@ class _FakeAuthService implements AuthService {
   }
 
   @override
+  Future<UserProfile> loginWithGoogle() async {
+    return _currentUser ??= const UserProfile(
+      uid: 'u_google',
+      email: 'google@fruitlens.id',
+      name: 'Budi Google',
+    );
+  }
+
+  @override
   Future<UserProfile> register(
     String email,
     String password,

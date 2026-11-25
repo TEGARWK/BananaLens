@@ -24,10 +24,10 @@ void main() {
 
         final harvest = theme.extension<HarvestColors>();
         expect(harvest, isNotNull);
-        expect(harvest!.accent, equals(const Color(0xFF3B2112)));
-        expect(harvest.unripe, equals(const Color(0xFF5D9412)));
-        expect(harvest.ripe, equals(const Color(0xFFE6B00E)));
-        expect(harvest.overripe, equals(const Color(0xFFB86B27)));
+        expect(harvest!.accent, equals(const Color(0xFF3B2417)));
+        expect(harvest.unripe, equals(const Color(0xFF2F7D46)));
+        expect(harvest.ripe, equals(const Color(0xFFFFC914)));
+        expect(harvest.overripe, equals(const Color(0xFFC66A28)));
         expect(harvest.rotten, equals(const Color(0xFFC43E2B)));
       },
     );
@@ -41,8 +41,8 @@ void main() {
 
       final harvest = theme.extension<HarvestColors>();
       expect(harvest, isNotNull);
-      expect(harvest!.unripe, equals(const Color(0xFFA3D955)));
-      expect(harvest.ripe, equals(const Color(0xFFF4C418)));
+      expect(harvest!.unripe, equals(const Color(0xFF4CAF6A)));
+      expect(harvest.ripe, equals(const Color(0xFFFFC914)));
     });
 
     test('Spacing and crisp editorial Radius scales follow design tokens', () {

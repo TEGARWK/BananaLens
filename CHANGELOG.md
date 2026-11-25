@@ -5,6 +5,34 @@
 
 ---
 
+## Rabu, 25 November 2026
+
+### Integrasi Login dengan Google (`google_sign_in` + Firebase Auth)
+- **Dependency (`pubspec.yaml`):** Menambahkan `google_sign_in: ^7.2.0` untuk autentikasi akun Google native.
+- **Lapisan Auth (`auth_service.dart`, `firebase_auth_service.dart`, `auth_providers.dart`):** Menambahkan kontrak `loginWithGoogle()` pada `AuthService`, implementasi `GoogleSignIn.instance.initialize()` + `authenticate()` → `GoogleAuthProvider.credential` pada `FirebaseAuthService`, serta `AuthNotifier.loginWithGoogle()` lengkap dengan sinkronisasi riwayat.
+- **UI Auth (`auth_screen.dart`):** Menambahkan tombol **Masuk dengan Google** / **Daftar dengan Google** beserta error handling `AuthException`.
+
+### Revisi UI/UX Detail Resep (`revisi-ui-ux-detail-resep-bananlens.md`)
+- **Identitas Sumber Resep (`recipe.dart`, `gemini_recipe_service.dart`, `recipe_detail_sections.dart`):** Menambahkan enum `RecipeSource` (`local`, `ai`) sehingga `RecipeDetailScreen` menampilkan badge eksplisit **Resep Lokal** (+ **Terkurasi** jika `isReviewed`) atau **Resep AI** dengan placeholder netral BananaLens.
+- **Metadata Kondisional, Checklist, & Clipboard (`recipe_detail_sections.dart`, `recipe_detail_screen.dart`):** Menyembunyikan metadata waktu/kesulitan jika kosong, menambahkan progress **`X dari Y bahan disiapkan`**, tombol **Salin** daftar bahan ke clipboard, fallback jika daftar bahan/langkah kosong, serta container `maxWidth: 840` untuk layar desktop.
+
+### Revisi UI/UX Halaman Tanya AI (`revisi-ui-ux-tanya-ai-bananalens.md`)
+- **Ikon AppBar & Tombol Kirim (`chat_screen.dart`, `chat_composer.dart`):** Mengubah latar ikon AI di AppBar dan tombol kirim menjadi **Banana Yellow** (`#FFC914`) dengan ikon **Banana Brown** (`#3B2417`), serta memperbesar area sentuh tombol header menjadi `44 × 44 px` lengkap dengan label aksesibilitas.
+- **Kartu Pembuka Percakapan (`chat_starter_grid.dart`, `chat_screen.dart`):** Memindahkan rekomendasi pertanyaan dari bagian bawah ke atas tepat di bawah pesan sambutan AI dengan judul **Mau tanya apa hari ini?** (2 kolom di mobile, hingga 4 kolom di desktop). Menekan kartu langsung mengirim prompt dan otomatis menyembunyikan grid setelah percakapan dimulai.
+- **Loading, Error Retry, & Responsivitas (`chat_composer.dart`, `chat_notifier.dart`, `chat_bubble.dart`):** Memperbarui indikator menjadi **`AI sedang berpikir...`**, menambahkan `retryLastMessage()` dengan tombol **Coba lagi** pada error state, serta membatasi lebar area percakapan (`maxWidth: 840`) dan bubble (`620 px`) untuk layar desktop.
+
+### Revisi UI/UX Halaman Beranda (`revisi-ui-ux-beranda-bananlens.md`)
+- **Hero & Alur Galeri (`home_hero_scan_card.dart`, `gallery_preview_sheet.dart`, `home_screen.dart`):** Memperbarui CTA menjadi **Scan Pisang** dan **Buka Galeri**, menambahkan guard anti double-tap, serta modal pratinjau konfirmasi foto (**Lanjut Analisis** / **Pilih Ulang**) sebelum AI memproses gambar dari galeri.
+- **Ringkasan Pindai & Filter Riwayat (`home_quick_stats_row.dart`, `app_router.dart`, `history_screen.dart`):** Menambahkan judul **Ringkasan Pindai** dengan label periode **Sepanjang waktu**, serta membuat kartu metrik (`Total Pindai`, `Siap Santap`, `Mentah`) interaktif menuju `/history?filter=...`.
+- **Riwayat Terakhir & Resep Kontekstual (`home_recent_scans_section.dart`, `home_recipes_section.dart`):** Menampilkan format waktu + label keyakinan eksplisit (`Keyakinan XX%`, disembunyikan bila tidak tersedia), CTA **Scan Pisang Pertama** pada empty state, judul **Resep yang Cocok untuk Pisangmu** yang menyesuaikan hasil scan terakhir, dan ringkasan kartu tanpa hitungan bahan.
+- **Header, Tips Hari Ini, & Responsivitas (`home_screen.dart`, `home_today_tip_card.dart`):** Menyesuaikan ukuran logo header ke `32 px`, menambahkan kategori dan batas 3 baris pada Tips Hari Ini, serta membatasi lebar konten Beranda (`maxWidth: 840`) untuk layar tablet/desktop.
+
+### Pembaruan Palet Warna Utama & Logo Splash Screen
+- **Palet Warna Pusat (`app_colors.dart`, `harvest_colors.dart`, `theme_test.dart`):** Mengadopsi palet baru di seluruh aplikasi — **Banana Yellow** (`#FFC914` Primary), **Banana Brown** (`#3B2417` Text & Dark Surface), **Banana Cream** (`#FFF9ED` Background), **Soft Off-White** (`#F0EDE6` Border & Divider & `#FAF8F5` Soft Surface), **Leaf Green** (`#2F7D46` Success), dan **Ripe Orange** (`#C66A28` Warning).
+- **Splash Screen (`splash_screen.dart`, `splash_scanner_mark.dart`, `assets/images/brand/splash_logo.png`):** Mengembalikan gaya scanner splash screen dengan logo pisang kuning beroutline hitam tanpa kotak pembungkus luar, menyesuaikan skala logo (`1.35x`) agar pas di area sapuan scan, serta mengubah teks `BananaLens` menjadi flat 2D kuning.
+
+---
+
 ## Selasa, 24 November 2026
 
 ### Perbaikan Responsivitas Tujuan `Olahan` pada SPK (`RecipeGatingService`)

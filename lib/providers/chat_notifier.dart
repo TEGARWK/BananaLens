@@ -216,6 +216,47 @@ class ChatNotifier extends Notifier<ChatState> {
     }
   }
 
+  /// Retries the most recent user message after a failed request without
+  /// duplicating the user turn in [ChatState.messages].
+  Future<void> retryLastMessage() async {
+    if (state.isLoading) return;
+    final lastUserIndex = state.messages.lastIndexWhere((m) => m.isUser);
+    if (lastUserIndex == -1) return;
+
+    final lastUserText = state.messages[lastUserIndex].content;
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final chatService = ref.read(chatServiceProvider);
+      final replyText = await chatService.send(
+        history: state.messages,
+        message: lastUserText,
+        scanContext: state.scanContext,
+      );
+
+      final modelTurn = ChatTurn(role: ChatRole.model, content: replyText);
+      final finalMessages = List<ChatTurn>.from(state.messages)..add(modelTurn);
+      final updatedSessions = _upsertCurrentSession(
+        finalMessages,
+        state.scanContext,
+      );
+
+      state = state.copyWith(
+        messages: finalMessages,
+        sessions: updatedSessions,
+        isLoading: false,
+        error: null,
+      );
+      unawaited(_persistSessions(updatedSessions));
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error:
+            'Gagal terhubung dengan asisten. Periksa koneksi atau coba lagi.',
+      );
+    }
+  }
+
   /// Starts a fresh conversation while keeping previous chats in [sessions].
   void startNewChat() {
     final updatedSessions = _upsertCurrentSession(

@@ -74,9 +74,47 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Resep Lokal'), findsOneWidget);
+    expect(find.text('Terkurasi'), findsOneWidget);
     expect(find.text('Bahan-bahan yang Dibutuhkan'), findsOneWidget);
+    expect(find.text('0 dari 2 bahan disiapkan'), findsOneWidget);
+    expect(find.text('Salin'), findsOneWidget);
     expect(find.text('Semangka segar'), findsOneWidget);
     expect(find.text('Langkah Pembuatan'), findsOneWidget);
     expect(find.text('Potong dadu semangka'), findsOneWidget);
+
+    await tester.tap(find.text('Semangka segar'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 dari 2 bahan disiapkan'), findsOneWidget);
+  });
+
+  testWidgets('renders AI recipe badge and hides empty metadata', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const RecipeDetailScreen(
+          recipe: Recipe(
+            id: 10001,
+            title: 'Smoothie Pisang AI',
+            fruitLabel: 'banana',
+            suitableRipeness: <String>['ripe'],
+            ingredients: <String>['2 pisang matang'],
+            steps: <String>['Blender hingga halus'],
+            prepTime: '',
+            difficulty: '',
+            source: RecipeSource.ai,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Resep AI'), findsOneWidget);
+    expect(find.text('Resep Lokal'), findsNothing);
+    expect(find.text('Waktu Masak'), findsNothing);
+    expect(find.text('Kesulitan'), findsNothing);
+    expect(find.text('0 dari 1 bahan disiapkan'), findsOneWidget);
   });
 }

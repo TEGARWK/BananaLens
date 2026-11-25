@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/harvest_colors.dart';
 import '../../data/models/recipe.dart';
+import '../../data/models/scan_result.dart';
+import '../../providers/history_providers.dart';
 import '../../providers/service_providers.dart';
+import 'empty_state.dart';
 import 'fruit_vector_icon.dart';
 import 'industrial_art.dart';
 import 'section_header.dart';
@@ -15,23 +18,51 @@ import 'shimmer_box.dart';
 class HomeRecipesSection extends ConsumerWidget {
   const HomeRecipesSection({super.key});
 
+  Future<_HomeRecipeBundle> _loadRecipes(
+    WidgetRef ref,
+    ScanResult? latestScan,
+  ) async {
+    final repo = ref.read(recipeRepositoryProvider);
+    if (latestScan != null && latestScan.ripenessLabel != 'rotten') {
+      final bucket = RipenessBucket.fromString(latestScan.ripenessLabel);
+      final matched = await repo.getReviewedByFruitAndBucket(
+        latestScan.fruitLabel,
+        bucket,
+      );
+      if (matched.isNotEmpty) {
+        return _HomeRecipeBundle(
+          recipes: matched.take(5).toList(),
+          isPersonalized: true,
+        );
+      }
+    }
+    final all = await repo.getAll();
+    return _HomeRecipeBundle(
+      recipes: all.take(5).toList(),
+      isPersonalized: false,
+      isLatestRotten: latestScan?.ripenessLabel == 'rotten',
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
-    final recipeRepo = ref.watch(recipeRepositoryProvider);
+    final historyItems =
+        ref.watch(historyListProvider).asData?.value ?? <ScanResult>[];
+    final latestScan = historyItems.isNotEmpty ? historyItems.first : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
-          title: 'Resep Rekomendasi',
+          title: 'Resep yang Cocok untuk Pisangmu',
           actionText: 'Lihat semua',
           onAction: () => context.go('/recipes'),
         ),
         const SizedBox(height: AppDimens.s8),
-        FutureBuilder<List<Recipe>>(
-          future: recipeRepo.getAll(),
+        FutureBuilder<_HomeRecipeBundle>(
+          future: _loadRecipes(ref, latestScan),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox(
@@ -50,39 +81,92 @@ class HomeRecipesSection extends ConsumerWidget {
               );
             }
 
-            final recipes = (snapshot.data ?? <Recipe>[]).take(5).toList();
-            if (recipes.isEmpty) return const SizedBox.shrink();
-
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(bottom: 2, right: 2),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (int index = 0; index < recipes.length; index++) ...[
-                      _HomeRecipeCard(
-                        recipe: recipes[index],
-                        isHighlight: index.isEven,
-                        theme: theme,
-                        harvest: harvest,
-                        onTap: () => context.push(
-                          '/recipe-detail',
-                          extra: recipes[index],
-                        ),
-                      ),
-                      if (index < recipes.length - 1)
-                        const SizedBox(width: AppDimens.s12),
-                    ],
-                  ],
+            final bundle = snapshot.data;
+            final recipes = bundle?.recipes ?? <Recipe>[];
+            if (recipes.isEmpty) {
+              return const IndustrialSpecimenCard(
+                padding: EdgeInsets.symmetric(vertical: AppDimens.s16),
+                child: EmptyState(
+                  icon: Icons.restaurant_menu_rounded,
+                  title: 'Belum Ada Resep Cocok',
+                  message:
+                      'Rekomendasi resep untuk tingkat kematangan ini belum tersedia.',
                 ),
-              ),
+              );
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (bundle?.isPersonalized ?? false)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppDimens.s8),
+                    child: Text(
+                      'Rekomendasi berdasarkan hasil scan terakhir',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: harvest.muted,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                else if (bundle?.isLatestRotten ?? false)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppDimens.s8),
+                    child: Text(
+                      'Pisang terakhir terdeteksi busuk. Berikut inspirasi olahan pisang lainnya:',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: harvest.muted,
+                      ),
+                    ),
+                  ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(bottom: 2, right: 2),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (
+                          int index = 0;
+                          index < recipes.length;
+                          index++
+                        ) ...[
+                          _HomeRecipeCard(
+                            recipe: recipes[index],
+                            isHighlight: index.isEven,
+                            theme: theme,
+                            harvest: harvest,
+                            onTap: () => context.push(
+                              '/recipe-detail',
+                              extra: recipes[index],
+                            ),
+                          ),
+                          if (index < recipes.length - 1)
+                            const SizedBox(width: AppDimens.s12),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         ),
       ],
     );
   }
+}
+
+class _HomeRecipeBundle {
+  const _HomeRecipeBundle({
+    required this.recipes,
+    required this.isPersonalized,
+    this.isLatestRotten = false,
+  });
+
+  final List<Recipe> recipes;
+  final bool isPersonalized;
+  final bool isLatestRotten;
 }
 
 class _HomeRecipeCard extends StatelessWidget {
@@ -236,13 +320,19 @@ class _HomeRecipeCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '${recipe.ingredients.length} bahan pilihan',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: harvest.muted,
-                          fontSize: 11,
+                      Expanded(
+                        child: Text(
+                          'Lihat detail resep',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: harvest.muted,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: AppDimens.s4),
                       Icon(
                         Icons.north_east_rounded,
                         size: 15,

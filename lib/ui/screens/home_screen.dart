@@ -9,6 +9,7 @@ import '../../providers/auth_providers.dart';
 import '../../providers/camera_providers.dart';
 import '../../providers/history_providers.dart';
 import '../../providers/scan_notifier.dart';
+import '../widgets/gallery_preview_sheet.dart';
 import '../widgets/home_hero_scan_card.dart';
 import '../widgets/home_quick_stats_row.dart';
 import '../widgets/home_recent_scans_section.dart';
@@ -23,8 +24,15 @@ import '../widgets/industrial_art.dart';
 /// 4. Recent scans with real thumbnails
 /// 5. Recommended banana recipes
 /// 6. Single daily insight card
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _isBusyGallery = false;
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -34,19 +42,34 @@ class HomeScreen extends ConsumerWidget {
     return 'Selamat malam';
   }
 
-  Future<void> _pickFromGallery(BuildContext context, WidgetRef ref) async {
-    final photoSource = ref.read(photoSourceProvider);
-    final path = await photoSource.pickFromGallery();
-    if (path != null && context.mounted) {
-      await ref.read(scanProvider.notifier).scan(path);
-      if (context.mounted) {
-        await context.push('/result');
+  Future<void> _pickFromGallery() async {
+    if (_isBusyGallery) return;
+    setState(() => _isBusyGallery = true);
+    try {
+      final photoSource = ref.read(photoSourceProvider);
+      while (mounted) {
+        final path = await photoSource.pickFromGallery();
+        if (path == null || !mounted) return;
+
+        final action = await showGalleryPreviewSheet(context, path);
+        if (!mounted || action == null) return;
+        if (action == GalleryPreviewAction.repick) continue;
+
+        await ref.read(scanProvider.notifier).scan(path);
+        if (mounted) {
+          await context.push('/result');
+        }
+        return;
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isBusyGallery = false);
       }
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final harvest = context.harvest;
     final userProfile = ref.watch(authNotifierProvider).asData?.value;
@@ -56,44 +79,53 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimens.screenPadding,
-            vertical: AppDimens.s12,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 840),
+            child: ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimens.screenPadding,
+                vertical: AppDimens.s12,
+              ),
+              children: [
+                // 1. Header Sapaan & Avatar
+                _HomeHeader(
+                  greeting: _getGreeting(),
+                  name: name,
+                  harvest: harvest,
+                  theme: theme,
+                ),
+                const SizedBox(height: AppDimens.s16),
+
+                // 2. Hero "Pindai Pisang"
+                HomeHeroScanCard(
+                  isBusy: _isBusyGallery,
+                  onScanTap: () => context.go('/scan'),
+                  onGalleryTap: _pickFromGallery,
+                ),
+                const SizedBox(height: AppDimens.s16),
+
+                // 3. Strip Statistik Pindai
+                HomeQuickStatsRow(
+                  historyAsync: historyAsync,
+                  onStatTap: (filter) => context.go('/history?filter=$filter'),
+                ),
+                const SizedBox(height: AppDimens.s20),
+
+                // 4. Riwayat Terakhir
+                HomeRecentScansSection(historyAsync: historyAsync),
+                const SizedBox(height: AppDimens.s20),
+
+                // 5. Resep Pilihan
+                const HomeRecipesSection(),
+                const SizedBox(height: AppDimens.s20),
+
+                // 6. Tips Hari Ini (tunggal, tanpa duplikasi)
+                const HomeTodayTipCard(),
+                const SizedBox(height: AppDimens.s24),
+              ],
+            ),
           ),
-          children: [
-            // 1. Header Sapaan & Avatar
-            _HomeHeader(
-              greeting: _getGreeting(),
-              name: name,
-              harvest: harvest,
-              theme: theme,
-            ),
-            const SizedBox(height: AppDimens.s16),
-
-            // 2. Hero "Pindai Pisang"
-            HomeHeroScanCard(
-              onScanTap: () => context.go('/scan'),
-              onGalleryTap: () => _pickFromGallery(context, ref),
-            ),
-            const SizedBox(height: AppDimens.s16),
-
-            // 3. Strip Statistik Pindai
-            HomeQuickStatsRow(historyAsync: historyAsync),
-            const SizedBox(height: AppDimens.s20),
-
-            // 4. Riwayat Terakhir
-            HomeRecentScansSection(historyAsync: historyAsync),
-            const SizedBox(height: AppDimens.s20),
-
-            // 5. Resep Pilihan
-            const HomeRecipesSection(),
-            const SizedBox(height: AppDimens.s20),
-
-            // 6. Tips Hari Ini (tunggal, tanpa duplikasi)
-            const HomeTodayTipCard(),
-            const SizedBox(height: AppDimens.s24),
-          ],
         ),
       ),
     );
@@ -126,7 +158,7 @@ class _HomeHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const IndustrialBananaMark(size: 22),
+                  const IndustrialBananaMark(size: 32),
                   const SizedBox(width: AppDimens.s8),
                   Text(
                     AppStrings.appName,

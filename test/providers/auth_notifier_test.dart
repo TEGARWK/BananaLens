@@ -17,6 +17,16 @@ class _FakeAuthService implements AuthService {
   }
 
   @override
+  Future<UserProfile> loginWithGoogle() async {
+    _user = const UserProfile(
+      uid: 'uid_google_1',
+      email: 'google@fruitlens.id',
+      name: 'Google User',
+    );
+    return _user!;
+  }
+
+  @override
   Future<UserProfile> register(
     String email,
     String password,
@@ -67,5 +77,12 @@ void main() {
     // Logout
     await container.read(authNotifierProvider.notifier).logout();
     expect(container.read(authNotifierProvider).value, isNull);
+
+    // Google Sign-In
+    await container.read(authNotifierProvider.notifier).loginWithGoogle();
+    expect(
+      container.read(authNotifierProvider).value?.email,
+      'google@fruitlens.id',
+    );
   });
 }

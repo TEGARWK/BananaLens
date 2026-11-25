@@ -7,9 +7,14 @@ import '../../data/models/scan_result.dart';
 /// Joined 2-tone Swiss Editorial KPI Metric Bar for BananaLens:
 /// `[ Total Pindai | Siap Santap ][ Mentah ]` — connected color blocks with zero gap.
 class HomeQuickStatsRow extends StatelessWidget {
-  const HomeQuickStatsRow({super.key, required this.historyAsync});
+  const HomeQuickStatsRow({
+    super.key,
+    required this.historyAsync,
+    this.onStatTap,
+  });
 
   final AsyncValue<List<ScanResult>> historyAsync;
+  final ValueChanged<String>? onStatTap;
 
   @override
   Widget build(BuildContext context) {
@@ -36,69 +41,114 @@ class HomeQuickStatsRow extends StatelessWidget {
     final unripeFg = theme.colorScheme.onSurface;
     final yellowBg = theme.colorScheme.primary;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppDimens.rCard),
-        border: Border.all(color: harvest.border, width: 1),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Left joined Soft Charcoal block (Total Pindai | Siap Santap)
-            Expanded(
-              flex: 2,
-              child: ColoredBox(
-                color: charcoalBg,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _MetricCell(
-                        value: '$totalScan',
-                        label: 'Total Pindai',
-                        valueColor: isDark ? yellowBg : charcoalFg,
-                        labelColor: charcoalFg.withValues(alpha: 0.8),
-                        theme: theme,
-                      ),
-                    ),
-                    VerticalDivider(
-                      width: 1,
-                      thickness: 1,
-                      indent: 10,
-                      endIndent: 10,
-                      color: charcoalDivider,
-                    ),
-                    Expanded(
-                      child: _MetricCell(
-                        value: '$readyCount',
-                        label: 'Siap Santap',
-                        valueColor: yellowBg,
-                        labelColor: charcoalFg.withValues(alpha: 0.8),
-                        theme: theme,
-                      ),
-                    ),
-                  ],
-                ),
+            Text(
+              'Ringkasan Pindai',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
               ),
             ),
-            // Right joined Crisp White / Soft Charcoal block (Mentah)
-            Expanded(
-              flex: 1,
-              child: ColoredBox(
-                color: unripeBg,
-                child: _MetricCell(
-                  value: '$unripeCount',
-                  label: 'Mentah',
-                  valueColor: unripeFg,
-                  labelColor: harvest.muted,
-                  theme: theme,
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimens.s8,
+                vertical: 3,
+              ),
+              decoration: BoxDecoration(
+                color: harvest.primarySoft,
+                borderRadius: BorderRadius.circular(AppDimens.rPill),
+                border: Border.all(color: harvest.border),
+              ),
+              child: Text(
+                'Sepanjang waktu',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: harvest.muted,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: AppDimens.s8),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppDimens.rCard),
+            border: Border.all(color: harvest.border, width: 1),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Left joined Soft Charcoal block (Total Pindai | Siap Santap)
+                Expanded(
+                  flex: 2,
+                  child: Material(
+                    color: charcoalBg,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _MetricCell(
+                            value: '$totalScan',
+                            label: 'Total Pindai',
+                            valueColor: isDark ? yellowBg : charcoalFg,
+                            labelColor: charcoalFg.withValues(alpha: 0.8),
+                            theme: theme,
+                            onTap: onStatTap == null
+                                ? null
+                                : () => onStatTap!('all'),
+                          ),
+                        ),
+                        VerticalDivider(
+                          width: 1,
+                          thickness: 1,
+                          indent: 10,
+                          endIndent: 10,
+                          color: charcoalDivider,
+                        ),
+                        Expanded(
+                          child: _MetricCell(
+                            value: '$readyCount',
+                            label: 'Siap Santap',
+                            valueColor: yellowBg,
+                            labelColor: charcoalFg.withValues(alpha: 0.8),
+                            theme: theme,
+                            onTap: onStatTap == null
+                                ? null
+                                : () => onStatTap!('ripe'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Right joined Crisp White / Soft Charcoal block (Mentah)
+                Expanded(
+                  flex: 1,
+                  child: Material(
+                    color: unripeBg,
+                    child: _MetricCell(
+                      value: '$unripeCount',
+                      label: 'Mentah',
+                      valueColor: unripeFg,
+                      labelColor: harvest.muted,
+                      theme: theme,
+                      onTap: onStatTap == null
+                          ? null
+                          : () => onStatTap!('unripe'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -110,6 +160,7 @@ class _MetricCell extends StatelessWidget {
     required this.valueColor,
     required this.labelColor,
     required this.theme,
+    this.onTap,
   });
 
   final String value;
@@ -117,10 +168,11 @@ class _MetricCell extends StatelessWidget {
   final Color valueColor;
   final Color labelColor;
   final ThemeData theme;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final content = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.s12,
         vertical: AppDimens.s12 + 2,
@@ -155,6 +207,14 @@ class _MetricCell extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (onTap == null) return content;
+
+    return Semantics(
+      button: true,
+      label: '$label: $value',
+      child: InkWell(onTap: onTap, child: content),
     );
   }
 }

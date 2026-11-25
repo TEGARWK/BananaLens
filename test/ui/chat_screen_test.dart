@@ -18,32 +18,43 @@ class _ContextChatNotifier extends ChatNotifier {
 }
 
 void main() {
-  testWidgets('renders chat screen with greeting and suggested prompt chips', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          chatServiceProvider.overrideWithValue(
-            FakeChatService(delay: Duration.zero),
+  testWidgets(
+    'renders chat screen with greeting, starter grid, and hides grid after send',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            chatServiceProvider.overrideWithValue(
+              FakeChatService(delay: Duration.zero),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const ChatScreen(),
           ),
-        ],
-        child: MaterialApp(
-          theme: AppTheme.lightTheme,
-          home: const ChatScreen(),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text(AppStrings.chatTitle), findsOneWidget);
-    expect(find.textContaining('Halo! Saya asisten'), findsOneWidget);
-    expect(
-      find.text('Cara simpan pisang biar tidak cepat hitam?'),
-      findsOneWidget,
-    );
-    expect(find.byType(TextField), findsOneWidget);
-  });
+      expect(find.text(AppStrings.chatTitle), findsOneWidget);
+      expect(find.textContaining('Halo! Saya asisten'), findsOneWidget);
+      expect(find.text('Mau tanya apa hari ini?'), findsOneWidget);
+      expect(find.text('Kematangan Pisang'), findsOneWidget);
+      expect(find.text('Resep Pisang'), findsOneWidget);
+      expect(find.text('Tips Penyimpanan'), findsOneWidget);
+      expect(find.text('Tanya Hasil Scan'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+
+      await tester.tap(find.text('Kematangan Pisang'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Bagaimana mengetahui pisang sudah matang?'),
+        findsOneWidget,
+      );
+      expect(find.text('Mau tanya apa hari ini?'), findsNothing);
+    },
+  );
 
   testWidgets('wraps long scanContext chip cleanly without horizontal overflow', (
     tester,

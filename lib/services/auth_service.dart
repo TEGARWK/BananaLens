@@ -17,6 +17,7 @@ class AuthException implements Exception {
 abstract class AuthService {
   Future<UserProfile?> getCurrentUser();
   Future<UserProfile> login(String email, String password);
+  Future<UserProfile> loginWithGoogle();
   Future<UserProfile> register(String email, String password, String name);
   Future<void> resetPassword(String email, String newPassword);
   Future<void> updateProfile(UserProfile profile);
@@ -137,6 +138,13 @@ class LocalAuthService implements AuthService {
     final user = UserProfile.fromJsonString(rawUser);
     await prefs.setString(_sessionKey, user.toJsonString());
     return user;
+  }
+
+  @override
+  Future<UserProfile> loginWithGoogle() async {
+    throw const AuthException(
+      'Masuk dengan Google membutuhkan layanan Firebase yang aktif.',
+    );
   }
 
   @override
