@@ -5,6 +5,14 @@
 
 ---
 
+## Kamis, 26 November 2026
+
+### Perapian Struktur File & Folder Proyek
+- **Organisasi Dokumentasi (`docs/`):** Memindahkan 15 file `.md` dari root ke subfolder terstruktur: `docs/specs/`, `docs/design/`, `docs/management/`, dan `docs/proposals/`, serta memperbarui referensi path di `AGENTS.md`. Root proyek kini hanya berisi file konfigurasi inti, `README.md`, `CHANGELOG.md`, dan `AGENTS.md`.
+- **Organisasi Tugas Kuliah (`tugas/`):** Mengelompokkan `tugas AI/` dan `tugas visikom/` ke dalam `tugas/ai/` dan `tugas/visikom/`.
+
+---
+
 ## Rabu, 25 November 2026
 
 ### Integrasi Login dengan Google (`google_sign_in` + Firebase Auth)

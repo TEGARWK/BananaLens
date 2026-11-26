@@ -7,12 +7,12 @@
 
 | File | Fungsi |
 |---|---|
-| `prd.md` | Apa & kenapa (fitur, layar, kriteria penerimaan) |
-| `kebutuhan-sistem.md` | Spesifikasi teknis (FR/NFR, model data, arsitektur) |
-| `ARCHITECTURE.md` | Konvensi kode Flutter, state management, struktur |
-| `DESIGN_RULES.md` | Aturan UI/UX anti "AI slop" |
-| `TEAM_ROLES.md` | Pembagian peran AI |
-| `TASKS.md` | Papan tugas: 1 tugas = 1 hasil |
+| `docs/specs/prd.md` | Apa & kenapa (fitur, layar, kriteria penerimaan) |
+| `docs/specs/kebutuhan-sistem.md` | Spesifikasi teknis (FR/NFR, model data, arsitektur) |
+| `docs/specs/ARCHITECTURE.md` | Konvensi kode Flutter, state management, struktur |
+| `docs/design/DESIGN_RULES.md` | Aturan UI/UX anti "AI slop" |
+| `docs/management/TEAM_ROLES.md` | Pembagian peran AI |
+| `docs/management/TASKS.md` | Papan tugas: 1 tugas = 1 hasil |
 
 Jangan mengarang fitur di luar dokumen ini. Jika ada yang ambigu, **tanya user**, jangan menebak.
 
@@ -20,7 +20,7 @@ Jangan mengarang fitur di luar dokumen ini. Jika ada yang ambigu, **tanya user**
 
 - **Jalur A — Aplikasi Flutter**: dikerjakan di repo ini (user + AI).
 - **Jalur B — Visi Komputer & AI** (training model, `.tflite`, Gemini asli): dikerjakan **teman user**. AI **tidak** melatih model atau menulis implementasi Gemini asli kecuali diminta.
-- AI di jalur A memakai `abstract class` + implementasi **Fake** berlabel `TODO-INTEGRASI`; kontrak ada di `INTEGRATION_CONTRACT.md`. Jangan mengubah kontrak sepihak.
+- AI di jalur A memakai `abstract class` + implementasi **Fake** berlabel `TODO-INTEGRASI`; kontrak ada di `docs/specs/INTEGRATION_CONTRACT.md`. Jangan mengubah kontrak sepihak.
 - Fake tidak boleh dianggap fitur final; diganti di Fase 7 saat artefak jalur B tiba.
 
 ## 2. Aturan Emas: 1 Fase = 1 Hasil
